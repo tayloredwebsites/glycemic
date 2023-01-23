@@ -41,6 +41,10 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # letter opener for development emails to tmp file & browser page
+  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.perform_deliveries = true
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
@@ -67,4 +71,11 @@ Rails.application.configure do
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
+
+  # Default Mailer Host
+  # Note: fix for ArgumentError in Devise::Confirmations#create
+  #   Missing host to link to! Please provide the :host parameter,
+  #     set default_url_options[:host], or set :only_path to true
+  Rails.application.routes.default_url_options[:host] = ENV['HOST']
+
 end

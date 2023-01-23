@@ -58,12 +58,15 @@ group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
   # see https://github.com/thoughtbot/factory_bot_rails
   gem "factory_bot_rails", "~> 6.2.0"
+  # store authentication_keys safely
+  gem "dotenv-rails", "~> 2.8.1"
 end
 
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem "letter_opener", "~> 1.8.1"
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
