@@ -35,6 +35,8 @@ Things you may want to cover:
     - database restores
 
           pg_restore --verbose --clean --no-acl --no-owner --dbname glycemic_development db/backups/2023-01-22d-initial2users.sql
+- [Jira board](https://tayloredwebsites.atlassian.net/jira/software/projects/GLYC/boards/1)
+- [Database Diagram](https://lucid.app/lucidchart/7013dcfa-d88b-42d7-b0b0-84bd45907e7c/edit)
 - How to run the test suite
 - Services (job queues, cache servers, search engines, etc.)
 - Deployment instructions
