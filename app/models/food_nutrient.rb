@@ -1,0 +1,2 @@
+class FoodNutrient < ApplicationRecord
+end

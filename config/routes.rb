@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  resources :food_nutrients
+  resources :foods
+  resources :nutrients
   get 'home/index'
   devise_for :users
   devise_scope :user do
