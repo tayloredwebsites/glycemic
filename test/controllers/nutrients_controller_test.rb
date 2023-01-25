@@ -1,11 +1,23 @@
 require "test_helper"
+require "helpers/user_helper"
 
 class NutrientsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+  include Capybara::DSL
+
   setup do
-    @nutrient = nutrients(:one)
+    @user = FactoryBot.create(:user)
+    sign_in @user
+    @nutrient = FactoryBot.create(:nutrient)
   end
 
-  test "should get index" do
+  # called after every single test
+  teardown do
+    # # when controller is using cache it may be a good idea to reset it afterwards
+    # Rails.cache.clear
+  end
+
+  test "should get nutrient listing page" do
     get nutrients_url
     assert_response :success
   end

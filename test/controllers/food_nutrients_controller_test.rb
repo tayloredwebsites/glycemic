@@ -1,8 +1,10 @@
 require "test_helper"
 
 class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
+  # include Devise::Test::IntegrationHelpers
   setup do
-    @food_nutrient = food_nutrients(:one)
+    @user = FactoryBot.create(@user)
+    @food_nutrient = FactoryBot.create(:food_nutrient)
   end
 
   test "should get index" do

@@ -1,8 +1,7 @@
 FactoryBot.define do
   factory :nutrient do
-    id { 1 }
-    name { "MyString" }
-    usda_ndb_num { 1 }
-    desc { "MyText" }
+    sequence(:name) { |n| "nutrient #{n}"}
+    sequence(:usda_ndb_num) { |n| n}
+    sequence(:desc) { |n| "Nutrient Description #{n}"}
   end
 end
