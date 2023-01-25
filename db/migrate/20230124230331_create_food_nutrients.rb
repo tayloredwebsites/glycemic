@@ -1,7 +1,6 @@
 class CreateFoodNutrients < ActiveRecord::Migration[7.0]
   def change
     create_table :food_nutrients do |t|
-      t.integer :id
       t.integer :nutrient_id
       t.integer :food_id
       t.boolean :study
@@ -14,6 +13,10 @@ class CreateFoodNutrients < ActiveRecord::Migration[7.0]
       t.text :desc
 
       t.timestamps
+
+      t.index :nutrient_id
+      t.index :food_id
+      t.index :study
     end
   end
 end
