@@ -64,4 +64,13 @@ Rails.application.configure do
   #     set default_url_options[:host], or set :only_path to true
   Rails.application.routes.default_url_options[:host] = ENV['HOST']
 
+  # # To adjust logger level, create a new logger
+  config.logger = ActiveSupport::Logger.new(STDOUT)
+  # # use debug see debugging statements as well as SQL statements
+  # config.log_level = :fatal
+  # config.log_level = :error
+  # config.log_level = :info
+  # config.log_level = :warn
+  config.log_level = :debug
+
 end
