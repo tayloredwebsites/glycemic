@@ -147,7 +147,7 @@ class HomeControllerTests
           "commit"=>"Resend confirmation instructions"
         }
       end
-      assert_redirected_root_to_sign_in()
+      assert_redirected_to_sign_in()
 
     end
 
