@@ -57,4 +57,20 @@ Rails.application.configure do
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
+
+  # Default Mailer Host
+  # Note: fix for ArgumentError in Devise::Confirmations#create
+  #   Missing host to link to! Please provide the :host parameter,
+  #     set default_url_options[:host], or set :only_path to true
+  Rails.application.routes.default_url_options[:host] = ENV['HOST']
+
+  # # To adjust logger level, create a new logger
+  config.logger = ActiveSupport::Logger.new(STDOUT)
+  # # use debug see debugging statements as well as SQL statements
+  # config.log_level = :fatal
+  config.log_level = :error
+  # config.log_level = :info
+  # config.log_level = :warn
+  # config.log_level = :debug
+
 end
