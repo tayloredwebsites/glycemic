@@ -2,7 +2,7 @@ require "test_helper"
 require "helpers/user_helper"
 
 class HomeControllerTests
-  class SignedInUserTest < ActionDispatch::IntegrationTest
+  class ExistingUserTest < ActionDispatch::IntegrationTest
     include Devise::Test::IntegrationHelpers
     include Capybara::DSL
 

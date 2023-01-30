@@ -28,6 +28,7 @@ class FoodNutrientsController < ApplicationController
         format.html { redirect_to food_nutrient_url(@food_nutrient), notice: "Food nutrient was successfully created." }
         format.json { render :show, status: :created, location: @food_nutrient }
       else
+        Rails.logger.error("ERROR: unable to create food nutrient #{@food_nutrient.errors.full_messages}")
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @food_nutrient.errors, status: :unprocessable_entity }
       end
