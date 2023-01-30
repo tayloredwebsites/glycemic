@@ -1,0 +1,23 @@
+<%
+  @title = "Food Listing"
+  content_for(:title, @title)
+%>
+<p style="color: green"><%= notice %></p>
+
+<h1><%= @title %></h1>
+
+<div id="foods">
+  <% @foods.each do |food| %>
+    <%= render food %>
+    <p>
+      <%= link_to "Show this food", food %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New food", new_food_path %>
+<ul>
+<li><a href='/food_nutrients'>Food Nutrients Listing</a></li>
+<li><a href="/">Home</a></li>
+<li><a href='/signout'>Sign Out</a></li>
+</ul>

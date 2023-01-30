@@ -1,0 +1,37 @@
+<%= form_with(model: nutrient) do |form| %>
+  <% if nutrient.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(nutrient.errors.count, "error") %> prohibited this nutrient from being saved:</h2>
+
+      <ul>
+        <% nutrient.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :id, style: "display: block" %>
+    <%= form.number_field :id %>
+  </div>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :usda_ndb_num, style: "display: block" %>
+    <%= form.number_field :usda_ndb_num %>
+  </div>
+
+  <div>
+    <%= form.label :desc, style: "display: block" %>
+    <%= form.text_area :desc %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

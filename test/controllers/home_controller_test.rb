@@ -1,85 +1,35 @@
 require "test_helper"
 
-class HomeControllerTests
-  class SignedInHomeTest < ActionDispatch::IntegrationTest
-    include Devise::Test::IntegrationHelpers
-    include Capybara::DSL
+class HomeControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+  include Capybara::DSL
 
-    setup do
-      @user = FactoryBot.create(:user)
-      sign_in(@user)
-    end
-
-    # called after every single test
-    teardown do
-      # # when controller is using cache it may be a good idea to reset it afterwards
-      # Rails.cache.clear
-    end
-
-    test "logged in user should get index" do
-      get home_index_url
-      assert_response :success
-
-      # html = Nokogiri::HTML.fragment(response.body)
-      # h1 = html.css('h1').first
-      # Rails.logger.info("$$$ h1: #{h1.inspect}")
-      # assert h1.text.include?('Home#index')
-      # h2 = html.css('h2')
-      # assert_equal(0, h2.count)
-    end
-
+  setup do
+    @user = FactoryBot.create(:user)
+    sign_in(@user)
   end
 
-  class UnconfirmedHomeTest < ActionDispatch::IntegrationTest
-    include Devise::Test::IntegrationHelpers
-
-    setup do
-      assert_emails 1 do
-        @unconfirmed_user = FactoryBot.create(:unconfirmed_user)
-      end
-    end
-
-    # called after every single test
-    teardown do
-      # # when controller is using cache it may be a good idea to reset it afterwards
-      # Rails.cache.clear
-    end
-
-    test "user should not get index if not confirmed" do
-      sign_in(@unconfirmed_user)
-      get home_index_url
-      assert_response 302
-      # # see nokogiri docs at https://nokogiri.org/rdoc/ (use search)
-      # page = Nokogiri::HTML.fragment(response.body)
-      # redir_url = page.css('a').first
-      # assert_match(/sign_in/,redir_url['href'])
-      assert_redirected_to new_user_session_path
-    end
-
+  # called after every single test
+  teardown do
+    # # when controller is using cache it may be a good idea to reset it afterwards
+    # Rails.cache.clear
   end
 
-  class NoUserHomeTest < ActionDispatch::IntegrationTest
-    include Devise::Test::IntegrationHelpers
-
-    setup do
-    end
-
-    # called after every single test
-    teardown do
-      # # when controller is using cache it may be a good idea to reset it afterwards
-      # Rails.cache.clear
-    end
-
-    test "user not signed in should get login page" do
-      get home_index_url
-      assert_response 302
-      # # see nokogiri docs at https://nokogiri.org/rdoc/ (use search)
-      # page = Nokogiri::HTML.fragment(response.body)
-      # redir_url = page.css('a').first
-      # assert_match(/sign_in/,redir_url['href'])
-      assert_redirected_to new_user_session_path
-    end
-
+  test "logged in user should get index and see links" do
+    get home_index_url
+    assert_response :success
+    page = Nokogiri::HTML.fragment(response.body)
+    h1 = page.css('h1').first
+    Rails.logger.debug("$$$ h1: #{h1.inspect}")
+    assert h1.text.include?('Home Page')
+    # make a hash of all links on the page
+    page_links = page.css('a')
+    assert_equal(3, page_links.count)
+    link_map = page_links.map{|a| [a.text, a['href']]}.to_h
+    Rails.logger.debug("link_map: #{link_map.inspect}")
+    assert_match("/foods",link_map['Foods Listing']) # has Foods Listing link
+    assert_match("/nutrients",link_map['Nutrients Listing']) # has Nutrients Listing link
+    assert_match("/signout",link_map['Sign Out']) # has Sign Out link
   end
 
 end

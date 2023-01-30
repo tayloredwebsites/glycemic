@@ -1,3 +1,10 @@
-<h1>Home#index</h1>
-<p>Find me in app/views/home/index.html.erb</p>
-<a href='/signout'>Sign Out</a>
+<%
+  @title = "Home Page"
+  content_for(:title, @title)
+%>
+<h1><%= @title %></h1>
+<ul>
+<li><a href='/foods'>Foods Listing</a></li>
+<li><a href='/nutrients'>Nutrients Listing</a></li>
+<li><a href='/signout'>Sign Out</a></li>
+</ul>
