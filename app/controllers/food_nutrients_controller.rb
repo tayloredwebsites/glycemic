@@ -1,9 +1,19 @@
 class FoodNutrientsController < ApplicationController
   before_action :set_food_nutrient, only: %i[ show edit update destroy ]
 
-  # GET /food_nutrients or /food_nutrients.json
-  def index
-    @food_nutrients = FoodNutrient.all
+  # # GET /food_nutrients or /food_nutrients.json
+  # def index
+  #   Rails.logger.debug("*** params: #{params.inspect}")
+  #   @food_nutrients = FoodNutrient.all
+  # end
+
+  def nutrients_of_food
+    Rails.logger.debug("*** params: #{params.inspect}")
+    food_id = Integer(params[:food_id]) rescue 0
+    @food = Food.find_by(id: food_id)
+    @food = Food.new(name: "cannot find food[#{params[:food_id]} - #{food_id}]") if @food.blank?
+    # get_nutrients_for_food
+    @food_nutrients = FoodNutrient.where(food_id: )
   end
 
   # GET /food_nutrients/1 or /food_nutrients/1.json
@@ -62,6 +72,11 @@ class FoodNutrientsController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_food_nutrient
       @food_nutrient = FoodNutrient.find(params[:id])
+      @food = Food.find(@food_nutrient.food_id)
+    end
+
+    def get_nutrients_for_food
+      @food_nutrients.where(food_id: params[:food_id])
     end
 
     # Only allow a list of trusted parameters through.

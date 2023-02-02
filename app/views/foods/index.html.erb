@@ -7,17 +7,16 @@
 <h1><%= @title %></h1>
 
 <div id="foods">
-  <% @foods.each do |food| %>
-    <%= render food %>
-    <p>
-      <%= link_to "Show this food", food %>
-    </p>
-  <% end %>
+  <table>
+    <%= render 'food_headers' %>
+    <% @foods.each do |food| %>
+      <%= render food %>
+    <% end %>
+  </table>
 </div>
 
-<%= link_to "New food", new_food_path %>
 <ul>
-<li><a href='/food_nutrients'>Food Nutrients Listing</a></li>
+<li><%= link_to "New food", new_food_path %></li>
 <li><a href="/">Home</a></li>
 <li><a href='/signout'>Sign Out</a></li>
 </ul>
