@@ -1,0 +1,24 @@
+<%
+  @title = "Nutrients of Food Listing"
+  content_for(:title, @title)
+%>
+<p style="color: green"><%= notice %></p>
+
+<h1><%= @title %></h1>
+<h2>for food: <%= @food.name %></h2>
+
+<div id="food_nutrients">
+  <table>
+  <%= render 'food_nutrient_headers' %>
+    <% @food_nutrients.each do |food_nutrient| %>
+      <%= render food_nutrient_row %>
+    <% end %>
+  </table>
+</div>
+
+<ul>
+<li><%= link_to "New food nutrient", new_food_nutrient_path %></li>
+<li><a href='/foods'>Foods Listing</a></li>
+<li><a href="/">Home</a></li>
+<li><a href='/signout'>Sign Out</a></li>
+</ul>

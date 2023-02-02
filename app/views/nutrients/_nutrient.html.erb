@@ -1,22 +1,11 @@
-<div id="<%= dom_id nutrient %>">
-  <p>
-    <strong>Id:</strong>
-    <%= nutrient.id %>
-  </p>
-
-  <p>
-    <strong>Name:</strong>
-    <%= nutrient.name %>
-  </p>
-
-  <p>
-    <strong>Usda ndb num:</strong>
-    <%= nutrient.usda_ndb_num %>
-  </p>
-
-  <p>
-    <strong>Desc:</strong>
-    <%= nutrient.desc %>
-  </p>
-
-</div>
+<tr id="<%= dom_id nutrient %>">
+  <td><%= nutrient.id %></td>
+  <td><%= nutrient.name %></td>
+  <td><%= nutrient.usda_ndb_num %></td>
+  <td><%= nutrient.desc %></td>
+  <td>
+    <a href='#'>View</a>
+    <a href='#'>Download</a>
+    <a href='#'>Edit</a>
+  </td>
+</tr>

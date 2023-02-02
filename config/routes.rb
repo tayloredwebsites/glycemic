@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
-  resources :food_nutrients
+  resources :food_nutrients, except: %i[index] do
+    member do
+    end
+    collection do
+    end
+  end
+  get '/nutrients_of_food/:food_id', to: 'food_nutrients#nutrients_of_food'
+
   resources :foods
   resources :nutrients
   get 'home/index'
