@@ -1,6 +1,11 @@
-<h1>Editing food nutrient</h1>
+<%
+  content_for :title, 'Food Nutrient Edit Page'
+  content_for :header, 'Food Nutrient Edit Page'
+  content_for :subheader, "#{@food_nutrient.present? ? "for food: #{@food_nutrient.food.name}" : ''}"
+  content_for :subheader2, "#{@food_nutrient.present? ? "and nutrient: #{@food_nutrient.nutrient.name}" : ''}"
+%>
 
-<%= render "form", food_nutrient: @food_nutrient %>
+<%= render partial: "form", locals: {food_nutrient: @food_nutrient, food: @food} %>
 
 <br>
 

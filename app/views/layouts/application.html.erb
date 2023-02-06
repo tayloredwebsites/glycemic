@@ -10,6 +10,29 @@
   </head>
 
   <body>
+    <h1><%= content_for?(:header) ? yield(:header) : "Glycemic" %></h1>
+    <% if content_for?(:subheader) %>
+      <h2>
+        <%= yield(:subheader) %>
+        <% if content_for?(:subheader2) %>
+          <br/><%= yield(:subheader2) %>
+        <% end %>
+      </h2>
+    <% end %>
+    <% if flash[:notice].present? %>
+      <p style="color: green"><%= flash[:notice] %></p>
+    <% end %>
+    <% if flash[:alert].present? %>
+      <p style="color: red"><%= flash[:alert] %></p>
+    <% end %>
+    <% if @errors.any? %>
+      <p style="color: red"><%= pluralize(@errors.count, "error") %> prohibited this food_nutrient from being saved:</p>
+      <% @errors.each do |error| %>
+        <p style="color: red"><%= error %></p>
+      <% end %>
+    <% end %>
+
+
     <%= yield %>
   </body>
 </html>

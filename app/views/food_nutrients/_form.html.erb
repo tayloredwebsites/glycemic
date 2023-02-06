@@ -1,68 +1,35 @@
 <%= form_with(model: food_nutrient) do |form| %>
-  <% if food_nutrient.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(food_nutrient.errors.count, "error") %> prohibited this food_nutrient from being saved:</h2>
-
-      <ul>
-        <% food_nutrient.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
 
   <div>
-    <%= form.label :id, style: "display: block" %>
-    <%= @food_nutrient.id %>
+    <input type='hidden' id="food_nutrient[food_id]" name="food_nutrient[food_id]" value="<%= @food.id %>"/>
+    <%= form.label :nutrient_id %>
+    <%
+      nutrient_options = []
+      @unused_nutrients.each do |nut|
+        nutrient_options << [nut.name, nut.id]
+      end
+    %>
+    <% if food_nutrient.blank? || food_nutrient.id.blank? %>
+      <%= form.select :nutrient_id, nutrient_options %>
+    <% else %>
+      <%= form.select :nutrient_id, nutrient_options, {}, {:disabled => true} %>
+    <% end %>
   </div>
 
   <div>
-    <%= form.label :nutrient_id, style: "display: block" %>
-    <%= form.number_field :nutrient_id %>
-  </div>
-
-  <div>
-    <%= form.label :food_id, style: "display: block" %>
-    <%= form.number_field :food_id %>
-  </div>
-
-  <div>
-    <%= form.label :study, style: "display: block" %>
-    <%= form.check_box :study %>
-  </div>
-
-  <div>
-    <%= form.label :study_weight, style: "display: block" %>
-    <%= form.text_field :study_weight %>
-  </div>
-
-  <!-- div>
-    <%= form.label :avg_rec_id, style: "display: block" %>
-    <%= form.number_field :avg_rec_id %>
-  </div -->
-
-  <div>
-    <%= form.label :portion, style: "display: block" %>
+    <%= form.label :portion %>
     <%= form.text_field :portion %>
+    <%= form.text_field :portion_unit, style: 'width: 30px' %>
   </div>
 
   <div>
-    <%= form.label :portion_unit, style: "display: block" %>
-    <%= form.text_field :portion_unit %>
-  </div>
-
-  <div>
-    <%= form.label :amount, style: "display: block" %>
+    <%= form.label :amount %>
     <%= form.text_field :amount %>
+    <%= form.text_field :amount_unit, style: 'width: 30px' %>
   </div>
 
   <div>
-    <%= form.label :amount_unit, style: "display: block" %>
-    <%= form.text_field :amount_unit %>
-  </div>
-
-  <div>
-    <%= form.label :desc, style: "display: block" %>
+    <%= form.label :desc %>
     <%= form.text_area :desc %>
   </div>
 

@@ -1,4 +1,6 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :title, 'Nutrient Page' %>
+<% content_for :header, "Nutrient Page" %>
+<% content_for :subheader, "#{@nutrient.present? ? 'for nutrient: '+@nutrient.name : ''}" %>
 
 <%= render @nutrient %>
 

@@ -1,10 +1,6 @@
-<%
-  @title = "Nutrients Listing"
-  content_for(:title, @title)
-%>
-<p style="color: green"><%= notice %></p>
+<% content_for :title, 'Nutrients Listing' %>
+<% content_for :header, "Nutrients Listing" %>
 
-<h1><%= @title %></h1>
 
 <div id="nutrients">
   <table>

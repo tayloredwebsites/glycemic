@@ -1,4 +1,7 @@
-<h1>Editing nutrient</h1>
+<% content_for :title, 'Edit Nutrient Page' %>
+<% content_for :header, "Edit Nutrient Page" %>
+<% content_for :subheader, "#{@nutrient.present? ? 'for nutrient: '+@nutrient.name : ''}" %>
+
 
 <%= render "form", nutrient: @nutrient %>
 

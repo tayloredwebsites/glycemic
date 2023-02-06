@@ -1,23 +1,42 @@
-<%
-  @title = "Nutrients of Food Listing"
-  content_for(:title, @title)
-%>
-<p style="color: green"><%= notice %></p>
-
-<h1><%= @title %></h1>
-<h2>for food: <%= @food.name %></h2>
+<% content_for :title, 'Nutrients of Food Listing' %>
+<% content_for :header, 'Nutrients of Food Listing' %>
+<% content_for :subheader, "#{@food.present? ? 'for food: '+@food.name : ''}" %>
 
 <div id="food_nutrients">
   <table>
-  <%= render 'food_nutrient_headers' %>
+    <tr>
+      <th>ID</th>
+      <th>Nutrient</th>
+      <th>Food</th>
+      <th>Study<br>/ Actual</th>
+      <th>Portion</th>
+      <th>Nutrient</th>
+      <th>Description</th>
+      <th>Actions</th>
+    </tr>
     <% @food_nutrients.each do |food_nutrient| %>
-      <%= render food_nutrient_row %>
+      <tr>
+        <td><%= food_nutrient.id %></td>
+        <td><%= food_nutrient.nutrient_id %> - <%= food_nutrient.nutrient.name if food_nutrient.nutrient_id.present? %></td>
+        <td><%= food_nutrient.food_id %> - <%= food_nutrient.food.name if food_nutrient.food_id.present? %></td>
+        <td><%= food_nutrient.study %>  <%= food_nutrient.study_weight %></td>
+        <td><%= food_nutrient.portion %> <%= food_nutrient.portion_unit %></td>
+        <td><%= food_nutrient.amount %> <%= food_nutrient.amount_unit %></td>
+        <td><%= food_nutrient.desc %></td>
+        <td>
+          <a href="/food_nutrients/<%= food_nutrient.id %>/edit">Edit</a>
+          <%= link_to "Delete", food_nutrient, method: :delete %>
+          <%= link_to "Delete", "/food_nutrient/#{food_nutrient.id}", data: { turbo_method: "delete", turbo_confirm: "Are you sure?" } %>
+          <!-- a href="/food_nutrient/<%=food_nutrient.id%>" role="button" data-method="delete" data-confirm="Are you sure?">
+            < i class="far fa-trash-alt" ></i>Delete</a -->
+        </td>
+      </tr>
     <% end %>
   </table>
 </div>
 
 <ul>
-<li><%= link_to "New food nutrient", new_food_nutrient_path %></li>
+<li><%= link_to "New food nutrient", "/food_nutrients/new?food_id=#{@food.id}" %></li>
 <li><a href='/foods'>Foods Listing</a></li>
 <li><a href="/">Home</a></li>
 <li><a href='/signout'>Sign Out</a></li>
