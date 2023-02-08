@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
-  resources :food_nutrients #  do  # , except: %i[index]
+  resources :food_nutrients, except: %i[index] do
+    member do
+    end
+    collection do
+    end
+  end
   get '/nutrients_of_food/:food_id', to: 'food_nutrients#nutrients_of_food'
-  # match '/food_nutrients/:id' => 'food_nutrients#destroy', :via => :delete, as: :destroy_food_nutrient # to add the missing destroy route
 
   resources :foods
   resources :nutrients

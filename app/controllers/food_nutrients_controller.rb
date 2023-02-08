@@ -43,12 +43,13 @@ class FoodNutrientsController < ApplicationController
   # GET /food_nutrients/1/edit
   def edit
     set_food_nutrient_from_params(params['id'], '') # set the FoodNutrient from its id and its Food
+    set_unused_nutrients
     set_flash_msg('','')
   end
 
   # POST /food_nutrients or /food_nutrients.json
   def create
-    set_food_nutrient_from_params('', params['food_id']) # set a new FoodNutrient for this Food
+    set_food_nutrient_from_params('', food_nutrient_params['food_id']) # set a new FoodNutrient for this Food
     @food_nutrient = FoodNutrient.new(food_nutrient_params)
 
     respond_to do |format|
@@ -86,7 +87,16 @@ class FoodNutrientsController < ApplicationController
   # DELETE /food_nutrients/1 or /food_nutrients/1.json
   def destroy
     set_food_nutrient_from_params(params['id'], '') # set the FoodNutrient from its id and its Food
-    # @food_nutrient.destroy
+    @food_nutrient.destroy
+    save_id = @food_nutrient.id
+    if @food_nutrient.destroy
+      Rails.logger.debug("$$$ destroyed food: #{@food_nutrient.inspect}")
+      Rails.logger.debug("$$$ destroyed food: #{save_id}")
+      set_flash_msg("Successfully deleted #{save_id}", "")
+    else
+      set_flash_msg('', "Error deleting food: #{@food_nutrient.id}")
+      @errors + @food_nutrient.errors.full_messages
+    end
 
     respond_to do |format|
       format.html { redirect_to food_nutrients_url, notice: "Food nutrient was stopped from being destroyed." }
@@ -153,11 +163,12 @@ class FoodNutrientsController < ApplicationController
 
     def set_food_nutrient_from_ids(id, food_id)
       if id > 0
-        Rails.logger.debug("$$$ get_food_nutrient(#{id})")
+        Rails.logger.debug("$$$ set_food_nutrient_from_ids(#{id})")
         @food = nil
         @food_nutrient = get_food_nutrient(id)
         if @food_nutrient.present?
           if @food_nutrient.food_id.present? && @food_nutrient.food_id > 0
+            Rails.logger.debug("$$$ set_food_nutrient_from_ids - @food_nutrient: #{@food_nutrient.inspect}")
             @food = get_food(@food_nutrient.food_id)
           else
             @errors << "Missing food in Food Nutrient id: #{@food_nutrient.id}"

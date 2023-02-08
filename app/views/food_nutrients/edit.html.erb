@@ -10,12 +10,8 @@
 <br>
 
 <div>
-  <%= link_to "Show this food nutrient", @food_nutrient %> |
-  <%= link_to "Back to food nutrients", food_nutrients_path %>
-  <ul>
-    <li><a href='<%= "/food_nutrients/#{@food.id}" %>'>View Food Nutrient</a></li>
-    <li><a href='<%= "/food_nutrients/#{@food.id}" %>'>Food Nutrients listing</a></li>
-    <li><a href='/foods'>Foods Listing</a></li>
-    <li><a href="/">Home</a></li>
-    <li><a href='/signout'>Sign Out</a></li>
-  </ul>
+<ul>
+  <li><a href="/food_nutrients/new?food_id=<%= @food.id %>">New nutrient for <%= @food.name %></a></li>
+  <li><a href="/food_nutrients/<%= @food.id %>">View this nutrient for <%= @food.name %></a></li>
+  <li><a href="/food_nutrients/<%=@food_nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete this nutrient</a></li>
+</ul>

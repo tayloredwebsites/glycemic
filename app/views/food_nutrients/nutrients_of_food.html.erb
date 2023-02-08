@@ -14,21 +14,19 @@
       <th>Description</th>
       <th>Actions</th>
     </tr>
-    <% @food_nutrients.each do |food_nutrient| %>
+    <% @food_nutrients.each do |fn| %>
       <tr>
-        <td><%= food_nutrient.id %></td>
-        <td><%= food_nutrient.nutrient_id %> - <%= food_nutrient.nutrient.name if food_nutrient.nutrient_id.present? %></td>
-        <td><%= food_nutrient.food_id %> - <%= food_nutrient.food.name if food_nutrient.food_id.present? %></td>
-        <td><%= food_nutrient.study %>  <%= food_nutrient.study_weight %></td>
-        <td><%= food_nutrient.portion %> <%= food_nutrient.portion_unit %></td>
-        <td><%= food_nutrient.amount %> <%= food_nutrient.amount_unit %></td>
-        <td><%= food_nutrient.desc %></td>
+        <td><%= fn.id %></td>
+        <td><%= fn.nutrient_id %> - <%= fn.nutrient.name if fn.nutrient_id.present? %></td>
+        <td><%= fn.food_id %> - <%= fn.food.name if fn.food_id.present? %></td>
+        <td><%= fn.study %>  <%= fn.study_weight %></td>
+        <td><%= fn.portion %> <%= fn.portion_unit %></td>
+        <td><%= fn.amount %> <%= fn.amount_unit %></td>
+        <td><%= fn.desc %></td>
         <td>
-          <a href="/food_nutrients/<%= food_nutrient.id %>/edit">Edit</a>
-          <%= link_to "Delete", food_nutrient, method: :delete %>
-          <%= link_to "Delete", "/food_nutrient/#{food_nutrient.id}", data: { turbo_method: "delete", turbo_confirm: "Are you sure?" } %>
-          <!-- a href="/food_nutrient/<%=food_nutrient.id%>" role="button" data-method="delete" data-confirm="Are you sure?">
-            < i class="far fa-trash-alt" ></i>Delete</a -->
+          <a href="/food_nutrients/<%= fn.id %>/edit">Edit</a>
+          <!-- %= link_to "Delete", "/food_nutrient/#{fn.id}", data: { turbo_method: "delete", turbo_confirm: "Are you sure?" } % -->
+          <a href="/food_nutrients/<%=fn.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a>
         </td>
       </tr>
     <% end %>
@@ -37,7 +35,4 @@
 
 <ul>
 <li><%= link_to "New food nutrient", "/food_nutrients/new?food_id=#{@food.id}" %></li>
-<li><a href='/foods'>Foods Listing</a></li>
-<li><a href="/">Home</a></li>
-<li><a href='/signout'>Sign Out</a></li>
 </ul>

@@ -12,20 +12,28 @@
     <% if food_nutrient.blank? || food_nutrient.id.blank? %>
       <%= form.select :nutrient_id, nutrient_options %>
     <% else %>
-      <%= form.select :nutrient_id, nutrient_options, {}, {:disabled => true} %>
+      <%= food_nutrient.nutrient.name %>
     <% end %>
   </div>
 
   <div>
     <%= form.label :portion %>
     <%= form.text_field :portion %>
-    <%= form.text_field :portion_unit, style: 'width: 30px' %>
+    <select id="portion_unit", style="width: 60px">
+      <% FoodNutrient::MEASUREMENTS.each do |m| %>
+        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.portion_unit == m ? ' selected' : '' %>/>
+      <% end %>
+    </select>
   </div>
 
   <div>
     <%= form.label :amount %>
     <%= form.text_field :amount %>
-    <%= form.text_field :amount_unit, style: 'width: 30px' %>
+    <select id="amount_unit", style="width: 60px">
+      <% FoodNutrient::MEASUREMENTS.each do |m| %>
+        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.amount_unit == m ? ' selected' : '' %>/>
+      <% end %>
+    </select>
   </div>
 
   <div>

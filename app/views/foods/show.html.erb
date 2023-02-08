@@ -4,9 +4,8 @@
 
 <%= render @food %>
 
-<div>
-  <%= link_to "Edit this food", edit_food_path(@food) %> |
-  <%= link_to "Back to foods", foods_path %>
-
-  <%= button_to "Destroy this food", @food, method: :delete %>
-</div>
+<ul>
+  <li><a href="/food/new %>">New Food</a></li>
+  <li><a href="/foods/<%= @food.id %>/edit">Edit this food</a></li>
+  <li><a href="/foods/<%=@food.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete this food</a></li>
+</ul>

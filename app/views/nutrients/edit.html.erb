@@ -7,7 +7,8 @@
 
 <br>
 
-<div>
-  <%= link_to "Show this nutrient", @nutrient %> |
-  <%= link_to "Back to nutrients", nutrients_path %>
-</div>
+<ul>
+  <li><a href="/nutrients/new %>">New Nutrient</a></li>
+  <li><a href="/nutrients/<%= @nutrient.id %>">View this nutrient</a></li>
+  <li><a href="/nutrients/<%=@nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete this nutrient</a></li>
+</ul>
