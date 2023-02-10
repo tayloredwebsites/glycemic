@@ -1,24 +1,38 @@
-<%
-  @title = "Nutrients of Food Listing"
-  content_for(:title, @title)
-%>
-<p style="color: green"><%= notice %></p>
-
-<h1><%= @title %></h1>
-<h2>for food: <%= @food.name %></h2>
+<% content_for :title, 'Nutrients of Food Listing' %>
+<% content_for :header, 'Nutrients of Food Listing' %>
+<% content_for :subheader, "#{@food.present? ? 'for food: '+@food.name : ''}" %>
 
 <div id="food_nutrients">
   <table>
-  <%= render 'food_nutrient_headers' %>
-    <% @food_nutrients.each do |food_nutrient| %>
-      <%= render food_nutrient_row %>
+    <tr>
+      <th>ID</th>
+      <th>Nutrient</th>
+      <th>Food</th>
+      <th>Study<br>/ Actual</th>
+      <th>Portion</th>
+      <th>Nutrient</th>
+      <th>Description</th>
+      <th>Actions</th>
+    </tr>
+    <% @food_nutrients.each do |fn| %>
+      <tr>
+        <td><%= fn.id %></td>
+        <td><%= fn.nutrient_id %> - <%= fn.nutrient.name if fn.nutrient_id.present? %></td>
+        <td><%= fn.food_id %> - <%= fn.food.name if fn.food_id.present? %></td>
+        <td><%= fn.study %>  <%= fn.study_weight %></td>
+        <td><%= fn.portion %> <%= fn.portion_unit %></td>
+        <td><%= fn.amount %> <%= fn.amount_unit %></td>
+        <td><%= fn.desc %></td>
+        <td>
+          <a href="/food_nutrients/<%= fn.id %>/edit">Edit</a>
+          <!-- %= link_to "Delete", "/food_nutrient/#{fn.id}", data: { turbo_method: "delete", turbo_confirm: "Are you sure?" } % -->
+          <a href="/food_nutrients/<%=fn.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a>
+        </td>
+      </tr>
     <% end %>
   </table>
 </div>
 
 <ul>
-<li><%= link_to "New food nutrient", new_food_nutrient_path %></li>
-<li><a href='/foods'>Foods Listing</a></li>
-<li><a href="/">Home</a></li>
-<li><a href='/signout'>Sign Out</a></li>
+<li><%= link_to "New food nutrient", "/food_nutrients/new?food_id=#{@food.id}" %></li>
 </ul>

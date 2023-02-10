@@ -1,10 +1,5 @@
-<%
-  @title = "Food Listing"
-  content_for(:title, @title)
-%>
-<p style="color: green"><%= notice %></p>
-
-<h1><%= @title %></h1>
+<% content_for :title, 'Foods Listing' %>
+<% content_for :header, "Foods Listing" %>
 
 <div id="foods">
   <table>
@@ -16,7 +11,5 @@
 </div>
 
 <ul>
-<li><%= link_to "New food", new_food_path %></li>
-<li><a href="/">Home</a></li>
-<li><a href='/signout'>Sign Out</a></li>
+  <li><a href="/foods/new">New Food</a></li>
 </ul>

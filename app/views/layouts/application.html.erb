@@ -7,9 +7,48 @@
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
   <body>
+    <h1 class="center">Food Nutrients Dietary Assistant</h1>
+    <div class="center">
+      <ul class="inlineListButtons">
+        <% if @food.present? %>
+          <li><a href="/nutrients_of_food/<%= @food.id %>"><%= @food.name.truncate(25).titleize %> Nutrients</a></li>
+        <% else %>
+          <li><a class="inactiveLink" href="#">Food Nutrients</a></li>
+        <% end %>
+        <li><a href='/foods'>Foods Listing</a></li>
+        <li><a href='/nutrients'>Nutrients Listing</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href='/signout'>Sign Out</a></li>
+      </ul>
+    </div>
+
+    <h2><%= content_for?(:header) ? yield(:header) : "Glycemic" %></h2>
+    <% if content_for?(:subheader) %>
+      <h2>
+        <%= yield(:subheader) %>
+        <% if content_for?(:subheader2) %>
+          <br/><%= yield(:subheader2) %>
+        <% end %>
+      </h2>
+    <% end %>
+    <% if flash[:notice].present? %>
+      <p style="color: green"><%= flash[:notice] %></p>
+    <% end %>
+    <% if flash[:alert].present? %>
+      <p style="color: red"><%= flash[:alert] %></p>
+    <% end %>
+    <% if @errors.any? %>
+      <p style="color: red"><%= pluralize(@errors.count, "error") %> prohibited this food_nutrient from being saved:</p>
+      <% @errors.each do |error| %>
+        <p style="color: red"><%= error %></p>
+      <% end %>
+    <% end %>
+
+
     <%= yield %>
   </body>
 </html>

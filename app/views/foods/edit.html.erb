@@ -1,4 +1,6 @@
-<h1>Editing food</h1>
+<% content_for :title, 'Edit Food Page' %>
+<% content_for :header, "Edit Food Page" %>
+<% content_for :subheader, "#{@food.present? ? 'for food: '+@food.name : ''}" %>
 
 <%= render "form", food: @food %>
 
@@ -8,3 +10,13 @@
   <%= link_to "Show this food", @food %> |
   <%= link_to "Back to foods", foods_path %>
 </div>
+<ul>
+  <li><a href="/foods/new %>">New Food</a></li>
+  <li><a href="/foods/<%= @food.id %>">View this food</a></li>
+  <li><a href="/foods/<%=@food.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete this food</a></li>
+  <li><a href="/nutrients_of_food/<%= @food.id %>"><%= @food.name %> Nutrients Listing</a></li>
+  <li><a href='/foods'>Foods Listing</a></li>
+  <li><a href='/nutrients'>Nutrients Listing</a></li>
+  <li><a href="/">Home</a></li>
+  <li><a href='/signout'>Sign Out</a></li>
+</ul>

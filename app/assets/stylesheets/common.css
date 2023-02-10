@@ -1,0 +1,28 @@
+.inlineList li {
+  display: inline;
+  margin-left: 10px;
+}
+
+.inlineListButtons li {
+  display: inline;
+  margin-left: 10px;
+}
+
+.inlineListButtons li a {
+  display: inline-block;
+  height: 20px;
+  width: auto;
+  border-radius: 4px;
+  border: 1px solid #000;
+  padding: 0 5px;
+}
+
+.center {
+  text-align: center;
+}
+
+.inactiveLink {
+  pointer-events: none;
+  cursor: default;
+  color: #999;
+}

@@ -4,8 +4,8 @@
   <td><%= nutrient.usda_ndb_num %></td>
   <td><%= nutrient.desc %></td>
   <td>
-    <a href='#'>View</a>
-    <a href='#'>Download</a>
-    <a href='#'>Edit</a>
+    <a href="/nutrients/<%=nutrient.id%>">View</a>
+    <a href="/nutrients/<%=nutrient.id%>/edit">Edit</a>
+    <a href="/nutrients/<%=nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a>
   </td>
 </tr>

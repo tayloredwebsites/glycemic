@@ -49,8 +49,16 @@ class FoodsController < ApplicationController
 
   # DELETE /foods/1 or /foods/1.json
   def destroy
-    @food.destroy
+    save_name = @food.name
+    if @food.destroy
+      Rails.logger.debug("$$$ destroyed food: #{@food.inspect}")
+      Rails.logger.debug("$$$ destroyed food: #{save_name}")
+      set_flash_msg("Successfully deleted #{save_name}", "")
 
+    else
+      set_flash_msg('', "Error deleting food: #{@food.name}")
+      @errors + @food.errors.full_messages
+    end
     respond_to do |format|
       format.html { redirect_to foods_url, notice: "Food was successfully destroyed." }
       format.json { head :no_content }

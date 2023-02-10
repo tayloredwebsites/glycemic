@@ -1,52 +1,27 @@
-<div id="<%= dom_id food_nutrient %>">
+<div id="food_nutrient_id_<%= food_nutrient.id %>">
   <p>
     <strong>Id:</strong>
     <%= food_nutrient.id %>
   </p>
 
   <p>
-    <strong>Nutrient:</strong>
-    <%= food_nutrient.nutrient_id %>
-  </p>
-
-  <p>
     <strong>Food:</strong>
-    <%= food_nutrient.food_id %>
+    <%= food_nutrient.food.name %>
   </p>
 
   <p>
-    <strong>Study:</strong>
-    <%= food_nutrient.study %>
-  </p>
-
-  <p>
-    <strong>Study weight:</strong>
-    <%= food_nutrient.study_weight %>
-  </p>
-
-  <p>
-    <strong>Avg rec:</strong>
-    <%= food_nutrient.avg_rec_id %>
+    <strong>Nutrient:</strong>
+    <%= food_nutrient.nutrient.name %>
   </p>
 
   <p>
     <strong>Portion:</strong>
-    <%= food_nutrient.portion %>
-  </p>
-
-  <p>
-    <strong>Portion unit:</strong>
-    <%= food_nutrient.portion_unit %>
+    <%= food_nutrient.portion %> <%= food_nutrient.portion_unit %>
   </p>
 
   <p>
     <strong>Amount:</strong>
-    <%= food_nutrient.amount %>
-  </p>
-
-  <p>
-    <strong>Amount unit:</strong>
-    <%= food_nutrient.amount_unit %>
+    <%= food_nutrient.amount %> <%= food_nutrient.amount_unit %>
   </p>
 
   <p>
