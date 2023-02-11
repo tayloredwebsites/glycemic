@@ -11,6 +11,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     @nutrient, @nutrient2 = FactoryBot.create_list(:nutrient, 2)
     @food_nutrient = FactoryBot.create(:food_nutrient, food: @food, nutrient: @nutrient)
     @food_nutrient2 = FactoryBot.create(:food_nutrient, food: @food, nutrient: @nutrient2)
+    @food_nutrients = [@food_nutrient, @food_nutrient2]
   end
 
   # called after every single test
@@ -19,23 +20,35 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # Rails.cache.clear
   end
 
-  test 'be able to get the Foods Nutrients listing page' do
-    get '/food_nutrients/'
+  test 'be able to get the Nutrients of a Food listing page' do
+    get "/nutrients_of_food/#{@food.id}"
     assert_response 200
     page = Nokogiri::HTML.fragment(response.body)
-    h1 = page.css('h1').first
-    Rails.logger.debug("$$$ h1: #{h1.inspect}")
-    assert h1.text.include?('Food Nutrients Listing')
+    h2 = page.css('h2').first
+    Rails.logger.debug("$$$ h2: #{h2.inspect}")
+    assert h2.text.include?('Nutrients of Food Listing')
+    assert h2.text.include?("for food: #{@food.name}")
     # make a hash of all links on the page
     page_links = page.css('a')
-    food_nutrients_count = FoodNutrient.all.count
-    assert_equal(4+food_nutrients_count, page_links.count)
-    link_map = page_links.map{|a| [a.text, a['href']]}.to_h
+    title_map = page_links.map{|a| [a.text, a['href']]}.to_h
+    Rails.logger.debug("title_map: #{title_map.inspect}")
+    link_map = page_links.map{|a| [ a['href'], a.text]}.to_h
     Rails.logger.debug("link_map: #{link_map.inspect}")
-    assert_match("/food_nutrients/new",link_map['New food nutrient']) # has New Food Nutrients link
-    assert_match("/foods",link_map['Foods Listing']) # has Foods Listing link
-    assert_match("/",link_map['Home']) # has Nutrients Listing link
-    assert_match("/signout",link_map['Sign Out']) # has Sign Out link
+    food_nutrients_count = FoodNutrient.all.count
+    assert_equal(2, food_nutrients_count)
+    # make sure we have links for the header, two for each nutrient, and one at the bottom
+    assert_equal(5+food_nutrients_count*2+1, page_links.count)
+    # make sure that we have the correct links on the page
+    assert_match("/nutrients_of_food/#{@food.id}",title_map["#{@food.name} Nutrients"])
+    assert_match("/foods",title_map["Foods Listing"])
+    assert_match("/nutrients",title_map["Nutrients Listing"])
+    assert_match("/",title_map["Home"])
+    assert_match("/signout",title_map["Sign Out"])
+    @food_nutrients.each do |fn|
+      assert_match("Edit",link_map["/food_nutrients/#{fn.id}/edit"])
+      assert_match("Delete",link_map["/food_nutrients/#{fn.id}"])
+    end
+    assert_match("/food_nutrients/new?food_id=#{@food.id}",title_map["New food nutrient"])
   end
 
   test "should get new" do

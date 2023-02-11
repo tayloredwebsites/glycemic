@@ -26,10 +26,10 @@
       </ul>
     </div>
 
-    <h2><%= content_for?(:header) ? yield(:header) : "Glycemic" %></h2>
-    <% if content_for?(:subheader) %>
-      <h2>
-        <%= yield(:subheader) %>
+    <h2>
+      <%= content_for?(:header) ? yield(:header) : "Glycemic" %>
+      <% if content_for?(:subheader) %>
+        <br/><%= yield(:subheader) %>
         <% if content_for?(:subheader2) %>
           <br/><%= yield(:subheader2) %>
         <% end %>
