@@ -27,4 +27,17 @@ class ActiveSupport::TestCase
     Capybara.reset_sessions!
     Capybara.use_default_driver
   end
+
+  # helper for controllers, to confirm link goes to where we expect it
+  def assert_gets_page(url, html_page_title, subtitle=nil)
+    get(url)
+    assert_response :success
+    assert_select "title", html_page_title
+    if subtitle.present?
+      page = Nokogiri::HTML.fragment(response.body)
+      h2 = page.css('h2').first
+      assert h2.text.include?(subtitle)
+    end
+  end
+  
 end

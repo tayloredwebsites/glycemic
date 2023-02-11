@@ -1,8 +1,6 @@
-<%
-  @title = "Home Page"
-  content_for(:title, @title)
-%>
-<h1><%= @title %></h1>
+<% content_for :title, 'Home' %>
+<% content_for :header, 'Home' %>
+
 <ul>
   <li><a href='/foods'>Foods Listing</a></li>
   <li><a href='/nutrients'>Nutrients Listing</a></li>

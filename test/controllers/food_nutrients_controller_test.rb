@@ -40,15 +40,23 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_equal(5+food_nutrients_count*2+1, page_links.count)
     # make sure that we have the correct links on the page
     assert_match("/nutrients_of_food/#{@food.id}",title_map["#{@food.name} Nutrients"])
+    assert_gets_page("/nutrients_of_food/#{@food.id}", 'Nutrients of Food Listing')
     assert_match("/foods",title_map["Foods Listing"])
+    assert_gets_page("/foods", 'Foods Listing')
     assert_match("/nutrients",title_map["Nutrients Listing"])
+    assert_gets_page("/nutrients", 'Nutrients Listing')
     assert_match("/",title_map["Home"])
+    assert_gets_page("/", 'Home')
     assert_match("/signout",title_map["Sign Out"])
+    # assert_gets_page("/signout", 'Log in')
     @food_nutrients.each do |fn|
       assert_match("Edit",link_map["/food_nutrients/#{fn.id}/edit"])
+      assert_gets_page("/food_nutrients/#{fn.id}/edit", 'Food Nutrient Edit Page', "for food: #{@food.name}")
       assert_match("Delete",link_map["/food_nutrients/#{fn.id}"])
+      #ToDo: validation of delete involves rest DELETE, and js popup. test in systems tests 
     end
-    assert_match("/food_nutrients/new?food_id=#{@food.id}",title_map["New food nutrient"])
+    assert_match("",title_map["New food nutrient"])
+    assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
   end
 
   test "should get new" do
