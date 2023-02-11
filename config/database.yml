@@ -17,7 +17,13 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  host: /private/tmp
+
+  # if error: Is the server running locally and accepting connections on Unix domain socket “/var/run/postgresql/.s.PGSQL.5432”?
+  # if error: Is the server running locally and accepting connections on Unix domain socket “/private/tmp/.s.PGSQL.5432”?
+  # see: https://stackoverflow.com/questions/51894053/is-the-server-running-locally-and-accepting-connections-on-unix-domain-socket
+  # host: /private/tmp # needed for mac
+  host: /var/run/postgresql # for running on linux
+  
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
