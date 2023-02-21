@@ -1,0 +1,65 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <pre class="mermaid">
+      erDiagram
+      foods ||--o{ food_nutrients : contains
+      foods {
+        string name
+        text desc
+        integer usda_fdc_id
+        datetime created_at
+        datetime updated_at
+      }
+      food_nutrients {
+        integer nutrient_id
+        integer food_id
+        boolean study
+        decimal study_weight_4_2
+        integer avg_rec_id
+        decimal portion_6_2
+        string portion_unit
+        decimal amount_6_2
+        string amount_unit
+        text desc
+        datetime created_at
+        datetime updated_at
+      }
+      nutrients ||--o{ food_nutrients : has_amount_of
+      nutrients {
+        string name
+        integer usda_ndb_num
+        text desc
+        datetime created_at
+        datetime updated_at
+      }
+      users {
+        string email
+        string username
+        string full_name
+        string encrypted_password
+        string reset_password_token
+        datetime reset_password_sent_at
+        datetime remember_created_at
+        string confirmation_token
+        datetime confirmed_at
+        datetime confirmation_sent_at
+        string unconfirmed_email
+        integer failed_attempts
+        string unlock_token
+        datetime locked_at
+        datetime created_at
+        datetime updated_at    
+      }
+  
+    </pre>
+    <a href="https://mermaid.js.org/syntax/entityRelationshipDiagram.html" target="_blank"></a>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+  </body>
+
+</html>
