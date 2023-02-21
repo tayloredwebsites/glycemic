@@ -1,4 +1,5 @@
 require "test_helper"
+require "helpers/nokogiri_helper"
 
 class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -8,7 +9,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     @user = FactoryBot.create(:user)
     sign_in(@user)
     @food = FactoryBot.create(:food)
-    @nutrient, @nutrient2 = FactoryBot.create_list(:nutrient, 2)
+    @nutrient, @nutrient2, @nutrient3 = FactoryBot.create_list(:nutrient, 3)
     @food_nutrient = FactoryBot.create(:food_nutrient, food: @food, nutrient: @nutrient)
     @food_nutrient2 = FactoryBot.create(:food_nutrient, food: @food, nutrient: @nutrient2)
     @food_nutrients = [@food_nutrient, @food_nutrient2]
@@ -39,8 +40,8 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # make sure we have links for the header, two for each nutrient, and one at the bottom
     assert_equal(5+food_nutrients_count*2+1, page_links.count)
     # make sure that we have the correct links on the page
-    assert_match("/nutrients_of_food/#{@food.id}",title_map["#{@food.name} Nutrients"])
-    assert_gets_page("/nutrients_of_food/#{@food.id}", 'Nutrients of Food Listing')
+    assert_match("#{@food.name} Nutrients",link_map["/nutrients_of_food/#{@food.id}"])
+    assert_gets_page("/nutrients_of_food/#{@food.id}", 'Nutrients of Food Listing', "for food: #{@food.name}")
     assert_match("/foods",title_map["Foods Listing"])
     assert_gets_page("/foods", 'Foods Listing')
     assert_match("/nutrients",title_map["Nutrients Listing"])
@@ -60,22 +61,68 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get new" do
-    get new_food_nutrient_url
+    get "/food_nutrients/new?food_id=#{@food.id}"
     assert_response :success
+    assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
+    page = Nokogiri::HTML.fragment(response.body)
+    # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
+    assert_select_has(page, 'food_nutrient_nutrient_id', {
+      :options_count => 1,
+      :selected_count => 0,
+      :displayed_option => @nutrient3.name,
+      # :selected => [
+      #   "value1" => "text1",
+      # ],
+      # :match_by_value => true,
+      # :match_by_text => true,
+      # :debugging => true,
+    })
+    # confirm all appropriate fields exist
+    assert_equal(1, page.css('input#food_nutrient_portion').count)
+    Rails.logger.debug("$$$ FoodNutrient::GRAM: #{FoodNutrient::GRAM}")
+    assert_select_has(page, 'portion_unit', {
+      :displayed_option => FoodNutrient::GRAM,
+    })
+    assert_equal(1, page.css('input#food_nutrient_amount').count)
+    assert_select_has(page, 'amount_unit', {
+      :displayed_option => FoodNutrient::GRAM,
+    })
+    assert_equal(1, page.css('textarea#food_nutrient_desc').count)
+    assert_equal(1, page.css("input[type='submit'][value='Create Food nutrient']").count)
+    assert_equal(1, page.css("form[action='/food_nutrients']").count)
+    # confirm hidden input field for food_id exists and is the correct value
+    food_id_node = page.css("input#food_nutrient_food_id")
+    Rails.logger.debug("$$$ food_id_node: #{food_id_node}")
+    assert_equal(1, food_id_node.count)
+    Rails.logger.debug("$$$ food_id_node['value']: #{food_id_node.first['value']}")
+    assert_equal(@food.id.to_s, food_id_node.first['value'])
   end
 
   test "should create food_nutrient" do
     @new_food_nutrient = FactoryBot.build(:food_nutrient)
     Rails.logger.debug("*** food id: #{@food.id}")
     Rails.logger.debug("*** nutrient id: #{@nutrient.id}")
-    assert_difference("FoodNutrient.count") do
-      post food_nutrients_url, params: { food_nutrient: { food_id: @food.id, nutrient_id: @nutrient.id, amount: @new_food_nutrient.amount, amount_unit: @new_food_nutrient.amount_unit, avg_rec_id: @new_food_nutrient.avg_rec_id, desc: @new_food_nutrient.desc, portion: @new_food_nutrient.portion, portion_unit: @new_food_nutrient.portion_unit, study: @new_food_nutrient.study, study_weight: @new_food_nutrient.study_weight } }
+    assert_difference("FoodNutrient.count", 1, "a Food Nutrient should be created") do
+      post food_nutrients_url, params: {
+        food_nutrient: {
+          food_id: @food.id,
+          nutrient_id: @nutrient.id,
+          amount: @new_food_nutrient.amount,
+          amount_unit: @new_food_nutrient.amount_unit,
+          avg_rec_id: @new_food_nutrient.avg_rec_id,
+          desc: @new_food_nutrient.desc,
+          portion: @new_food_nutrient.portion,
+          portion_unit: @new_food_nutrient.portion_unit,
+          study: @new_food_nutrient.study,
+          study_weight: @new_food_nutrient.study_weight
+        }
+      }
     end
 
     assert_redirected_to food_nutrient_url(FoodNutrient.last)
   end
 
-  test "should show food_nutrient" do
+  test "should show food_nutrients for " do
     get food_nutrient_url(@food_nutrient)
     assert_response :success
   end

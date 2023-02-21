@@ -15,7 +15,9 @@
     <div class="center">
       <ul class="inlineListButtons">
         <% if @food.present? %>
-          <li><a href="/nutrients_of_food/<%= @food.id %>"><%= @food.name.truncate(25).titleize %> Nutrients</a></li>
+          <li><a href="/nutrients_of_food/<%= @food.id %>">
+            <%= @food.present? && @food.name.present? ? @food.name.truncate(25).titleize : "food is missing" %> Nutrients
+            </a></li>
         <% else %>
           <li><a class="inactiveLink" href="#">Food Nutrients</a></li>
         <% end %>
@@ -33,8 +35,8 @@
         <% if content_for?(:subheader2) %>
           <br/><%= yield(:subheader2) %>
         <% end %>
-      </h2>
-    <% end %>
+      <% end %>
+    </h2>
     <% if flash[:notice].present? %>
       <p style="color: green"><%= flash[:notice] %></p>
     <% end %>
