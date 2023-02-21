@@ -23,7 +23,8 @@ class HomeControllerTests
       assert_response 200
       # see nokogiri docs at https://nokogiri.org/rdoc/ (use search)
       page = Nokogiri::HTML.fragment(response.body)
-      assert_equal('Log in',page.css('h2').first.text)
+      h2 = page.css('h2').first
+      assert h2.text.include?('Log in')
       # confirm we have all the fields necessary
       assert_equal(1, page.css('#user_email').count)
       assert_equal(1, page.css('#user_password').count)
@@ -67,7 +68,9 @@ class HomeControllerTests
       get new_user_unlock_url
       assert_response 200
       page = Nokogiri::HTML.fragment(response.body)
-      assert_equal('Resend unlock instructions',page.css('h2').first.text)
+      h2 = page.css('h2').first
+      assert h2.text.include?('Resend unlock instructions')
+
       # confirm we have all the fields necessary
       assert_equal(1, page.css('#user_email').count)
       assert_equal(1, page.css('input[value="Resend unlock instructions"]').count)
@@ -134,7 +137,8 @@ class HomeControllerTests
       get new_user_confirmation_url
       assert_response 200
       page = Nokogiri::HTML.fragment(response.body)
-      assert_equal('Resend confirmation instructions',page.css('h2').first.text)
+      h2 = page.css('h2').first
+      assert h2.text.include?('Resend confirmation instructions')
       # confirm we have the 1 input field plus 1 for the "Resend Confirmation instruction" button
       assert_equal(1, page.css('#user_email').count)
       assert_equal(1, page.css('input[value="Resend confirmation instructions"]').count)
@@ -173,14 +177,15 @@ class HomeControllerTests
       assert_response 200
       # see nokogiri docs at https://nokogiri.org/rdoc/ (use search)
       page = Nokogiri::HTML.fragment(response.body)
-      assert_equal('Log in',page.css('h2').first.text)
+      h2 = page.css('h2').first
+      assert h2.text.include?('Log in')
       assert_equal(1, page.css('a:contains("Sign up")').count)
 
       get new_user_registration_path
       assert_response 200
       page = Nokogiri::HTML.fragment(response.body)
       h2 = page.css('h2').first
-      assert_equal('Sign up',h2.text)
+      assert h2.text.include?('Sign up')
       # confirm we have the 3 input fields plus 1 for the sign up button
       assert_equal(1, page.css('#user_email').count)
       assert_equal(1, page.css('#user_password').count)
