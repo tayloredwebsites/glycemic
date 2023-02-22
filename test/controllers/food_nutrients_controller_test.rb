@@ -23,46 +23,54 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
 
   test 'be able to get the Nutrients of a Food listing page' do
     get "/nutrients_of_food/#{@food.id}"
-    assert_response 200
+    assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
-    h2 = page.css('h2').first
-    Rails.logger.debug("$$$ h2: #{h2.inspect}")
-    assert h2.text.include?('Nutrients of Food Listing')
-    assert h2.text.include?("for food: #{@food.name}")
-    # make a hash of all links on the page
-    page_links = page.css('a')
-    title_map = page_links.map{|a| [a.text, a['href']]}.to_h
-    Rails.logger.debug("title_map: #{title_map.inspect}")
-    link_map = page_links.map{|a| [ a['href'], a.text]}.to_h
-    Rails.logger.debug("link_map: #{link_map.inspect}")
-    food_nutrients_count = FoodNutrient.all.count
+    assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
+    # confirm we are starting with 2 total food nutrients for this food
+    food_nutrients_count = FoodNutrient.where(food_id: @food.id).count
     assert_equal(2, food_nutrients_count)
+    linksH = get_links_hashes(page)
     # make sure we have links for the header, two for each nutrient, and one at the bottom
-    assert_equal(5+food_nutrients_count*2+1, page_links.count)
+    assert_equal(5+food_nutrients_count*2+1, linksH[:count])
     # make sure that we have the correct links on the page
-    assert_match("#{@food.name} Nutrients",link_map["/nutrients_of_food/#{@food.id}"])
-    assert_gets_page("/nutrients_of_food/#{@food.id}", 'Nutrients of Food Listing', "for food: #{@food.name}")
-    assert_match("/foods",title_map["Foods Listing"])
-    assert_gets_page("/foods", 'Foods Listing')
-    assert_match("/nutrients",title_map["Nutrients Listing"])
-    assert_gets_page("/nutrients", 'Nutrients Listing')
-    assert_match("/",title_map["Home"])
-    assert_gets_page("/", 'Home')
-    assert_match("/signout",title_map["Sign Out"])
+    assert_page_headers(linksH)
     # assert_gets_page("/signout", 'Log in')
     @food_nutrients.each do |fn|
-      assert_match("Edit",link_map["/food_nutrients/#{fn.id}/edit"])
-      assert_gets_page("/food_nutrients/#{fn.id}/edit", 'Food Nutrient Edit Page', "for food: #{@food.name}")
-      assert_match("Delete",link_map["/food_nutrients/#{fn.id}"])
-      #ToDo: validation of delete involves rest DELETE, and js popup. test in systems tests 
+      assert_link_has(linksH, {
+        :link_text => "Edit",
+        :link_url => "/food_nutrients/#{fn.id}/edit",
+        :page_title => "Food Nutrient Edit Page",
+        :page_subtitle => "Food Nutrient Edit Page",
+        :page_subtitle2 => "for food: #{@food.name}",
+      })
+      assert_link_has(linksH, {
+        :link_text => "Delete",
+        :link_url => "/food_nutrients/#{fn.id}",
+        # ToDo: validate the "Are you sure?" alert
+        # ToDo: validate the delete page is linked to properly
+      })
     end
-    assert_match("",title_map["New food nutrient"])
-    assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
+    assert_link_has(linksH, {
+      :link_text => "New food nutrient",
+      :link_url => "/food_nutrients/new?food_id=#{@food.id}",
+      :page_title => "New Food Nutrient",
+      :page_subtitle => "New Food Nutrient",
+      :page_subtitle2 => "for food: #{@food.name}",
+    })
+
   end
 
   test "should get new" do
     get "/food_nutrients/new?food_id=#{@food.id}"
     assert_response :success
+    page = Nokogiri::HTML.fragment(response.body)
+    assert_at_page(page, "New Food Nutrient", "New Food Nutrient", "for food: #{@food.name}")
+    linksH = get_links_hashes(page)
+    # make sure we have links for the header
+    assert_equal(5, linksH[:count])
+    # make sure that we have the correct links on the page
+    assert_page_headers(linksH)
+
     assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
     page = Nokogiri::HTML.fragment(response.body)
     # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
@@ -70,12 +78,6 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       :options_count => 1,
       :selected_count => 0,
       :displayed_option => @nutrient3.name,
-      # :selected => [
-      #   "value1" => "text1",
-      # ],
-      # :match_by_value => true,
-      # :match_by_text => true,
-      # :debugging => true,
     })
     # confirm all appropriate fields exist
     assert_equal(1, page.css('input#food_nutrient_portion').count)
@@ -153,10 +155,8 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_link_has(linksH, {
       :link_text => "Remove this nutrient from #{@food.name}",
       :link_url => "/food_nutrients/#{@food_nutrient.id}",
-      # ToDo: validate the "A"re you sure?"" alert
-      # :page_title => "New Food Nutrient",
-      # :page_subtitle => "for food:",
-      # :page_subtitle2 => @food.name,
+      # ToDo: validate the "Are you sure?" alert
+      # ToDo: validate the delete page is linked to properly
     })
   
     assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
