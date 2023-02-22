@@ -1,5 +1,5 @@
-<% content_for :title, 'Food Nutrient Show Page' %>
-<% content_for :header, 'Food Nutrient Show Page' %>
+<% content_for :title, "'#{@food.name}' Nutrient View Page" %>
+<% content_for :header, "'#{@food.name}' Nutrient View Page" %>
 <% content_for :subheader, "#{@food_nutrient.present? ? 'for food nutrient: '+@food_nutrient.nutrient.name : ''}" %>
 
 <%= render 'food_nutrient', food_nutrient: @food_nutrient %>
@@ -10,5 +10,5 @@
 <ul>
   <li><a href="/food_nutrients/new?food_id=<%= @food.id %>">New nutrient for <%= @food.name %></a></li>
   <li><a href="/food_nutrients/<%= @food_nutrient.id %>/edit">Edit this nutrient for <%= @food.name %></a></li>
-  <li><a href="/food_nutrients/<%=@food_nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete this nutrient</a></li>
+  <li><a href="/food_nutrients/<%=@food_nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Remove this nutrient from <%= @food.name %></a></li>
 </ul>

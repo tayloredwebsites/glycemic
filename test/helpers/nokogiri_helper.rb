@@ -1,5 +1,5 @@
 
-# function to do assertions (by params passed) on a select tag with options
+# function to do assertions on a select tag with options (by params passed) in controller tests
 def assert_select_has(nokogiri_body, select_id, params)
   # example: <select id="portion_unit">
   #  <option value="g">gram</option>
@@ -14,7 +14,7 @@ def assert_select_has(nokogiri_body, select_id, params)
   #   ],
   #   :match_by_value => true,
   #   :match_by_text => true,
-  #   :debugging => false,
+  #   :debugging => true,
   # }
   # only matching done will be on params that are passed
   # { :displayed_option => gram } will return false
@@ -70,3 +70,107 @@ def get_option_text_or_label(option)
   end
   ret
 end
+
+def assert_page_headers(links_hash)
+  assert_link_has(links_hash, {
+    :link_text => "#{@food.name} Nutrients",
+    :link_url => "/nutrients_of_food/#{@food.id}",
+    :page_title => "Nutrients of Food Listing",
+    :page_subtitle => "for food:",
+    :page_subtitle2 => @food.name,
+  })
+  assert_link_has(links_hash, {
+    :link_text => "Foods Listing",
+    :link_url => "/foods",
+    :page_title => "Foods Listing",
+  })
+  assert_link_has(links_hash, {
+    :link_text => "Nutrients Listing",
+    :link_url => "/nutrients",
+    :page_title => "Nutrients Listing",
+  })
+  assert_link_has(links_hash, {
+    :link_text => "Home",
+    :link_url => "/",
+    :page_title => "Home",
+  })
+  assert_link_has(links_hash, {
+    :link_text => "Sign Out",
+    :link_url => "/signout",
+  })
+
+end
+
+# function to do assertions on a link tag (by params passed) in controller tests
+def assert_link_has(links_hash, params)
+  # example:
+  #   Link: <a href="LinkURL">LinkText</a>
+  #   Page at LinkURL:
+  #     <html>
+  #       <head><title>PageTitleText</title></head>
+  #       <body><h1>AppTitleText</h1><h2>SubtitleText<br/>Subtitle2Text</h2></body>
+  #     </html>
+  # e.g. all params used, returns true:
+  # params: {
+  #   :link_text => 'LinkText',
+  #   :link_url => 'LinkURL',
+  #   :match_by_text => true, # only needed when there are multiple links to the same url on a page with different link text
+  #   :page_title => "PageTitleText",
+  #   :page_subtitle => "SubtitleText",
+  #   :page_subtitle2 => "Subtitle2Text",
+  #   :debugging => "true",
+  # }
+  # only matching done will be on params that are passed
+
+  debug_mode = (params[:debugging] && params[:debugging] == true) ? true : false
+
+  Rails.logger.debug("$$$ assert_link_has links_hash: #{JSON.pretty_generate(links_hash)}") if debug_mode
+
+  # Check to make sure the URL and Link Text match
+  if params[:match_by_text].present? && params[:match_by_text] == true
+    # confirm the link text passed in the params points to the url passed in the params
+    # uses the links_hash created in get_links_hashes to match them up
+    Rails.logger.debug("$$$ Match by Text, to see if params[:link_text] match params[:link_url]") if debug_mode
+    assert_equal(params[:link_url], links_hash[:by_text][params[:link_text]], 'link text lookup does not match link url')
+  else
+    # This is the default, to look find the Link Text for an href (in the anchor tags on the page)
+    # confirm the url passed in the params points to the text passed in the params
+    # uses the links_url child hash created in get_links_hashes to match them up
+    Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+    assert(links_hash[:by_href][params[:link_url]].present?, "lookup of text: #{params[:link_text]} matching url: #{params[:link_url]} was not found")
+    assert(
+      links_hash[:by_href][params[:link_url]].include?(
+        params[:link_text]
+      ), "link url lookup found #{params[:link_text]} does not include text: #{params[:link_text]}"
+    )
+  end
+
+  if params[:page_title].present? || params[:page_subtitle].present? || params[:page_subtitle2].present?
+    # confirm link goes to where we expect it
+    get(params[:link_url])
+    assert_response :success
+    new_page = Nokogiri::HTML.fragment(response.body)
+    assert_equal new_page.css('title').text, params[:page_title], "page title #{params[:page_title]} does not match #{new_page.css('title').text}"
+    if params[:page_subtitle].present?
+      h2 = new_page.css('h2').first
+      # Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+      assert h2.text.include?(params[:page_subtitle]), "page subtitle #{params[:page_subtitle]} is not contained in #{h2.text}"
+      if params[:page_subtitle2].present?
+        # Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+        assert h2.text.include?(params[:page_subtitle2]), "page subtitle2 #{params[:page_subtitle2]} is not contained in #{h2.text}"
+      end
+    end
+  end
+end
+    
+  # get the links on page hashes (:by_text, :by_href, and :count) within one parent hash
+def get_links_hashes(noko_page)
+  ret = Hash.new
+  page_links = noko_page.css('a')
+  ret[:by_text] = page_links.map{|a| [a.text, a['href']]}.to_h
+  # Rails.logger.debug("title_map: #{title_map.inspect}")
+  ret[:by_href] = page_links.map{|a| [ a['href'], a.text]}.to_h
+  ret[:count] = page_links.count
+  return ret
+end
+  

@@ -13,10 +13,10 @@ class ActiveSupport::TestCase
   # see https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#configure-your-test-suite
   include FactoryBot::Syntax::Methods
 
-#   # Add more helper methods to be used by all tests here...
-# end
+    #   # Add more helper methods to be used by all tests here...
+    # end
 
-# class ActionDispatch::IntegrationTest
+    # class ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in all integration tests
   include Capybara::DSL
   # Make `assert_*` methods behave like Minitest assertions
@@ -29,14 +29,22 @@ class ActiveSupport::TestCase
   end
 
   # helper for controllers, to confirm link goes to where we expect it
-  def assert_gets_page(url, html_page_title, subtitle=nil)
+  def assert_gets_page(url, html_page_title, subtitle=nil, subtitle2)
     get(url)
     assert_response :success
-    assert_select "title", html_page_title
+    page = Nokogiri::HTML.fragment(response.body)
+    assert_at_page(page, html_page_title, subtitle=nil, subtitle2=nil)
+  end
+  
+  # helper for controllers, to confirm link goes to where we expect it
+  def assert_at_page(noko_page, html_page_title, subtitle=nil, subtitle2=nil)
+    assert_equal html_page_title, noko_page.css("title").text, 'title mismatch'
     if subtitle.present?
-      page = Nokogiri::HTML.fragment(response.body)
-      h2 = page.css('h2').first
-      assert h2.text.include?(subtitle)
+      h2 = noko_page.css('h2').first
+      assert h2.text.include?(subtitle), 'subtitle mismatch'
+      if subtitle2.present?
+        assert h2.text.include?(subtitle2), 'subtitle2 mismatch'
+      end
     end
   end
   

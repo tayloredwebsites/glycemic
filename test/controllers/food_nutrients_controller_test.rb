@@ -122,9 +122,45 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to food_nutrient_url(FoodNutrient.last)
   end
 
-  test "should show food_nutrients for " do
+  test "should view food_nutrients for " do
     get food_nutrient_url(@food_nutrient)
     assert_response :success
+    page = Nokogiri::HTML.fragment(response.body)
+    assert_at_page(page, "'#{@food.name}' Nutrient View Page", 'for food nutrient', @food_nutrient.nutrient.name)
+    # confirm we are starting with 2 total food nutrients for this food
+    # food_nutrients_count = FoodNutrient.where(food_id: @food.id).count
+    # assert_equal(2, food_nutrients_count)
+    linksH = get_links_hashes(page)
+    # make sure we have 5 links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
+    assert_equal(5+3, linksH[:count])
+    # make sure that we have the correct links on the page
+    assert_page_headers(linksH)
+    assert_link_has(linksH, {
+      :link_text => "New nutrient for #{@food.name}",
+      :link_url => "/food_nutrients/new?food_id=#{@food.id}",
+      :page_title => "New Food Nutrient",
+      :page_subtitle => "for food:",
+      :page_subtitle2 => @food.name,
+    })
+    assert_link_has(linksH, {
+      :link_text => "Edit this nutrient for #{@food.name}",
+      :link_url => "/food_nutrients/#{@food_nutrient.id}/edit",
+      :page_title => "Food Nutrient Edit Page",
+      :page_subtitle => "for food: #{@food.name}",
+      :page_subtitle2 => "and nutrient: #{@food_nutrient.nutrient.name}",
+      :debugging => true,
+    })
+    assert_link_has(linksH, {
+      :link_text => "Remove this nutrient from #{@food.name}",
+      :link_url => "/food_nutrients/#{@food_nutrient.id}",
+      # ToDo: validate the "A"re you sure?"" alert
+      # :page_title => "New Food Nutrient",
+      # :page_subtitle => "for food:",
+      # :page_subtitle2 => @food.name,
+    })
+  
+    assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
+
   end
 
   test "should get edit" do
