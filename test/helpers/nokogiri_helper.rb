@@ -23,7 +23,8 @@ def assert_select_has(nokogiri_body, select_id, params)
 
   selects = nokogiri_body.css("select##{select_id}")
   # Rails.logger.debug("$$$ assert_select_has selects.count: #{selects.count}") if params[:debugging]
-  Rails.logger.debug("$$$ assert_select_has selects.first: #{selects.first}") if params[:debugging]
+  Rails.logger.debug("$$$ assert_select_has - matched select element: #{selects.first}") if params[:debugging]
+  Rails.logger.debug("$$$ assert_select_has - matched select count: #{selects.count}") if params[:debugging]
   assert_equal(1, selects.count)
   # match the options count
   options = selects.css('option')
@@ -174,3 +175,22 @@ def get_links_hashes(noko_page)
   return ret
 end
   
+# function to do assertions on a link tag (by params passed) in controller tests
+def get_input_hidden_field_value(noko_page, params)
+  # example:
+  # element: <input type="hidden" id="input_id_attr" value="input_value_attr" />
+  # usage: e.g. all params used, returns true, params:
+  # {
+  #   :hidden_field_id => "hidden_field_id"
+  #   :debugging => "true",
+  # }
+  debug_mode = (params[:debugging] && params[:debugging] == true) ? true : false
+  css_str = "input##{params[:hidden_field_id]}"
+  Rails.logger.debug("$$$ css_str: #{css_str}") if debug_mode
+  hidden_field = noko_page.css(css_str)
+  Rails.logger.debug("$$$ get_input_hidden_field_value hidden_field: #{hidden_field.inspect}") if debug_mode
+  Rails.logger.debug("$$$ get_input_hidden_field_value hidden_field.attr('value'): #{hidden_field.attr('value').inspect}") if debug_mode
+  Rails.logger.debug("$$$ get_input_hidden_field_value hidden_field.attr('value').to_s: #{hidden_field.attr('value').to_s}") if debug_mode
+  return hidden_field.attr('value').to_s
+end
+

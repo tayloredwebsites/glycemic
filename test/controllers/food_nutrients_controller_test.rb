@@ -164,8 +164,50 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get edit" do
-    get edit_food_nutrient_url(@food_nutrient)
+    get edit_food_nutrient_url(@food_nutrient) # "/food_nutrient/#{@food_nutrient.id}/edit"
     assert_response :success
+    page = Nokogiri::HTML.fragment(response.body)
+    assert_at_page(page, "Food Nutrient Edit Page", "for food: #{@food.name}", "and nutrient: #{@food_nutrient.nutrient.name}")
+    linksH = get_links_hashes(page)
+    # make sure we have links for the header, plus 3 at the bottom
+    assert_equal(5+3, linksH[:count])
+    # make sure that we have the correct links on the page
+    assert_page_headers(linksH)
+
+    # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
+    # No select on nutrient, so, check:
+    # the hidden field with the food_nutrient id exists and is correct:
+    assert_equal(@food_nutrient.food_id.to_s, get_input_hidden_field_value(page, {
+      :hidden_field_id => "food_nutrient_food_id"
+    }))
+    # the hidden field with the food_nutrient id exists and is correct:
+    assert_equal(@food_nutrient.nutrient_id.to_s, get_input_hidden_field_value(page, {
+      :hidden_field_id => "food_nutrient_nutrient_id"
+    }))
+    # the nutrient name is displayed:
+    assert_equal(@food_nutrient.nutrient.name, page.css("#food_nutrient_nutrient_name").text)
+    # confirm all appropriate fields exist
+    assert_equal(1, page.css('input#food_nutrient_portion').count)
+    assert_select_has(page, 'portion_unit', {
+      :displayed_option => @food_nutrient.portion_unit,
+    })
+    assert_equal(1, page.css('input#food_nutrient_amount').count)
+    assert_select_has(page, 'amount_unit', {
+      :displayed_option => @food_nutrient.amount_unit,
+    })
+    assert_equal(1, page.css('textarea#food_nutrient_desc').count)
+    assert_equal(1, page.css("input[type='submit'][value='Update Food nutrient']").count)
+    assert_equal(1, page.css("form[action='/food_nutrients/#{@food_nutrient.id}']").count)
+    # confirm hidden input field for food_id exists and is the correct value
+    food_id_node = page.css("input#food_nutrient_food_id")
+    Rails.logger.debug("$$$ food_id_node: #{food_id_node}")
+    assert_equal(1, food_id_node.count)
+    Rails.logger.debug("$$$ food_id_node['value']: #{food_id_node.first['value']}")
+    assert_equal(@food.id.to_s, food_id_node.first['value'])
+
+    assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
+    page = Nokogiri::HTML.fragment(response.body)
+
   end
 
   test "should update food_nutrient" do

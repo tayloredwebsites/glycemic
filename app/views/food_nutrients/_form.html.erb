@@ -9,10 +9,19 @@
         nutrient_options << [nut.name, nut.id]
       end
     %>
-    <% if food_nutrient.blank? || food_nutrient.id.blank? %>
+    <%
+      if food_nutrient.blank? || food_nutrient.id.blank?
+        # display the food nutrient select element when creating a nutrient for a food_nutrient
+    %>
       <%= form.select :nutrient_id, nutrient_options %>
-    <% else %>
-      <%= food_nutrient.nutrient.name %>
+    <%
+      else
+        # This is a previously created food_nutrient, so the nutrient doesn't change - display it, no select.
+        # Display the nutrient id as a hidden input field, so it is used for the update (consider dropping this)
+        # Simply display the nutrient name (with an ID for testing)
+    %>
+        <input type='hidden' id="food_nutrient_nutrient_id" value="<%= food_nutrient.nutrient.id %>">
+        <span id="food_nutrient_nutrient_name"><%= food_nutrient.nutrient.name %></span>
     <% end %>
   </div>
 
