@@ -33,7 +33,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # make sure we have links for the header, two for each nutrient, and one at the bottom
     assert_equal(5+food_nutrients_count*2+1, linksH[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(linksH)
+    assert_page_headers(page, linksH)
     # assert_gets_page("/signout", 'Log in')
     @food_nutrients.each do |fn|
       assert_link_has(linksH, {
@@ -69,7 +69,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # make sure we have links for the header
     assert_equal(5, linksH[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(linksH)
+    assert_page_headers(page, linksH)
 
     assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
     page = Nokogiri::HTML.fragment(response.body)
@@ -136,7 +136,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # make sure we have 5 links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
     assert_equal(5+3, linksH[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(linksH)
+    assert_page_headers(page, linksH)
     assert_link_has(linksH, {
       :link_text => "New nutrient for #{@food.name}",
       :link_url => "/food_nutrients/new?food_id=#{@food.id}",
@@ -172,7 +172,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # make sure we have links for the header, plus 3 at the bottom
     assert_equal(5+3, linksH[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(linksH)
+    assert_page_headers(page, linksH)
 
     # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
     # No select on nutrient, so, check:

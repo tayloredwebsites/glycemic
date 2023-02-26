@@ -72,14 +72,18 @@ def get_option_text_or_label(option)
   ret
 end
 
-def assert_page_headers(links_hash)
-  assert_link_has(links_hash, {
-    :link_text => "#{@food.name} Nutrients",
-    :link_url => "/nutrients_of_food/#{@food.id}",
-    :page_title => "Nutrients of Food Listing",
-    :page_subtitle => "for food:",
-    :page_subtitle2 => @food.name,
-  })
+def assert_page_headers(noko_page, links_hash)
+  if @food.present?
+    assert_link_has(links_hash, {
+      :link_text => "#{@food.name} Nutrients",
+      :link_url => "/nutrients_of_food/#{@food.id}",
+      :page_title => "Nutrients of Food Listing",
+      :page_subtitle => "for food:",
+      :page_subtitle2 => @food.name,
+    })
+  else
+    assert_equal(1, noko_page.css("#food_nutrients_link[class='inactiveLink']").count)
+  end
   assert_link_has(links_hash, {
     :link_text => "Foods Listing",
     :link_url => "/foods",
@@ -93,7 +97,7 @@ def assert_page_headers(links_hash)
   assert_link_has(links_hash, {
     :link_text => "Home",
     :link_url => "/",
-    :page_title => "Home",
+    :page_title => "Food Nutrients Home",
   })
   assert_link_has(links_hash, {
     :link_text => "Sign Out",

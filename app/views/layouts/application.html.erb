@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for?(:title) ? yield(:title) : "Glycemic" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "Food Nutrients" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -19,7 +19,7 @@
             <%= @food.present? && @food.name.present? ? @food.name.truncate(25).titleize : "food is missing" %> Nutrients
             </a></li>
         <% else %>
-          <li><a class="inactiveLink" href="#">Food Nutrients</a></li>
+          <li><a id="food_nutrients_link" class="inactiveLink" href="#">Food Nutrients</a></li>
         <% end %>
         <li><a href='/foods'>Foods Listing</a></li>
         <li><a href='/nutrients'>Nutrients Listing</a></li>
