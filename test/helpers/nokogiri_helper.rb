@@ -73,7 +73,9 @@ def get_option_text_or_label(option)
 end
 
 def assert_page_headers(noko_page, links_hash)
+  Rails.logger.debug("$$$ assert_page_headers")
   if @food.present?
+    Rails.logger.debug("$$$ assert_page_headers food present")
     assert_link_has(links_hash, {
       :link_text => "#{@food.name} Nutrients",
       :link_url => "/nutrients_of_food/#{@food.id}",
@@ -82,32 +84,38 @@ def assert_page_headers(noko_page, links_hash)
       :page_subtitle2 => @food.name,
     })
   else
+    Rails.logger.debug("$$$ assert_page_headers - food not present")
     assert_equal(1, noko_page.css("#food_nutrients_link[class='inactiveLink']").count)
   end
   assert_link_has(links_hash, {
     :link_text => "Foods Listing",
     :link_url => "/foods",
     :page_title => "Foods Listing",
+    # :debugging => true,
   })
   assert_link_has(links_hash, {
     :link_text => "Nutrients Listing",
     :link_url => "/nutrients",
     :page_title => "Nutrients Listing",
+    # :debugging => true,
   })
   assert_link_has(links_hash, {
     :link_text => "Home",
     :link_url => "/",
     :page_title => "Food Nutrients Home",
+    # :debugging => true,
   })
   assert_link_has(links_hash, {
     :link_text => "Sign Out",
     :link_url => "/signout",
+    # :debugging => true,
   })
 
 end
 
 # function to do assertions on a link tag (by params passed) in controller tests
 def assert_link_has(links_hash, params)
+  Rails.logger.debug("$$$ assert_link_has")
   # example:
   #   Link: <a href="LinkURL">LinkText</a>
   #   Page at LinkURL:
@@ -123,7 +131,7 @@ def assert_link_has(links_hash, params)
   #   :page_title => "PageTitleText",
   #   :page_subtitle => "SubtitleText",
   #   :page_subtitle2 => "Subtitle2Text",
-  #   :debugging => "true",
+  #   :debugging => true,
   # }
   # only matching done will be on params that are passed
 
@@ -155,7 +163,7 @@ def assert_link_has(links_hash, params)
     get(params[:link_url])
     assert_response :success
     new_page = Nokogiri::HTML.fragment(response.body)
-    assert_equal new_page.css('title').text, params[:page_title], "page title #{params[:page_title]} does not match #{new_page.css('title').text}"
+    assert_equal params[:page_title], new_page.css('title').text, "page title #{params[:page_title]} does not match #{new_page.css('title').text}"
     if params[:page_subtitle].present?
       h2 = new_page.css('h2').first
       # Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode

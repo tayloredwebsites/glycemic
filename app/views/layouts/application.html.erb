@@ -14,9 +14,9 @@
     <h1 class="center">Food Nutrients Dietary Assistant</h1>
     <div class="center">
       <ul class="inlineListButtons">
-        <% if @food.present? %>
+        <% if @food.present? && @food.id.present? %>
           <li><a href="/nutrients_of_food/<%= @food.id %>">
-            <%= @food.present? && @food.name.present? ? @food.name.truncate(25).titleize : "food is missing" %> Nutrients
+            <%= @food.name.present? ? @food.name.truncate(25).titleize : "Food" %> Nutrients
             </a></li>
         <% else %>
           <li><a id="food_nutrients_link" class="inactiveLink" href="#">Food Nutrients</a></li>
