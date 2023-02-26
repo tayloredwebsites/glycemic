@@ -211,8 +211,68 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update food_nutrient" do
-    patch food_nutrient_url(@food_nutrient), params: { food_nutrient: { amount: @food_nutrient.amount, amount_unit: @food_nutrient.amount_unit, avg_rec_id: @food_nutrient.avg_rec_id, desc: @food_nutrient.desc, food_id: @food_nutrient.food_id, id: @food_nutrient.id, nutrient_id: @food_nutrient.nutrient_id, portion: @food_nutrient.portion, portion_unit: @food_nutrient.portion_unit, study: @food_nutrient.study, study_weight: @food_nutrient.study_weight } }
+    # save off the original state of the food nutrient
+    @changed_nutrient = @food_nutrient.dup
+
+    # put in some changes
+    # @changed_nutrient.id = -1  # this is the record to be updated
+    @changed_nutrient.nutrient_id = 99999 # should not let foreign key be changed
+    @changed_nutrient.food_id = 99999  # should not let foreign key be changed
+    # @changed_nutrient.study = true # not implemented yet
+    # @changed_nutrient.study_weight = 1.0 # not implemented yet
+    # @changed_nutrient.avg_rec_id = -1 # not implemented yet
+    @changed_nutrient.portion = 200
+    @changed_nutrient.portion_unit = 'l'
+    @changed_nutrient.amount = 75
+    @changed_nutrient.amount_unit = 'ug'
+    @changed_nutrient.desc = 'Has been changed.'
+    # @changed_nutrient.created_at = Date.tomorrow # should not be a permitted param
+    # @changed_nutrient.updated_at = Date.tomorrow # should not be a permitted param
+
+    Rails.logger.debug("$$$ @food_nutrient: #{@food_nutrient.inspect}")
+    Rails.logger.debug("$$$ @changed_nutrient: #{@changed_nutrient.inspect}")
+
+    # confirm no new records are created from this update
+    assert_difference("FoodNutrient.count", 0, "No Food Nutrients should be created") do
+      # update the food_nutrient in the controller update action
+      patch food_nutrient_url(@food_nutrient), params: {
+        food_nutrient: {
+          # id: @food_nutrient.id, # note: this is passed in params
+          nutrient_id: @changed_nutrient.nutrient_id,  # should not let foreign key be changed
+          food_id: @changed_nutrient.food_id,  # should not let foreign key be changed
+          # study: @changed_nutrient.study, # not implemented yet
+          # study_weight: @changed_nutrient.study_weight, # not implemented yet
+          # avg_rec_id: @changed_nutrient.avg_rec_id, # not implemented yet
+          portion: @changed_nutrient.portion,
+          portion_unit: @changed_nutrient.portion_unit,
+          amount: @changed_nutrient.amount,
+          amount_unit: @changed_nutrient.amount_unit,
+          desc: @changed_nutrient.desc,
+        }
+      }
+    end
+
+    # confirm we are at the food nutrient view page
     assert_redirected_to food_nutrient_url(@food_nutrient)
+
+    @updated_food_nutrient = FoodNutrient.find_by(id: @food_nutrient.id)
+
+    Rails.logger.debug("$$$ @updated_food_nutrient: #{@updated_food_nutrient.inspect}")
+
+    # assert_equal(@orig_nutrient.id, @updated_food_nutrient.id) # should not have changed - Note: (dup) does not have ID set
+    assert_equal(@food_nutrient.nutrient_id, @updated_food_nutrient.nutrient_id) # should not let foreign key be changed
+    assert_equal(@food_nutrient.food_id, @updated_food_nutrient.food_id) # should not let foreign key be changed
+    # assert_equal(@food_nutrient.study, @updated_food_nutrient.study) # not implemented yet
+    # assert_equal(@food_nutrient.study_weight, @updated_food_nutrient.study_weight) # not implemented yet
+    # assert_equal(@food_nutrient.avg_rec_id, @updated_food_nutrient.avg_rec_id) # not implemented yet
+    assert_equal(@changed_nutrient.portion, @updated_food_nutrient.portion)
+    assert_equal(@changed_nutrient.portion_unit, @updated_food_nutrient.portion_unit)
+    assert_equal(@changed_nutrient.amount, @updated_food_nutrient.amount)
+    assert_equal(@changed_nutrient.amount_unit, @updated_food_nutrient.amount_unit)
+    assert_equal(@changed_nutrient.desc, @updated_food_nutrient.desc)
+    assert_equal(@food_nutrient.created_at, @updated_food_nutrient.created_at) # should not have changed - note: (dup) is not set
+    assert_not_equal(@food_nutrient.updated_at, @updated_food_nutrient.updated_at) # should have changed - note: (dup) is not set
+
   end
 
   test "should destroy food_nutrient" do

@@ -69,7 +69,11 @@ class FoodNutrientsController < ApplicationController
   # PATCH/PUT /food_nutrients/1 or /food_nutrients/1.json
   def update
     set_food_nutrient_from_params(params['id'], '') # set the FoodNutrient from its id and its Food
-    @food_nutrient.assign_attributes(food_nutrient_params)
+    cleaned_food_nutrient_params = food_nutrient_params.except(
+      :nutrient_id,  # do not let foreign key be changed
+      :food_id,  # do not let foreign key be changed
+    )
+    @food_nutrient.assign_attributes(cleaned_food_nutrient_params)
     respond_to do |format|
       if @food_nutrient.save
         set_flash_msg( "Food nutrient was successfully updated.", '')
