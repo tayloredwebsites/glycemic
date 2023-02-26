@@ -1,4 +1,5 @@
 require "test_helper"
+require "helpers/nokogiri_helper"
 
 class HomeControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -19,17 +20,29 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     get home_index_url
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
-    h1 = page.css('h1').first
-    Rails.logger.debug("$$$ h1: #{h1.inspect}")
-    assert h1.text.include?('Home Page')
-    # make a hash of all links on the page
-    page_links = page.css('a')
-    assert_equal(3, page_links.count)
-    link_map = page_links.map{|a| [a.text, a['href']]}.to_h
-    Rails.logger.debug("link_map: #{link_map.inspect}")
-    assert_match("/foods",link_map['Foods Listing']) # has Foods Listing link
-    assert_match("/nutrients",link_map['Nutrients Listing']) # has Nutrients Listing link
-    assert_match("/signout",link_map['Sign Out']) # has Sign Out link
+    assert_at_page(page, 'Food Nutrients Home')
+    linksH = get_links_hashes(page)
+    # make sure we have 5 links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
+    assert_equal(5+4, linksH[:count])
+    # make sure that we have the correct links on the page
+    assert_page_headers(page, linksH)
+    assert_link_has(linksH, {
+      :link_text => "Foods Listing",
+      :link_url => "/foods",
+    })
+    assert_link_has(linksH, {
+      :link_text => "Nutrients Listing",
+      :link_url => "/nutrients",
+    })
+    assert_link_has(linksH, {
+      :link_text => "Database Diagrams",
+      :link_url => "/diagrams.html",
+    })
+    assert_link_has(linksH, {
+      :link_text => "Sign Out",
+      :link_url => "/signout",
+    })
+  
   end
 
 end

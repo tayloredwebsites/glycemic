@@ -1,7 +1,7 @@
 <%= form_with(model: food_nutrient) do |form| %>
 
   <div>
-    <input type='hidden' id="food_nutrient[food_id]" name="food_nutrient[food_id]" value="<%= @food.id %>"/>
+    <input type='hidden' id="food_nutrient_food_id" name="food_nutrient[food_id]" value="<%= @food.id %>"/>
     <%= form.label :nutrient_id %>
     <%
       nutrient_options = []
@@ -9,10 +9,19 @@
         nutrient_options << [nut.name, nut.id]
       end
     %>
-    <% if food_nutrient.blank? || food_nutrient.id.blank? %>
+    <%
+      if food_nutrient.blank? || food_nutrient.id.blank?
+        # display the food nutrient select element when creating a nutrient for a food_nutrient
+    %>
       <%= form.select :nutrient_id, nutrient_options %>
-    <% else %>
-      <%= food_nutrient.nutrient.name %>
+    <%
+      else
+        # This is a previously created food_nutrient, so the nutrient doesn't change - display it, no select.
+        # Display the nutrient id as a hidden input field, so it is used for the update (consider dropping this)
+        # Simply display the nutrient name (with an ID for testing)
+    %>
+        <input type='hidden' id="food_nutrient_nutrient_id" value="<%= food_nutrient.nutrient.id %>">
+        <span id="food_nutrient_nutrient_name"><%= food_nutrient.nutrient.name %></span>
     <% end %>
   </div>
 
@@ -21,7 +30,7 @@
     <%= form.text_field :portion %>
     <select id="portion_unit", style="width: 60px">
       <% FoodNutrient::MEASUREMENTS.each do |m| %>
-        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.portion_unit == m ? ' selected' : '' %>/>
+        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.portion_unit == m ? ' selected' : '' %>><%= m %></option>
       <% end %>
     </select>
   </div>
@@ -31,7 +40,7 @@
     <%= form.text_field :amount %>
     <select id="amount_unit", style="width: 60px">
       <% FoodNutrient::MEASUREMENTS.each do |m| %>
-        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.amount_unit == m ? ' selected' : '' %>/>
+        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.amount_unit == m ? ' selected' : '' %>><%= m %></option>
       <% end %>
     </select>
   </div>

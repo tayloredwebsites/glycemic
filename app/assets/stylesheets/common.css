@@ -26,3 +26,11 @@
   cursor: default;
   color: #999;
 }
+
+form label {
+  font-weight: bold;
+}
+
+form label::after {
+  content: ":";
+}

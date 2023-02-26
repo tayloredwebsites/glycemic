@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for?(:title) ? yield(:title) : "Glycemic" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "Food Nutrients" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -14,10 +14,12 @@
     <h1 class="center">Food Nutrients Dietary Assistant</h1>
     <div class="center">
       <ul class="inlineListButtons">
-        <% if @food.present? %>
-          <li><a href="/nutrients_of_food/<%= @food.id %>"><%= @food.name.truncate(25).titleize %> Nutrients</a></li>
+        <% if @food.present? && @food.id.present? %>
+          <li><a href="/nutrients_of_food/<%= @food.id %>">
+            <%= @food.name.present? ? @food.name.truncate(25).titleize : "Food" %> Nutrients
+            </a></li>
         <% else %>
-          <li><a class="inactiveLink" href="#">Food Nutrients</a></li>
+          <li><a id="food_nutrients_link" class="inactiveLink" href="#">Food Nutrients</a></li>
         <% end %>
         <li><a href='/foods'>Foods Listing</a></li>
         <li><a href='/nutrients'>Nutrients Listing</a></li>
@@ -26,15 +28,15 @@
       </ul>
     </div>
 
-    <h2><%= content_for?(:header) ? yield(:header) : "Glycemic" %></h2>
-    <% if content_for?(:subheader) %>
-      <h2>
-        <%= yield(:subheader) %>
+    <h2>
+      <%= content_for?(:header) ? yield(:header) : "Glycemic" %>
+      <% if content_for?(:subheader) %>
+        <br/><%= yield(:subheader) %>
         <% if content_for?(:subheader2) %>
           <br/><%= yield(:subheader2) %>
         <% end %>
-      </h2>
-    <% end %>
+      <% end %>
+    </h2>
     <% if flash[:notice].present? %>
       <p style="color: green"><%= flash[:notice] %></p>
     <% end %>
