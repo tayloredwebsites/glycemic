@@ -45,9 +45,10 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       })
       assert_link_has(linksH, {
         :link_text => "Delete",
+
         :link_url => "/food_nutrients/#{fn.id}",
-        # ToDo: validate the "Are you sure?" alert
-        # ToDo: validate the delete page is linked to properly
+        # TODO: validate the "Are you sure?" alert
+        # TODO: validate the delete page is linked to properly
       })
     end
     assert_link_has(linksH, {
@@ -155,8 +156,8 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_link_has(linksH, {
       :link_text => "Remove this nutrient from #{@food.name}",
       :link_url => "/food_nutrients/#{@food_nutrient.id}",
-      # ToDo: validate the "Are you sure?" alert
-      # ToDo: validate the delete page is linked to properly
+      # TODO: validate the "Are you sure?" alert
+      # TODO: validate the delete page is linked to properly
     })
   
     assert_gets_page("/food_nutrients/new?food_id=#{@food.id}", 'New Food Nutrient', "for food: #{@food.name}")
