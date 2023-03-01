@@ -6,16 +6,16 @@
 .inlineListButtons li {
   display: inline;
   margin-left: 10px;
+  a {
+    display: inline-block;
+    height: 20px;
+    width: auto;
+    border-radius: 4px;
+    border: 1px solid #000;
+    padding: 0 5px;
+  }
 }
 
-.inlineListButtons li a {
-  display: inline-block;
-  height: 20px;
-  width: auto;
-  border-radius: 4px;
-  border: 1px solid #000;
-  padding: 0 5px;
-}
 
 .center {
   text-align: center;
@@ -29,8 +29,8 @@
 
 form label {
   font-weight: bold;
+  ::after {
+    content: ":";
+  }
 }
 
-form label::after {
-  content: ":";
-}
