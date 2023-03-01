@@ -93,17 +93,24 @@ class FoodNutrientsController < ApplicationController
     set_food_nutrient_from_params(params['id'], '') # set the FoodNutrient from its id and its Food
     @food_nutrient.destroy
     save_id = @food_nutrient.id
+    save_food_id = @food_nutrient.food_id
     if @food_nutrient.destroy
       Rails.logger.debug("$$$ destroyed food: #{@food_nutrient.inspect}")
       Rails.logger.debug("$$$ destroyed food: #{save_id}")
       set_flash_msg("Successfully deleted #{save_id}", "")
     else
       set_flash_msg('', "Error deleting food: #{@food_nutrient.id}")
-      @errors + @food_nutrient.errors.full_messages
+      @errors + @food_nutrient.errors.full_messages.join(', ')
     end
 
     respond_to do |format|
-      format.html { redirect_to food_nutrients_url, notice: "Food nutrient was stopped from being destroyed." }
+      format.html {
+        if @errors.count > 0
+          redirect_to food_nutrients_url, notice: "Food nutrient was stopped from being destroyed."
+        else
+          redirect_to "/nutrients_of_food/#{save_food_id}"
+        end
+      }
       format.json { head :no_content }
     end
     set_flash_msg('','')
