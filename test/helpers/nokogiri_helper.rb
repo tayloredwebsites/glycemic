@@ -131,12 +131,14 @@ def assert_link_has(links_hash, params)
   #   :page_title => "PageTitleText",
   #   :page_subtitle => "SubtitleText",
   #   :page_subtitle2 => "Subtitle2Text",
+  #   :not_page_title => "NotPageTitleText" # to confirm page has changed, etc.
   #   :debugging => true,
   # }
   # only matching done will be on params that are passed
 
   debug_mode = (params[:debugging] && params[:debugging] == true) ? true : false
 
+  Rails.logger.debug("$$$ assert_link_has params: #{JSON.pretty_generate(params)}") if debug_mode
   Rails.logger.debug("$$$ assert_link_has links_hash: #{JSON.pretty_generate(links_hash)}") if debug_mode
 
   # Check to make sure the URL and Link Text match
@@ -158,21 +160,24 @@ def assert_link_has(links_hash, params)
     )
   end
 
-  if params[:page_title].present? || params[:page_subtitle].present? || params[:page_subtitle2].present?
+  if params[:page_title].present? || params[:page_subtitle].present? || params[:page_subtitle2].present?  || params[:not_page_title].present?
     # confirm link goes to where we expect it
     get(params[:link_url])
     assert_response :success
     new_page = Nokogiri::HTML.fragment(response.body)
-    assert_equal params[:page_title], new_page.css('title').text, "page title #{params[:page_title]} does not match #{new_page.css('title').text}"
+    Rails.logger.debug("$$$ Match by URL, got to page: #{new_page.css('title').text}") if debug_mode
+    assert_equal params[:page_title], new_page.css('title').text, "page title #{params[:page_title]} does not match #{new_page.css('title').text}" if params[:page_title].present?
     if params[:page_subtitle].present?
       h2 = new_page.css('h2').first
-      # Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+      Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
       assert h2.text.include?(params[:page_subtitle]), "page subtitle #{params[:page_subtitle]} is not contained in #{h2.text}"
       if params[:page_subtitle2].present?
-        # Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+        Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
         assert h2.text.include?(params[:page_subtitle2]), "page subtitle2 #{params[:page_subtitle2]} is not contained in #{h2.text}"
       end
     end
+    assert_not_equal params[:not_page_title], new_page.css('title').text, "page title #{params[:not_page_title]} should not match #{new_page.css('title').text}" if params[:not_page_title].present?
+
   end
 end
     

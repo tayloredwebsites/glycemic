@@ -47,8 +47,8 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
       assert_link_has(linksH, {
         :link_text => "Delete",
         :link_url => "/foods/#{fn.id}",
-        # ToDo: validate the "Are you sure?" alert
-        # ToDo: validate the delete page is linked to properly
+        # TODO: validate the "Are you sure?" alert
+        # TODO: validate the delete page is linked to properly
       })
     end
     assert_link_has(linksH, {
@@ -71,7 +71,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     # make sure that we have the correct links on the page
     assert_page_headers(page, linksH)
 
-    # confirm all appropriate fields exist
+    # confirm all appropriate form fields exist
     assert_equal(1, page.css("form[action='/foods']").count)
     assert_equal(1, page.css('input#food_name').count)
     assert_equal(1, page.css('textarea#food_desc').count)
@@ -96,7 +96,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should show food" do
-    # ToDo: enhance this test if and when show page is enhanced
+    # TODO: enhance this test if and when show page is enhanced
     get food_url(@food1)
     assert_response :success
   end
@@ -122,8 +122,8 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_link_has(linksH, {
       :link_text => "Delete this food",
       :link_url => "/foods/#{@food1.id}",
-      # ToDo: validate the "Are you sure?" alert
-      # ToDo: validate the delete page is linked to properly
+      # TODO: validate the "Are you sure?" alert
+      # TODO: validate the delete page is linked to properly
     })
 
   end

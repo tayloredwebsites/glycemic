@@ -75,7 +75,7 @@ class HomeControllerTests
       assert_equal(1, page.css('#user_email').count)
       assert_equal(1, page.css('input[value="Resend unlock instructions"]').count)
       assert_equal(2, page.css('input').count)
-      # ToDo: simulate the unlock post message - unlock token seems to be encrypted
+      # TODO: simulate the unlock post message - unlock token seems to be encrypted
       # do the post that would be in the unlock email
       @user.reload
       Rails.logger.debug("after lock - @user.locked_at: #{@user.locked_at}")
