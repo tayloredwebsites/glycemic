@@ -1,8 +1,0 @@
-// Sassy
-// to manually build before deploy: rails dartsass:build
-// for dev watch mode: either:
-//   1: either by running 'rails dartsass:watch' as a separate process
-//   2: or by running ./bin/dev which uses foreman to:
-//      start both the Dart Sass watch process and the rails server in development mode.
-
-@use './common';
