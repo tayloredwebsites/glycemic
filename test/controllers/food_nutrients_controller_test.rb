@@ -281,6 +281,6 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       delete food_nutrient_url(@food_nutrient)
     end
 
-    assert_redirected_to food_nutrients_url
+    assert_redirected_to "/nutrients_of_food/#{@food_nutrient.food_id}"
   end
 end
