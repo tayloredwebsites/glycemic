@@ -39,3 +39,6 @@
 # ignore spreadsheets in docs folder
 /docs/*.ods*
 /docs/*.xls*
+
+/app/assets/builds/*
+!/app/assets/builds/.keep
