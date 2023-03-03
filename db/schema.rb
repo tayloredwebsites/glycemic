@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_01_24_230331) do
+ActiveRecord::Schema[7.0].define(version: 2023_03_03_164501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_24_230331) do
     t.text "desc"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "active", default: true
     t.index ["food_id"], name: "index_food_nutrients_on_food_id"
     t.index ["nutrient_id"], name: "index_food_nutrients_on_nutrient_id"
     t.index ["study"], name: "index_food_nutrients_on_study"
@@ -38,6 +39,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_24_230331) do
     t.integer "usda_fdc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "active", default: true
   end
 
   create_table "nutrients", force: :cascade do |t|
@@ -46,6 +48,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_24_230331) do
     t.text "desc"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "active", default: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -65,6 +68,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_24_230331) do
     t.datetime "locked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "active", default: true
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
