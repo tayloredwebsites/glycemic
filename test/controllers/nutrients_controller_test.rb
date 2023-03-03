@@ -44,6 +44,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
         :link_url => "/nutrients/#{nut.id}",
         # TODO: validate the "Are you sure?" alert
         # TODO: validate the delete page is linked to properly
+    })
     end
     assert_link_has(linksH, {
       :link_text => "New Nutrient",
