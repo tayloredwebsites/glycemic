@@ -3,7 +3,21 @@ class NutrientsController < ApplicationController
 
   # GET /nutrients or /nutrients.json
   def index
-    @nutrients = Nutrient.all
+    Rails.logger.debug("*** params: #{params.inspect}")
+    @showing_active = params[:showing_active]
+    @nutrients = Nutrient
+    if @showing_active == 'all'
+      Rails.logger.debug("$$$ Show all Nutrient records")
+      @nutrients = @nutrients.all
+    elsif @showing_active == 'deact'
+      Rails.logger.debug("$$$ Show deactivated Nutrient records")
+      @nutrients = @nutrients.deact_nutrients
+    else
+      # default - show active food nutrients
+      Rails.logger.debug("$$$ Show active Nutrient records")
+      @nutrients = @nutrients.active_nutrients
+    end
+
   end
 
   # GET /nutrients/1 or /nutrients/1.json
@@ -49,7 +63,8 @@ class NutrientsController < ApplicationController
 
   # DELETE /nutrients/1 or /nutrients/1.json
   def destroy
-    @nutrient.destroy
+    @nutrient.active = false
+    @nutrient.save
 
     respond_to do |format|
       format.html { redirect_to nutrients_url, notice: "Nutrient was successfully destroyed." }
@@ -60,7 +75,7 @@ class NutrientsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_nutrient
-      @nutrient = Nutrient.find(params[:id])
+      @nutrient = Nutrient.active_nutrients.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

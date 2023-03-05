@@ -26,4 +26,8 @@ class FoodNutrient < ApplicationRecord
     LITER,
   ]
 
+  scope :active_food_nutrients, -> { where(active: true) }
+  scope :deact_food_nutrients, -> { where(active: false) }
+  # scope :all_food_nutrients, -> { where(active: [true, false]) }
+  # scope :all_food_nutrients, -> {}
 end

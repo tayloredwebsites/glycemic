@@ -2,6 +2,25 @@
 <% content_for :header, 'Nutrients of Food Listing' %>
 <% content_for :subheader, "#{@food.present? ? 'for food: '+@food.name : ''}" %>
 
+<div id='filterButtons'>
+  <ul class="inlineListButtons">
+    <li><span>Filter:</span></li>
+    <% if @showing_active == 'deact' %>
+      <li><a id="food_nutrients_all_link" href="/nutrients_of_food/<%= @food.id %>?showing_active=all">All</a></li>
+      <li><a id="food_nutrients_deact_link" class="selectedLink" href="#">Deactivated</a></li>
+      <li><a id="food_nutrients_active_link" href="/nutrients_of_food/<%= @food.id %>?showing_active=active">Active</a></li>
+    <% elsif @showing_active == 'all' %>
+      <li><a id="food_nutrients_all_link"  class="selectedLink" href="#">All</a></li>
+      <li><a id="food_nutrients_deact_link" href="/nutrients_of_food/<%= @food.id %>?showing_active=deact">Deactivated</a></li>
+      <li><a id="food_nutrients_active_link" href="/nutrients_of_food/<%= @food.id %>?showing_active=active">Active</a></li>
+    <% else %>
+      <li><a id="food_nutrients_all_link" href="/nutrients_of_food/<%= @food.id %>?showing_active=all">All</a></li>
+      <li><a id="food_nutrients_deact_link" href="/nutrients_of_food/<%= @food.id %>?showing_active=deact">Deactivated</a></li>
+      <li><a id="food_nutrients_active_link" class="selectedLink" href="#">Active</a></li>
+    <% end %>
+  </ul>
+</div>
+
 <div id="food_nutrients">
   <table>
     <tr>

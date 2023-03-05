@@ -3,7 +3,20 @@ class FoodsController < ApplicationController
 
   # GET /foods or /foods.json
   def index
-    @foods = Food.all
+    Rails.logger.debug("*** params: #{params.inspect}")
+    @showing_active = params[:showing_active]
+    @foods = Food
+    if @showing_active == 'all'
+      Rails.logger.debug("$$$ Show all Food records")
+      @foods = @foods.all
+    elsif @showing_active == 'deact'
+      Rails.logger.debug("$$$ Show deactivated Food records")
+      @foods = @foods.deact_foods
+    else
+      # default - show active food nutrients
+      Rails.logger.debug("$$$ Show active Food records")
+      @foods = @foods.active_foods
+    end
   end
 
   # GET /foods/1 or /foods/1.json
@@ -50,17 +63,18 @@ class FoodsController < ApplicationController
   # DELETE /foods/1 or /foods/1.json
   def destroy
     save_name = @food.name
-    if @food.destroy
-      Rails.logger.debug("$$$ destroyed food: #{@food.inspect}")
-      Rails.logger.debug("$$$ destroyed food: #{save_name}")
-      set_flash_msg("Successfully deleted #{save_name}", "")
+    @food.active = false
+    if @food.save
+      Rails.logger.debug("$$$ deactivated food: #{@food.inspect}")
+      Rails.logger.debug("$$$ deactivated food: #{save_name}")
+      set_flash_msg("Successfully deactivated #{save_name}", "")
 
     else
-      set_flash_msg('', "Error deleting food: #{@food.name}")
+      set_flash_msg('', "Error deactivated food: #{@food.name}")
       @errors + @food.errors.full_messages
     end
     respond_to do |format|
-      format.html { redirect_to foods_url, notice: "Food was successfully destroyed." }
+      format.html { redirect_to foods_url, notice: "Food was successfully deactivated." }
       format.json { head :no_content }
     end
   end
@@ -68,7 +82,7 @@ class FoodsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_food
-      @food = Food.find(params[:id])
+      @food = Food.active_foods.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
