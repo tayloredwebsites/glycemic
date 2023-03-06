@@ -34,13 +34,13 @@
 
 .inactiveLink {
   pointer-events: none;
-  cursor: default;
+  cursor: not-allowed;
   color: #999;
 }
 
 .selectedLink {
   pointer-events: none;
-  cursor: default;
+  cursor: not-allowed;
   color: #000;
   font-weight: bold;
   text-decoration: none;

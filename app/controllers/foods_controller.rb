@@ -1,5 +1,5 @@
 class FoodsController < ApplicationController
-  before_action :set_food, only: %i[ show edit update destroy ]
+  before_action :set_food, only: %i[ show edit update destroy reactivate ]
 
   # GET /foods or /foods.json
   def index
@@ -79,10 +79,24 @@ class FoodsController < ApplicationController
     end
   end
 
+  def reactivate
+    Rails.logger.debug("$$$ Reactivate - params: #{params.inspect}")
+    respond_to do |format|
+      if @food.update(active: true)
+        format.html { redirect_to foods_url, notice: "Food was successfully reactivated." }
+        format.json { render :show, status: :ok, location: @food }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @food.errors, status: :unprocessable_entity }
+      end
+    end
+
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_food
-      @food = Food.active_foods.find(params[:id])
+      @food = Food.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

@@ -7,7 +7,11 @@ Rails.application.routes.draw do
   end
   get '/nutrients_of_food/:food_id', to: 'food_nutrients#nutrients_of_food'
 
-  resources :foods
+  resources :foods do
+    member do
+      get 'reactivate'
+    end
+  end
   resources :nutrients
   get 'home/index'
   devise_for :users

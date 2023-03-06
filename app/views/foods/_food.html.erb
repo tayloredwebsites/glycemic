@@ -1,11 +1,18 @@
-<tr id="<%= dom_id food %>">
-  <td><%= food.id %></td>
-  <td><%= food.name %></td>
-  <td><%= food.usda_fdc_id %></td>
-  <td><%= food.desc %></td>
-  <td>
-    <a href="/foods/<%= food.id %>/edit">Edit</a>
-    <a href="/nutrients_of_food/<%= food.id %>">Nutrients</a>
-    <a href="/foods/<%=food.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a>
-  </td>
-</tr>
+<div id="food_id_<%= food.id %>">
+  <p>
+    <strong>Id:</strong>
+    <%= food.id %>
+  </p>
+  <p>
+    <strong>Name:</strong>
+    <%= food.name %>
+  </p>
+  <p>
+    <strong>USDA FDC ID:</strong>
+    <%= food.usda_fdc_id %>
+  </p>
+  <p>
+    <strong>Desc:</strong>
+    <%= food.desc %>
+  </p>
+</div>
