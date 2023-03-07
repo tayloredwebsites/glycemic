@@ -1,0 +1,15 @@
+<tr id="nutrient_id_<%= nutrient.id %>">
+  <td><%= nutrient.id %></td>
+  <td><%= nutrient.name %></td>
+  <td><%= nutrient.usda_ndb_num %></td>
+  <td><%= nutrient.desc %></td>
+  <td>
+    <% if nutrient.active == true %>
+      <a href="/nutrients/<%= nutrient.id %>/edit">Edit</a>
+      <a href="/nutrients/<%=nutrient.id%>" data-turbo-method="delete">Deactivate</a>
+    <% else %>
+      <a href="/nutrients/<%= nutrient.id %>/edit" class="inactiveLink">Edit</a>
+      <a href="/nutrients/<%=nutrient.id%>/reactivate">Reactivate</a>
+    <% end %>
+  </td>
+</tr>

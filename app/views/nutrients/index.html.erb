@@ -24,7 +24,7 @@
   <table>
     <%= render 'nutrient_headers' %>
     <% @nutrients.each do |nutrient| %>
-      <%= render nutrient %>
+      <%= render partial: 'nutrient_row', locals: { nutrient: nutrient}, object: nutrient %>
     <% end %>
   </table>
 </div>

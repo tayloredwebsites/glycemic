@@ -25,7 +25,6 @@
     <thead><%= render 'food_headers' %></thead>
     <tbody>
       <% @foods.each do |food| %>
-        <tr>Hello</tr>
         <%= render partial: 'food_row', locals: { food: food}, object: food %>
       <% end %>
     </tbody>

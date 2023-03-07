@@ -1,5 +1,5 @@
 class NutrientsController < ApplicationController
-  before_action :set_nutrient, only: %i[ show edit update destroy ]
+  before_action :set_nutrient, only: %i[ show edit update destroy reactivate ]
 
   # GET /nutrients or /nutrients.json
   def index
@@ -63,19 +63,39 @@ class NutrientsController < ApplicationController
 
   # DELETE /nutrients/1 or /nutrients/1.json
   def destroy
+    save_name = @nutrient.name
     @nutrient.active = false
-    @nutrient.save
-
+    if @nutrient.save
+      Rails.logger.debug("$$$ deactivated nutrient: #{@nutrient.inspect}")
+      Rails.logger.debug("$$$ deactivated nutrient: #{save_name}")
+      set_flash_msg("Successfully deactivated #{save_name}", "")
+    else
+      set_flash_msg('', "Error deactivated nutrient: #{@nutrient.name}")
+      @errors + @nutrient.errors.full_messages
+    end
     respond_to do |format|
-      format.html { redirect_to nutrients_url, notice: "Nutrient was successfully destroyed." }
+      format.html { redirect_to nutrients_url, notice: "Nutrient was successfully deactivated." }
       format.json { head :no_content }
+    end
+  end
+
+  def reactivate
+    Rails.logger.debug("$$$ Reactivate - params: #{params.inspect}")
+    respond_to do |format|
+      if @nutrient.update(active: true)
+        format.html { redirect_to nutrients_url, notice: "Nutrient was successfully reactivated." }
+        format.json { render :show, status: :ok, location: @nutrient }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @nutrient.errors, status: :unprocessable_entity }
+      end
     end
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_nutrient
-      @nutrient = Nutrient.active_nutrients.find(params[:id])
+      @nutrient = Nutrient.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

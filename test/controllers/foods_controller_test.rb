@@ -31,7 +31,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Foods Listing")
     linksH = get_links_hashes(page)
-    # make sure we have links for the header,, three filter buttons, three for each food, and one at the bottom
+    # make sure we have links for the header, three filter buttons, three for each active food, and one at the bottom
     assert_equal(5+3+2*3+1, linksH[:count])
 
     # get foods index listing with deactivated foods only
@@ -53,9 +53,9 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     linksH = get_links_hashes(page)
     # make sure we have links for the header,, three filter buttons, three for each food, and one at the bottom
     assert_equal(5+3+foods_count*3+1, linksH[:count])
-    # make sure that we have the correct links on the page
-    assert_page_headers(page, linksH)
 
+    # make sure that we have the correct links on the all foods page
+    assert_page_headers(page, linksH)
     @foods.each do |fn|
       if fn.active == true
         assert_link_has(linksH, {
@@ -145,7 +145,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "should get active edit" do
+  test "should get active food edit" do
     get edit_food_url(@food1)
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
@@ -164,10 +164,9 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
       :page_subtitle => "New Food Page",
     })
     assert_link_has(linksH, {
-      :link_text => "Delete this food",
+      :link_text => "Deactivate this food",
       :link_url => "/foods/#{@food1.id}",
-      # TODO: validate the "Are you sure?" alert
-      # TODO: validate the delete page is linked to properly
+      :page_title => 'Foods Listing',
     })
 
   end

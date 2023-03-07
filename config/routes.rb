@@ -12,7 +12,11 @@ Rails.application.routes.draw do
       get 'reactivate'
     end
   end
-  resources :nutrients
+  resources :nutrients do
+    member do
+      get 'reactivate'
+    end
+  end
   get 'home/index'
   devise_for :users
   devise_scope :user do
