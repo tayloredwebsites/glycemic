@@ -1,4 +1,8 @@
 
+# Diet Support Program
+# Copyright (C) 2023 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
+# Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
+
 # function to do assertions on a select tag with options (by params passed) in controller tests
 def assert_select_has(nokogiri_body, select_id, params)
   # example: <select id="portion_unit">
