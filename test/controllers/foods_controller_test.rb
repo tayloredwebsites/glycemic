@@ -89,7 +89,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
         assert_link_has(linksH, {
           :link_text => "Reactivate",
           :link_url => "/foods/#{fn.id}/reactivate",
-          # :debugging => true,
+          :page_title => "Foods Listing",
         })
       end
     end
@@ -140,9 +140,13 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should show active food" do
-    # TODO: enhance this test if and when show page is enhanced
+    skip "TODO - enable when food views are available in menus"
     get food_url(@food1)
     assert_response :success
+  end
+
+  test "should be able to view deactivated food" do
+    skip "TODO - develop test for viewing deactivated foods when viewing foods is available"
   end
 
   test "should get active food edit" do
@@ -187,7 +191,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     Rails.logger.debug("$$$ @changed_food: #{@changed_food.inspect}")
 
     # confirm no new records are created from this update
-    assert_difference("Food.count", 0, "No Foods should be created") do
+    assert_difference("Food.count", 0, "No Foods should be created on update") do
       # update the food_nutrient in the controller update action
       patch food_url(@food1), params: {
         food: {

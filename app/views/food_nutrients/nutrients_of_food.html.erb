@@ -43,9 +43,13 @@
         <td><%= fn.amount %> <%= fn.amount_unit %></td>
         <td><%= fn.desc %></td>
         <td>
-          <a href="/food_nutrients/<%= fn.id %>/edit">Edit</a>
-          <!-- %= link_to "Delete", "/food_nutrient/#{fn.id}", data: { turbo_method: "delete", turbo_confirm: "Are you sure?" } % -->
-          <a href="/food_nutrients/<%=fn.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a>
+          <% if fn.active == true %>
+            <a href="/food_nutrients/<%= fn.id %>/edit">Edit</a>
+            <a href="/food_nutrients/<%=fn.id%>" data-turbo-method="delete">Deactivate</a>
+          <% else %>
+            <a href="/food_nutrients/<%= fn.id %>/edit" class="inactiveLink">Edit</a>
+            <a href="/food_nutrients/<%=fn.id%>/reactivate">Reactivate</a>
+          <% end %>
         </td>
       </tr>
     <% end %>

@@ -25,7 +25,7 @@ def assert_select_has(nokogiri_body, select_id, params)
   # Rails.logger.debug("$$$ assert_select_has selects.count: #{selects.count}") if params[:debugging]
   Rails.logger.debug("$$$ assert_select_has - matched select element: #{selects.first}") if params[:debugging]
   Rails.logger.debug("$$$ assert_select_has - matched select count: #{selects.count}") if params[:debugging]
-  assert_equal(1, selects.count)
+  assert_equal(1, selects.count, "cannot find a select element with an ID of the parameter 'select_id' (#{select_id.inspect})")
   # match the options count
   options = selects.css('option')
   # Rails.logger.debug("$$$ assert_select_has options[:options_count]: #{params[:options_count]}") if params[:debugging]

@@ -130,9 +130,13 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should show nutrient" do
-    # TODO: enhance this test if and when show page is enhanced
+    skip "TODO - enable when nutrient views are available in menus"
     get nutrient_url(@nutrient1)
     assert_response :success
+  end
+
+  test "should view deactivated nutrient" do
+    skip "TODO - develop test for viewing deactivated nutrients when viewing nutrients is available"
   end
 
   test "should get active nutrient edit" do

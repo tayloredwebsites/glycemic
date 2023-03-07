@@ -15,7 +15,8 @@ class FoodNutrientsController < ApplicationController
     @showing_active = params[:showing_active]
     # set_food_nutrient_from_params('', params['food_id'])
     food_id = Integer(params[:food_id]) rescue 0
-    @food = Food.active_foods.find_by(id: food_id)
+    # find food, regardless if it is active or not
+    @food = Food.find_by(id: food_id)
     if @food.blank? || @food.id.blank?
       err_msg = "cannot find food[#{params[:food_id]} - #{food_id}]"
       @food = Food.new(name: err_msg)
@@ -67,7 +68,7 @@ class FoodNutrientsController < ApplicationController
     respond_to do |format|
       if @food_nutrient.save
         set_flash_msg( "Food nutrient was successfully created.", '')
-        format.html { redirect_to food_nutrient_url(@food_nutrient) }
+        format.html { redirect_to nutrients_of_food_url(@food), notice: "Food nutrient was successfully created." }
         format.json { render :show, status: :created, location: @food_nutrient }
       else
         @errors + @food_nutrient.errors.full_messages
@@ -89,10 +90,10 @@ class FoodNutrientsController < ApplicationController
     respond_to do |format|
       if @food_nutrient.save
         set_flash_msg( "Food nutrient was successfully updated.", '')
-        format.html { redirect_to food_nutrient_url(@food_nutrient), notice: "Food nutrient was successfully updated." }
+        format.html { redirect_to nutrients_of_food_url(@food), notice: "Food nutrient was successfully updated." }
         format.json { render :show, status: :ok, location: @food_nutrient }
       else
-        @errors + @food_nutrient.errors.full_messages
+        # @errors + @food_nutrient.errors.full_messages
         set_flash_msg('', "ERROR: unable to create food nutrient")
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @food_nutrient.errors, status: :unprocessable_entity }
@@ -128,6 +129,22 @@ class FoodNutrientsController < ApplicationController
     set_flash_msg('','')
   end
 
+  def reactivate
+    Rails.logger.debug("$$$ Reactivate - params: #{params.inspect}")
+    set_food_nutrient_from_params(params['id'], '') # set the FoodNutrient from its id and its Food
+    respond_to do |format|
+      if @food_nutrient.update(active: true)
+        format.html { redirect_to nutrients_of_food_url(@food_nutrient.food_id), notice: "Food nutrient was successfully reactivated." }
+        format.json { render :show, status: :ok, location: @food_nutrient }
+      else
+        set_flash_msg('', "ERROR: unable to deactivate food nutrient")
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @food_nutrient.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+
   private
     # Use callbacks to share common setup or constraints between actions.
     # def set_food_nutrient
@@ -139,7 +156,7 @@ class FoodNutrientsController < ApplicationController
     # end
 
     def get_food_nutrient(id)
-      food_nutrient = FoodNutrient.active_food_nutrients.find_by(id: id)
+      food_nutrient = FoodNutrient.find_by(id: id)
       if !food_nutrient.present?
         @errors << "Missing Food Nutrient Id #{id}"
       end
@@ -155,7 +172,7 @@ class FoodNutrientsController < ApplicationController
     end
 
     def set_food_nutrients()
-      @food_nutrients.active_food_nutrients.where(food_id: food_id)
+      @food_nutrients.where(food_id: food_id)
     end
 
     def set_foods()
@@ -163,7 +180,7 @@ class FoodNutrientsController < ApplicationController
     end
 
     def set_nutrients()
-      @nutrients = Nutrient.active_nutrients
+      @nutrients = Nutrient
     end
 
     def set_unused_nutrients()
@@ -174,6 +191,8 @@ class FoodNutrientsController < ApplicationController
       )
     end
 
+    # get food_nutrient from either the food_nutrient id or food id params
+    # TODO: consider splitting this and the next into two methods
     def set_food_nutrient_from_params(id_param, food_id_param)
       Rails.logger.debug("$$$ set_food_nutrient_from_params - param: #{params.inspect}")
       # Rails.logger.debug("$$$ set_food_nutrient_from_params - food_nutrient_params: #{food_nutrient_params.inspect}")
@@ -186,7 +205,7 @@ class FoodNutrientsController < ApplicationController
 
     def set_food_nutrient_from_ids(id, food_id)
       if id > 0
-        Rails.logger.debug("$$$ set_food_nutrient_from_ids(#{id})")
+        Rails.logger.debug("$$$ set_food_nutrient_from_ids(#{id}, #{food_id})")
         @food = nil
         @food_nutrient = get_food_nutrient(id)
         if @food_nutrient.present?
@@ -210,9 +229,7 @@ class FoodNutrientsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def food_nutrient_params
-      params.permit(
-        :food_id,
-        ).require(:food_nutrient).permit(
+      params.require(:food_nutrient).permit(
         :id,
         :nutrient_id,
         :food_id,
