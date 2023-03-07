@@ -9,4 +9,10 @@ class User < ApplicationRecord
   scope :deact_users, -> { where(active: true) }
   scope :all_users, -> { where(active: [true, false]) }
 
+  # do not allow deactivated users from logging in
+  def active_for_authentication? 
+    super && active == true
+  end 
+  
+
 end
