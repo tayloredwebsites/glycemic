@@ -1,4 +1,8 @@
 
+# Diet Support Program
+# Copyright (C) 2023 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
+# Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
+
 # function to do assertions on a select tag with options (by params passed) in controller tests
 def assert_select_has(nokogiri_body, select_id, params)
   # example: <select id="portion_unit">
@@ -25,7 +29,7 @@ def assert_select_has(nokogiri_body, select_id, params)
   # Rails.logger.debug("$$$ assert_select_has selects.count: #{selects.count}") if params[:debugging]
   Rails.logger.debug("$$$ assert_select_has - matched select element: #{selects.first}") if params[:debugging]
   Rails.logger.debug("$$$ assert_select_has - matched select count: #{selects.count}") if params[:debugging]
-  assert_equal(1, selects.count)
+  assert_equal(1, selects.count, "cannot find a select element with an ID of the parameter 'select_id' (#{select_id.inspect})")
   # match the options count
   options = selects.css('option')
   # Rails.logger.debug("$$$ assert_select_has options[:options_count]: #{params[:options_count]}") if params[:debugging]
@@ -127,7 +131,11 @@ def assert_link_has(links_hash, params)
   # params: {
   #   :link_text => 'LinkText',
   #   :link_url => 'LinkURL',
-  #   :match_by_text => true, # only needed when there are multiple links to the same url on a page with different link text
+  #   :match_by_text => true, # default, not needed to be explicitly stated
+  #   :match_by_url => true, # only needed when there are duplicate link texts, note: non-GET urls can cause duplicate URLs
+  #   :link_has_classes => "class1, class2"
+  #   :link_hasnt_classes => "class3, class4"
+  #   :link_has_method => "delete"
   #   :page_title => "PageTitleText",
   #   :page_subtitle => "SubtitleText",
   #   :page_subtitle2 => "Subtitle2Text",
@@ -142,28 +150,48 @@ def assert_link_has(links_hash, params)
   Rails.logger.debug("$$$ assert_link_has links_hash: #{JSON.pretty_generate(links_hash)}") if debug_mode
 
   # Check to make sure the URL and Link Text match
-  if params[:match_by_text].present? && params[:match_by_text] == true
+  # if params[:match_by_url].present? && (params[:match_by_url] == true || params[:match_by_url] == 'true')
+  # default to look up links by href first, only do by text if specified in params
+  matched_item = nil
+  if params[:match_by_text].present? && (params[:match_by_text] == true || params[:match_by_text] == 'true')
     # confirm the link text passed in the params points to the url passed in the params
-    # uses the links_hash created in get_links_hashes to match them up
-    Rails.logger.debug("$$$ Match by Text, to see if params[:link_text] match params[:link_url]") if debug_mode
-    assert_equal(params[:link_url], links_hash[:by_text][params[:link_text]], 'link text lookup does not match link url')
+    # uses the by_text hash created in get_links_hashes to match them up
+    Rails.logger.debug("$$$ Match by Text, to see if lookup of params[:link_text] match params[:link_url]") if debug_mode
+    assert(links_hash[:by_text][params[:link_text]].present?, "lookup of text: #{params[:link_text]} does not exist")
+    assert(links_hash[:by_text][params[:link_text]].count > 0, "lookup of text: #{params[:link_text]} [:href] does not exist")
+    matched, matched_item = in_by_text_hash( links_hash, params[:link_text], params[:link_url])
+    assert( matched, "lookup of link text #{params[:link_text]} does not have url: #{params[:link_url]}" )
   else
     # This is the default, to look find the Link Text for an href (in the anchor tags on the page)
-    # confirm the url passed in the params points to the text passed in the params
-    # uses the links_url child hash created in get_links_hashes to match them up
-    Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
-    assert(links_hash[:by_href][params[:link_url]].present?, "lookup of text: #{params[:link_text]} matching url: #{params[:link_url]} was not found")
-    assert(
-      links_hash[:by_href][params[:link_url]].include?(
-        params[:link_text]
-      ), "link url lookup found #{params[:link_text]} does not include text: #{params[:link_text]}"
-    )
+    # confirm the link url passed in the params points to the text passed in the params
+    # uses the by_href hash created in get_links_hashes to match them up
+    # ?? Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_url]") if debug_mode
+    # ?? assert_equal(params[:link_url], links_hash[:by_text][params[:link_text]], 'link text lookup does not match link url')
+    Rails.logger.debug("$$$ Match by URL, to see if lookup of params[:link_url] match params[:link_text]") if debug_mode
+    # confirm links hash by href has a value matching the link_url param
+    assert(links_hash[:by_href][params[:link_url]].present?, "lookup of link url: #{params[:link_url]} does not exist")
+    assert(links_hash[:by_href][params[:link_url]].count > 0 , "lookup of link url: #{params[:link_url]} has no items")
+    matched, matched_item = in_by_href_hash( links_hash, params[:link_url], params[:link_text])
+    assert( matched, "lookup of link url #{params[:link_url]} does not have text: #{params[:link_text]}" )
   end
 
   if params[:page_title].present? || params[:page_subtitle].present? || params[:page_subtitle2].present?  || params[:not_page_title].present?
     # confirm link goes to where we expect it
-    get(params[:link_url])
-    assert_response :success
+    if matched_item[:method] == 'delete'
+      delete(matched_item[:href])
+    else
+      get(matched_item[:href])
+    end
+    new_page = Nokogiri::HTML.fragment(response.body)
+    if response.status == 200
+      # good
+    elsif response.status = 302
+      redir_page = Nokogiri::HTML.fragment(response.body)
+      redir_url = redir_page.css('a').first.attribute('href').text
+      Rails.logger.debug("%%% redir_url: #{redir_url.inspect}")
+      get(redir_url)
+      assert_response :success
+    end
     new_page = Nokogiri::HTML.fragment(response.body)
     Rails.logger.debug("$$$ Match by URL, got to page: #{new_page.css('title').text}") if debug_mode
     assert_equal params[:page_title], new_page.css('title').text, "page title #{params[:page_title]} does not match #{new_page.css('title').text}" if params[:page_title].present?
@@ -177,17 +205,52 @@ def assert_link_has(links_hash, params)
       end
     end
     assert_not_equal params[:not_page_title], new_page.css('title').text, "page title #{params[:not_page_title]} should not match #{new_page.css('title').text}" if params[:not_page_title].present?
-
+  elsif params[:link_has_classes].present?
+    params[:link_has_classes].split(/[\s,\,,\;]/).each do |cls| # split on whitespace, comma, and/or semicolon
+      # assert anchor tag has all of the classes specified
+      assert matched_item[:class].include?(cls.strip())
+    end
+  elsif params[:link_hasnt_classes].present?
+    params[:link_hasnt_classes].split(/[\s,\,,\;]/).each do |cls| # split on whitespace, comma, and/or semicolon
+      # assert anchor tag has none of the classes specified
+      assert_not matched_item[:class].include?(cls.strip())
+    end
   end
 end
+
+def in_by_text_hash(links_hash, link_text, link_url)
+  links_hash[:by_text][link_text].each do |page_link|
+    Rails.logger.debug("$$$ page_link: #{page_link.inspect}")
+    return true if page_link[:href].include?(link_url)
+  end
+  return false, {}
+end
     
+def in_by_href_hash(links_hash, link_url, link_text)
+  Rails.logger.debug("$$$ in_by_href_hash: #{link_url} to match #{link_text}")
+  links_hash[:by_href][link_url].each do |page_link|
+    Rails.logger.debug("$$$ page_link: #{page_link.inspect}")
+    return true, page_link if page_link[:text].include?(link_text)
+  end
+  return false, {}
+end
+
   # get the links on page hashes (:by_text, :by_href, and :count) within one parent hash
 def get_links_hashes(noko_page)
-  ret = Hash.new
+  ret = Hash.new {|h,k| h[k] = Hash.new {|h,k| h[k] = [] } }
   page_links = noko_page.css('a')
-  ret[:by_text] = page_links.map{|a| [a.text, a['href']]}.to_h
-  # Rails.logger.debug("title_map: #{title_map.inspect}")
-  ret[:by_href] = page_links.map{|a| [ a['href'], a.text]}.to_h
+  # ret[:by_text] = page_links.map{|a| [a.text, "#{a['href']}"]}.to_h
+  # allow multiple items to be stored for duplicated link text values (hash of arrays)
+  page_links.each do |a|
+    link_item = {
+      text: a.text,
+      href: a['href'],
+      class: a['class'],
+      method: a['data-turbo-method']
+    }  
+    ret[:by_text][a.text] << link_item # note automatically created as an array if nothing there yet
+    ret[:by_href][a['href']] << link_item # note automatically created as an array if nothing there yet
+  end
   ret[:count] = page_links.count
   return ret
 end

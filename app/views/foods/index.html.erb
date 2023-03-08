@@ -1,12 +1,33 @@
 <% content_for :title, 'Foods Listing' %>
 <% content_for :header, "Foods Listing" %>
 
+<div id='filterButtons'>
+  <ul class="inlineListButtons">
+    <li><span>Filter:</span></li>
+    <% if @showing_active == 'deact' %>
+      <li><a id="foods_all_link" href="/foods?showing_active=all">All</a></li>
+      <li><a id="foods_deact_link" class="selectedLink" href="#">Deactivated</a></li>
+      <li><a id="foods_active_link" href="/foods?showing_active=active">Active</a></li>
+    <% elsif @showing_active == 'all' %>
+      <li><a id="foods_all_link"  class="selectedLink" href="#">All</a></li>
+      <li><a id="foods_deact_link" href="/foods?showing_active=deact">Deactivated</a></li>
+      <li><a id="foods_active_link" href="/foods?showing_active=active">Active</a></li>
+    <% else %>
+      <li><a id="foods_all_link" href="/foods?showing_active=all">All</a></li>
+      <li><a id="foods_deact_link" href="/foods?showing_active=deact">Deactivated</a></li>
+      <li><a id="foods_active_link" class="selectedLink" href="#">Active</a></li>
+    <% end %>
+  </ul>
+</div>
+
 <div id="foods">
   <table>
-    <%= render 'food_headers' %>
-    <% @foods.each do |food| %>
-      <%= render food %>
-    <% end %>
+    <thead><%= render 'food_headers' %></thead>
+    <tbody>
+      <% @foods.each do |food| %>
+        <%= render partial: 'food_row', locals: { food: food}, object: food %>
+      <% end %>
+    </tbody>
   </table>
 </div>
 

@@ -1,14 +1,21 @@
 Rails.application.routes.draw do
   resources :food_nutrients, except: %i[index] do
     member do
-    end
-    collection do
+      get 'reactivate'
     end
   end
-  get '/nutrients_of_food/:food_id', to: 'food_nutrients#nutrients_of_food'
+  get '/nutrients_of_food/:food_id', to: 'food_nutrients#nutrients_of_food', as: 'nutrients_of_food'
 
-  resources :foods
-  resources :nutrients
+  resources :foods do
+    member do
+      get 'reactivate'
+    end
+  end
+  resources :nutrients do
+    member do
+      get 'reactivate'
+    end
+  end
   get 'home/index'
   devise_for :users
   devise_scope :user do

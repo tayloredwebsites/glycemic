@@ -1,12 +1,30 @@
 <% content_for :title, 'Nutrients Listing' %>
 <% content_for :header, "Nutrients Listing" %>
 
+<div id='filterButtons'>
+  <ul class="inlineListButtons">
+    <li><span>Filter:</span></li>
+    <% if @showing_active == 'deact' %>
+      <li><a id="nutrients_all_link" href="/nutrients?showing_active=all">All</a></li>
+      <li><a id="nutrients_deact_link" class="selectedLink" href="#">Deactivated</a></li>
+      <li><a id="nutrients_active_link" href="/nutrients?showing_active=active">Active</a></li>
+    <% elsif @showing_active == 'all' %>
+      <li><a id="nutrients_all_link"  class="selectedLink" href="#">All</a></li>
+      <li><a id="nutrients_deact_link" href="/nutrients?showing_active=deact">Deactivated</a></li>
+      <li><a id="nutrients_active_link" href="/nutrients?showing_active=active">Active</a></li>
+    <% else %>
+      <li><a id="nutrients_all_link" href="/nutrients?showing_active=all">All</a></li>
+      <li><a id="nutrients_deact_link" href="/nutrients?showing_active=deact">Deactivated</a></li>
+      <li><a id="nutrients_active_link" class="selectedLink" href="#">Active</a></li>
+    <% end %>
+  </ul>
+</div>
 
 <div id="nutrients">
   <table>
     <%= render 'nutrient_headers' %>
     <% @nutrients.each do |nutrient| %>
-      <%= render nutrient %>
+      <%= render partial: 'nutrient_row', locals: { nutrient: nutrient}, object: nutrient %>
     <% end %>
   </table>
 </div>

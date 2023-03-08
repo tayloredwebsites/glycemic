@@ -1,0 +1,17 @@
+<tr id="food_id_<%= food.id %>">
+  <td><%= food.id %></td>
+  <td><%= food.name %></td>
+  <td><%= food.usda_fdc_id %></td>
+  <td><%= food.desc %></td>
+  <td>
+    <% if food.active == true %>
+      <a href="/foods/<%= food.id %>/edit">Edit</a>
+      <a href="/nutrients_of_food/<%= food.id %>">Nutrients</a>
+      <a href="/foods/<%=food.id%>" data-turbo-method="delete">Deactivate</a>
+    <% else %>
+      <a href="/foods/<%= food.id %>/edit" class="inactiveLink">Edit</a>
+      <a href="/nutrients_of_food/<%= food.id %>" class="inactiveLink">Nutrients</a>
+      <a href="/foods/<%=food.id%>/reactivate">Reactivate</a>
+    <% end %>
+  </td>
+</tr>
