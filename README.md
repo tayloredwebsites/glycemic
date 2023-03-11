@@ -3,22 +3,33 @@
 ## Diet Support Program
 
 ### Purpose and Goals
-- This website is intended to help wisely develop and manage a diet to help meet any of a number of possible goals.  These goals could include:
-    - monitoring calorie intake.
-    - monitoring carbohydrate to protein ratio - probable impact on blood sugar.
-    - monitoring glycemic load - probable impact on blood sugar.
-    - monitoring PRAL index (probable impact of food on body acid balance and kidneys).
-   -  monitoring anti-nutrients such as oxalates with possible impact on kidney stones.
-    - monitoring calcium intake with possible impact on kidney stones..
-    -  more...
-- The nutrition information of foods will be downloaded (as needed) using the USDA nutrition website APIs.
-- Some pre-packaged meals are already available from the USDA, so the accurate nutrition of these meals will be easy to obtain.
-- Home cooked meals will contain food portions from foods, or  your recipes.
-    - the program will assist you in entering food portions so that the nutrition of that portion is available.
-    - the program will automatically accumulate the nutrition of the portions you have chosen for a meal.
-    - the nutritional content of an entire recipe will be stored so the nutrition of a portion of a recipe will be known.
--  By adusting portions and foods, a meal may be developed and adjusted until you meet your goals.
--  Goals will be made up of an ideal (green) range, a maximum and/or minimum to provide upper and lower red ranges, and yellow ranges between.  This will make it easy to easily monitor  multiple goals at the same time.
+The program is being designed to help you plan your diet, and to give you feedback to better help you meet your nutritional related objectives.:
+- Objectives you might want to monitor:
+    - calorie intake -for its possible impact on weight.
+    - carbohydrate to protein ratio - for its probable impact on blood sugar.
+    - glycemic load - for its probable impact on blood sugar.
+    - PRAL index - for its probable impact of food on body acid balance and kidneys.
+   -  anti-nutrients such as oxalates for their possible impact on kidney stones.
+    - calcium and other mineral intake with possible impact on bone health, etc
+    - more...
+- USDA Nutritional Data will be preloaded into the program.
+    - Thee nutritional information of many foods will be available from the USDA nutritional databases.
+    - The USDA additionally has many pre-packaged foods and meals that can be easily obtained by this program.
+- Home cooked foods and Recipes:
+    - Foods that you prepare will also be able to be stored in the program, and the program will conveniently let you determine the nutritional benefits of your recipes and meals from them.
+    - Wnen you enter your home cooded foods, it will be able to be entered as a recipe.  Since the recipe has the ingredient quantities, this will provide both printable instructions, as well as ingredient quantities needed to determine nutritional values of the food prepared.
+    - There will be convenient ways to provide for substitutions and enhancements to your recipes.
+- Meals
+    - Meals will consist of food portions of  any known USDA foods, as well as  your home cooked foods.
+    - By adusting portions and foods, a meal may be planned and adjusted until it meets your goals.
+-  Meeting your Goals:
+    - You will be able to develop your own goal ranges of ideal (green) range, as well as warning (yellow) and alert(red) ranges .
+    - Since all of these ranges will be displayed simultaneously, his will make it easy to easily monitor  all of your goals at the same time.
+    - The goals will be available on the foods and meals pages
+- Daily results:
+    - the plan will be for you to be ability to enter your daily meals, so that you will be able to see how you met your goals in a daily summary page.
+    - The plan will be to also allow you to enter test results, such as blood sugar levels, to help monitor and analyze the impact on your diet.
+    - Eventually, it it hoped that we will be able to provide statistical analysis of your diet and test results.
 
 ### Development Plan
 DONE
@@ -27,13 +38,16 @@ DONE
 NEXT STEPS
 - Download the foods and nutrients in the USDA database, and populate the database with them.
 - Foods listing page with various sorts and filters to help choose foods for a meal.
-- Ability to download the nutritional values of a food from the USDA website if not done already.
 - Dynamically develop a meal with portions of foods, with the ability to adjust portions till goals are met.
 - Save a meal for future reference.
 - Meal listing page with various sorts and filters to help choose a meal.
-- Recipes listing page, with various sorts and filters to help choose a recipe.
-    - Various adjustments to recipes will allow for comparing the nutrition of the dishes, to better meet goals.
-    - Recipes will be designed to assist in having accurate recipe and portion nutrition.
+- Home cooked foods & Recipes listing page, with various sorts and filters to help choose one.
+    - Screen viewable and printable recipes, with the nutritional information by total and portion size(s).
+    - Create variations of a recipe using alternate ingredients (e.g. whole wheat vs all purpose flour) or quantities.
+    - When viewing a Home Cooked food, the recipe will be displayed with a list of existing saved variations.
+    - ability to write up notes on the impact of a recipe variation.
+- Ability to enter all meals for the day, to obtain a daily summary page
+- Ability to enter tests, so statistical analysis of your diet on your tests could be done
 
 ### Testing
 - This diet_support program has been developed with concurrent automated testing (test driven and/or tested as developed).  This helps ensure that the software will have minimal bugs.

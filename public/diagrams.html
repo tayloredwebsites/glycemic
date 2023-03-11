@@ -6,40 +6,122 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <style>
+      .header {
+        /* position: absolute; */
+        width: 100%;
+        top:0;
+        font-size: 0.7em;
+        line-height: 1.0em;
+        text-align: center;
+        margin-bottom: -10px;      }
+    </style>
   </head>
   <body>
+    <div class="header">Copyright (C) 2023 tayloredwebsites.com. Freely shared and licensed under <a href="https://opensource.org/license/agpl-v3/" target="_blank">AGPL-3.0-only</a></div>
     <pre class="mermaid">
       erDiagram
+      meals {
+        integer id PK
+        integer user_id FK
+        string name
+        integer base_recipe_id_null
+        boolean active
+        boolean public
+      }
       foods ||--o{ food_nutrients : contains
       foods {
+        integer id PK
         string name
-        text desc
         integer usda_fdc_id
         datetime created_at
         datetime updated_at
+        boolean active
+        integer recipe_id FK
+        boolean public
+        string usda_upc_num
+        integer food_category_id FK
+        string usda_desc
+        string usda_data_type
+        date usda_pub_date
       }
-      food_nutrients {
-        integer nutrient_id
-        integer food_id
-        boolean study
-        decimal study_weight_4_2
-        integer avg_rec_id
-        decimal portion_6_2
+      food_categories ||--o{ foods : belongs_to
+      food_categories {
+        integer id PK
+        string usda_code
+        string desc
+      }
+      recipes ||--o{ foods : makes
+      recipes {
+        integer id PK
+        integer user_id FK
+        string recipe_name
+        integer base_recipe_id_null
+        string recipe_display_template
+        boolean public
+      }
+      foods ||--o{ recipe_items : how_used_in_recipe
+      recipes ||--o{ recipe_items : used_in
+      recipe_items {
+        integer id PK
+        integer food_id FK
+        integer alt_food_id_null FK
+        string sequencer
+        string item_template
+      }
+      meals ||--o{ portions : combine_into
+      foods ||--o{ portions : is_portions_of
+      portions {
+        integer id PK
+        integer meal_id FK
+        integer food_id FK
+        integer alt_food_id_null FK
+        decimal portion_amount_8_3
         string portion_unit
-        decimal amount_6_2
-        string amount_unit
-        text desc
-        datetime created_at
-        datetime updated_at
       }
-      nutrients ||--o{ food_nutrients : has_amount_of
+      tests ||--o{ tests_taken : took_this_test
+      tests {
+        integer id PK
+        string name
+        string description
+      }
+      users ||--o{ tests_taken : user_took_test
+      tests_taken {
+        integer id PK
+        integer user_id FK
+        integer test_id FK
+        datetime when_taken
+      }
       nutrients {
+        integer id PK
         string name
         integer usda_ndb_num
         text desc
         datetime created_at
         datetime updated_at
+        boolean active
+        decimal rda_8_3
+        string rda_unit
+        string usda_nutrient_num
+        string usda_nutrient_name
       }
+      food_nutrients {
+        integer id PK
+        integer nutrient_id FK
+        integer food_id FK
+        decimal portion_amount_8_3
+        string portion_unit
+        decimal amount_8_3
+        string amount_unit
+        datetime created_at
+        datetime updated_at
+        boolean active
+        string usda_nutrient_num
+        integer yyy_usda_fdc_id
+      }
+      nutrients ||--o{ food_nutrients : has_amount_of
+      users ||--o{ meals : planned_meals
+      users ||--o{ recipes : has_recipe
       users {
         string email
         string username
@@ -57,10 +139,17 @@
         datetime locked_at
         datetime created_at
         datetime updated_at    
+        boolean active
       }
-  
+      users ||--o{ meals_eaten : ate
+      meals_eaten {
+        integer id PK
+        integer user_id FK
+        integer meal_id FK
+        datetime when_eaten
+      }
+        
     </pre>
-    <a href="https://mermaid.js.org/syntax/entityRelationshipDiagram.html" target="_blank"></a>
     <script type="module">
       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs';
       mermaid.initialize({ startOnLoad: true });
