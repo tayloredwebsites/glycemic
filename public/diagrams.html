@@ -40,15 +40,19 @@
         integer recipe_id FK
         boolean public
         string usda_upc_num
-        integer food_category_id FK
+        integer usda_food_cat_lu_id FK
+        integer wweia_food_cat_lui_id FK
         string usda_desc
         string usda_data_type
         date usda_pub_date
       }
-      food_categories ||--o{ foods : belongs_to
-      food_categories {
+      lookup_tables ||--o{ foods : has_usda_food_cat
+      lookup_tables ||--o{ foods : has_wweia_food_cat
+        lookup_tables {
         integer id PK
-        string usda_code
+        string lu_table
+        integer id
+        string code
         string desc
       }
       recipes ||--o{ foods : makes
