@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_03_03_164501) do
+ActiveRecord::Schema[7.0].define(version: 2023_03_12_145809) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -34,12 +34,37 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_03_164501) do
   end
 
   create_table "foods", force: :cascade do |t|
-    t.string "name"
-    t.text "desc"
+    t.string "name", default: "", null: false
+    t.text "desc", default: "", null: false
     t.integer "usda_fdc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "active", default: true
+    t.boolean "active", default: true, null: false
+    t.integer "recipe_id"
+    t.boolean "public", default: true, null: false
+    t.string "usda_upc_num", limit: 14, default: "", null: false
+    t.string "usda_food_cat_lu_id", limit: 4, default: "", null: false
+    t.string "wweia_food_cat_lu_id", limit: 4, default: "", null: false
+    t.string "usda_desc", default: "", null: false
+    t.string "usda_data_type", default: "", null: false
+    t.date "usda_pub_date"
+    t.index ["public"], name: "ix_foods_on_public"
+    t.index ["recipe_id"], name: "ix_foods_on_recipe_id", unique: true
+    t.index ["usda_food_cat_lu_id"], name: "ix_foods_on_usda_cat"
+    t.index ["wweia_food_cat_lu_id"], name: "ix_foods_on_wweia_cat"
+  end
+
+  create_table "lookup_tables", force: :cascade do |t|
+    t.string "lu_table"
+    t.integer "lu_id"
+    t.string "lu_code", default: "", null: false
+    t.text "lu_desc", default: "", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lu_code"], name: "ix_lookup_tables_on_lu_code"
+    t.index ["lu_table", "lu_code"], name: "ix_lookup_tables_on_lu_table_lu_code", unique: true
+    t.index ["lu_table"], name: "ix_lookup_tables_on_lu_table"
   end
 
   create_table "nutrients", force: :cascade do |t|

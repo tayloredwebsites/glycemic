@@ -10,4 +10,7 @@ class Food < ApplicationRecord
   # scope :all_foods, -> { where(active: [true, false]) }
   # scope :all_foods, -> {}
 
+  belongs_to 'usda_food_cat_lu', class_name: 'lookup_tables'
+  belongs_to 'wweia_food_cat_lu', class_name: 'lookup_tables'
+
 end
