@@ -14,11 +14,11 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     @food = FactoryBot.create(:food)
     @nutrient, @nutrient2, @nutrient3 = FactoryBot.create_list(:nutrient, 3)
-    @nutrientD = FactoryBot.create(:nutrient, active: false)
+    @nutrient_d = FactoryBot.create(:nutrient, active: false)
     @food_nutrient = FactoryBot.create(:food_nutrient, food: @food, nutrient: @nutrient)
     @food_nutrient2 = FactoryBot.create(:food_nutrient, food: @food, nutrient: @nutrient2)
-    @food_nutrientD = FactoryBot.create(:food_nutrient, active: false, food: @food, nutrient: @nutrientD)
-    @food_nutrients = [@food_nutrient, @food_nutrient2, @food_nutrientD]
+    @food_nutrient_d = FactoryBot.create(:food_nutrient, active: false, food: @food, nutrient: @nutrient_d)
+    @food_nutrients = [@food_nutrient, @food_nutrient2, @food_nutrient_d]
   end
 
   # called after every single test
@@ -40,9 +40,9 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header, three for the filter, two for each of the two active nutrient, and one at the bottom
-    assert_equal(5+3+2*2+1, linksH[:count])
+    assert_equal(5+3+2*2+1, links_h[:count])
 
 
     # get nutrients of foods index listing (deactivated nutrients only)
@@ -50,9 +50,9 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header, three for the filter, two for the one deactivated nutrient, and one at the bottom
-    assert_equal(5+3+1*2+1, linksH[:count])
+    assert_equal(5+3+1*2+1, links_h[:count])
 
 
     # get default nutrients of foods index listing (active nutrients only)
@@ -60,35 +60,35 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header, three for the filter, three for each of the nutrients, and one at the bottom
-    assert_equal(5+3+3*2+1, linksH[:count])
+    assert_equal(5+3+3*2+1, links_h[:count])
 
     # make sure that we have the correct links on the all nutrients listing page
-    assert_page_headers(page, linksH)
+    assert_page_headers(page, links_h)
     # assert_gets_page("/signout", 'Log in')
     @food_nutrients.each do |fn|
       if fn.active == true
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Edit",
           :link_url => "/food_nutrients/#{fn.id}/edit",
           :page_title => "Food Nutrient Edit Page",
           :page_subtitle => "Food Nutrient Edit Page",
           :page_subtitle2 => "for food: #{@food.name}",
         })
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Deactivate",
           :link_url => "/food_nutrients/#{fn.id}",
           :page_title => "Nutrients of Food Listing",
           :page_subtitle => "for food: #{@food.name}",
         })
       else
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Edit",
           :link_url => "/food_nutrients/#{fn.id}/edit",
           :link_has_classes => 'inactiveLink',
         })
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Reactivate",
           :link_url => "/food_nutrients/#{fn.id}/reactivate",
           :page_title => "Nutrients of Food Listing",
@@ -96,7 +96,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
         })
       end
     end
-    assert_link_has(linksH, {
+    assert_link_has(links_h, {
       :link_text => "New food nutrient",
       :link_url => "/food_nutrients/new?food_id=#{@food.id}",
       :page_title => "New Food Nutrient",
@@ -111,12 +111,12 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "New Food Nutrient", "New Food Nutrient", "for food: #{@food.name}")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header
-    assert_equal(5, linksH[:count])
+    assert_equal(5, links_h[:count])
     Rails.logger.debug("check the header links")
     # make sure that we have the correct links on the page
-    assert_page_headers(page, linksH)
+    assert_page_headers(page, links_h)
 
     # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
     assert_select_has(page, 'food_nutrient_nutrient_id', {
@@ -177,19 +177,19 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "'#{@food.name}' Nutrient View Page", 'for food nutrient', @food_nutrient.nutrient.name)
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have 5 links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
-    assert_equal(5+3, linksH[:count])
+    assert_equal(5+3, links_h[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(page, linksH)
-    assert_link_has(linksH, {
+    assert_page_headers(page, links_h)
+    assert_link_has(links_h, {
       :link_text => "New nutrient for #{@food.name}",
       :link_url => "/food_nutrients/new?food_id=#{@food.id}",
       :page_title => "New Food Nutrient",
       :page_subtitle => "for food:",
       :page_subtitle2 => @food.name,
     })
-    assert_link_has(linksH, {
+    assert_link_has(links_h, {
       :link_text => "Edit this nutrient for #{@food.name}",
       :link_url => "/food_nutrients/#{@food_nutrient.id}/edit",
       :page_title => "Food Nutrient Edit Page",
@@ -197,7 +197,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       :page_subtitle2 => "and nutrient: #{@food_nutrient.nutrient.name}",
       :debugging => true,
     })
-    assert_link_has(linksH, {
+    assert_link_has(links_h, {
       :link_text => "Remove this nutrient from #{@food.name}",
       :link_url => "/food_nutrients/#{@food_nutrient.id}",
       # TODO: validate the "Are you sure?" alert
@@ -216,11 +216,11 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Food Nutrient Edit Page", "for food: #{@food.name}", "and nutrient: #{@food_nutrient.nutrient.name}")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header, plus 3 at the bottom
-    assert_equal(5+3, linksH[:count])
+    assert_equal(5+3, links_h[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(page, linksH)
+    assert_page_headers(page, links_h)
 
     # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
     # No select on nutrient, so, check:
@@ -334,13 +334,13 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should reactivate a deactived food_nutrient" do
-    assert_equal(false, @food_nutrientD.active)
+    assert_equal(false, @food_nutrient_d.active)
     assert_difference("FoodNutrient.count", 0) do
-      get reactivate_food_nutrient_url(@food_nutrientD)
+      get reactivate_food_nutrient_url(@food_nutrient_d)
     end
-    @food_nutrientD.reload
-    assert_equal(true, @food_nutrientD.active)
-    assert_redirected_to "/nutrients_of_food/#{@food_nutrientD.food_id}"
+    @food_nutrient_d.reload
+    assert_equal(true, @food_nutrient_d.active)
+    assert_redirected_to "/nutrients_of_food/#{@food_nutrient_d.food_id}"
   end
 
 end

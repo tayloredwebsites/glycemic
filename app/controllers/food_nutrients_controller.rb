@@ -18,7 +18,7 @@ class FoodNutrientsController < ApplicationController
     Rails.logger.debug("*** params: #{params.inspect}")
     @showing_active = params[:showing_active]
     # set_food_nutrient_from_params('', params['food_id'])
-    food_id = Integer(params[:food_id]) rescue 0
+    food_id = params[:food_id].to_integer(0)
     # find food, regardless if it is active or not
     @food = Food.find_by(id: food_id)
     if @food.blank? || @food.id.blank?
@@ -75,8 +75,8 @@ class FoodNutrientsController < ApplicationController
         format.html { redirect_to nutrients_of_food_url(@food), notice: "Food nutrient was successfully created." }
         format.json { render :show, status: :created, location: @food_nutrient }
       else
-        @errors + @food_nutrient.errors.full_messages
-        set_flash_msg('', "ERROR: unable to create food nutrient")
+        msg = @errors + @food_nutrient.errors.full_messages
+        set_flash_msg('', "ERROR: unable to create food nutrient: #{msg.join('; ')}")
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @food_nutrient.errors, status: :unprocessable_entity }
       end
@@ -202,8 +202,8 @@ class FoodNutrientsController < ApplicationController
       # Rails.logger.debug("$$$ set_food_nutrient_from_params - food_nutrient_params: #{food_nutrient_params.inspect}")
       Rails.logger.debug("$$$ set_food_nutrient_from_params - id_param: #{id_param.inspect}")
       Rails.logger.debug("$$$ set_food_nutrient_from_params - food_id_param: #{food_id_param.inspect}")
-      id = Integer(id_param) rescue 0
-      food_id = Integer(food_id_param) rescue 0
+      id = id_param.to_integer(0)
+      food_id = food_id_param.to_integer(0)
       set_food_nutrient_from_ids(id, food_id)
     end
 

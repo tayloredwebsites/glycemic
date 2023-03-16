@@ -34,9 +34,9 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Foods Listing")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header, three filter buttons, three for each active food, and one at the bottom
-    assert_equal(5+3+2*3+1, linksH[:count])
+    assert_equal(5+3+2*3+1, links_h[:count])
 
     # get foods index listing with deactivated foods only
     get '/foods?showing_active=deact'
@@ -44,9 +44,9 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Foods Listing")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header,, three filter buttons, three for each food, and one at the bottom
-    assert_equal(5+3+1*3+1, linksH[:count])
+    assert_equal(5+3+1*3+1, links_h[:count])
 
     # get foods index listing with all foods
     get '/foods?showing_active=all'
@@ -54,50 +54,50 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Foods Listing")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header,, three filter buttons, three for each food, and one at the bottom
-    assert_equal(5+3+foods_count*3+1, linksH[:count])
+    assert_equal(5+3+foods_count*3+1, links_h[:count])
 
     # make sure that we have the correct links on the all foods page
-    assert_page_headers(page, linksH)
+    assert_page_headers(page, links_h)
     @foods.each do |fn|
       if fn.active == true
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Edit",
           :link_url => "/foods/#{fn.id}/edit",
           :page_title => "Edit Food Page",
           :page_subtitle => "for food: #{fn.name}",
         })
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Nutrients",
           :link_url => "/nutrients_of_food/#{fn.id}",
           :page_title => "Nutrients of Food Listing",
           :page_subtitle => "for food: #{fn.name}",
         })
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Deactivate",
           :link_url => "/foods/#{fn.id}",
           :page_title => "Foods Listing",
         })
       else
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Edit",
           :link_url => "/foods/#{fn.id}/edit",
           :link_has_classes => 'inactiveLink',
         })
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Nutrients",
           :link_url => "/nutrients_of_food/#{fn.id}",
           :link_has_classes => 'inactiveLink',
         })
-        assert_link_has(linksH, {
+        assert_link_has(links_h, {
           :link_text => "Reactivate",
           :link_url => "/foods/#{fn.id}/reactivate",
           :page_title => "Foods Listing",
         })
       end
     end
-    assert_link_has(linksH, {
+    assert_link_has(links_h, {
       :link_text => "New Food",
       :link_url => "/foods/new",
       :page_title => "New Food Page",
@@ -111,11 +111,11 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "New Food Page", "New Food Page")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header
-    assert_equal(5, linksH[:count])
+    assert_equal(5, links_h[:count])
     # make sure that we have the correct links on the page
-    assert_page_headers(page, linksH)
+    assert_page_headers(page, links_h)
 
     # confirm all appropriate form fields exist
     assert_equal(1, page.css("form[action='/foods']").count)
@@ -158,20 +158,20 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Edit Food Page", "Edit Food Page", "for food: #{@food1.name}")
-    linksH = get_links_hashes(page)
+    links_h = get_links_hashes(page)
     # make sure we have links for the header plus 2 extra ones below
-    assert_equal(5+2, linksH[:count])
+    assert_equal(5+2, links_h[:count])
     # make sure that we have the correct links on the page
     @food = @food1.clone # 'assert_page_headers' uses @food to determine if 'Food' Nutrients link should be dim or not.
-    assert_page_headers(page, linksH)
+    assert_page_headers(page, links_h)
 
-    assert_link_has(linksH, {
+    assert_link_has(links_h, {
       :link_text => "New Food",
       :link_url => "/foods/new",
       :page_title => "New Food Page",
       :page_subtitle => "New Food Page",
     })
-    assert_link_has(linksH, {
+    assert_link_has(links_h, {
       :link_text => "Deactivate this food",
       :link_url => "/foods/#{@food1.id}",
       :page_title => 'Foods Listing',
@@ -217,7 +217,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_equal(@changed_food.name, @updated_food.name)
     assert_equal(@changed_food.desc, @updated_food.desc)
     assert_equal(@changed_food.usda_fdc_id, @updated_food.usda_fdc_id)
-    
+
   end
 
   test "should deactivate active food" do
