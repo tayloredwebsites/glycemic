@@ -6,224 +6,10 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 3
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: with_first_argument, with_fixed_indentation
-Layout/ArgumentAlignment:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'app/models/user.rb'
-
-# Offense count: 5
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowForAlignment.
-Layout/CommentIndentation:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'test/controllers/food_nutrients_controller_test.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-    - 'test/helpers/user_helper.rb'
-    - 'test/test_helper.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Layout/EmptyLineAfterGuardClause:
-  Exclude:
-    - 'test/controllers/user_controller_test.rb'
-
-# Offense count: 6
-# This cop supports safe autocorrection (--autocorrect).
-Layout/EmptyLines:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'app/services/Import_usda_csv_files.rb'
-    - 'test/controllers/food_nutrients_controller_test.rb'
-    - 'test/controllers/nutrients_controller_test.rb'
-    - 'test/controllers/user_controller_test.rb'
-
-# Offense count: 11
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowMultipleStyles, EnforcedHashRocketStyle, EnforcedColonStyle, EnforcedLastArgumentHashStyle.
-# SupportedHashRocketStyles: key, separator, table
-# SupportedColonStyles: key, separator, table
-# SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
-Layout/HashAlignment:
-  Exclude:
-    - 'test/controllers/user_controller_test.rb'
-
-# Offense count: 13
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: normal, indented_internal_methods
-Layout/IndentationConsistency:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'app/controllers/foods_controller.rb'
-    - 'app/controllers/nutrients_controller.rb'
-
-# Offense count: 13
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Width, AllowedPatterns.
-Layout/IndentationWidth:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'app/controllers/foods_controller.rb'
-    - 'app/controllers/nutrients_controller.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Layout/InitialIndentation:
-  Exclude:
-    - 'test/helpers/user_helper.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Layout/LeadingEmptyLines:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-    - 'test/helpers/user_helper.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineMethodCallBraceLayout:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-
-# Offense count: 11
-# This cop supports safe autocorrection (--autocorrect).
-Layout/SpaceAfterComma:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'app/services/Import_usda_csv_files.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 3
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: .
-# SupportedStyles: space, no_space
-Layout/SpaceAroundEqualsInParameterDefault:
-  EnforcedStyle: no_space
-
-# Offense count: 57
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowForAlignment, EnforcedStyleForExponentOperator.
-# SupportedStylesForExponentOperator: space, no_space
-Layout/SpaceAroundOperators:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-    - 'test/controllers/food_nutrients_controller_test.rb'
-    - 'test/controllers/foods_controller_test.rb'
-    - 'test/controllers/home_controller_test.rb'
-    - 'test/controllers/nutrients_controller_test.rb'
-    - 'test/controllers/user_controller_test.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-    - 'test/test_helper.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Layout/SpaceBeforeComma:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBrackets.
-# SupportedStyles: space, no_space, compact
-# SupportedStylesForEmptyBrackets: space, no_space
-Layout/SpaceInsideArrayLiteralBrackets:
-  Exclude:
-    - 'config/environments/production.rb'
-
-# Offense count: 14
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Exclude:
-    - 'test/factories/food.rb'
-    - 'test/factories/nutrient.rb'
-    - 'test/factories/user.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
-# SupportedStyles: space, no_space, compact
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideHashLiteralBraces:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-
-# Offense count: 8
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, compact, no_space
-Layout/SpaceInsideParens:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 8
-# This cop supports safe autocorrection (--autocorrect).
-Layout/SpaceInsidePercentLiteralDelimiters:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-    - 'app/controllers/foods_controller.rb'
-    - 'app/controllers/nutrients_controller.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: final_newline, final_blank_line
-Layout/TrailingEmptyLines:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 12
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowInHeredoc.
-Layout/TrailingWhitespace:
-  Exclude:
-    - 'app/models/user.rb'
-    - 'app/services/Import_usda_csv_files.rb'
-    - 'test/controllers/food_nutrients_controller_test.rb'
-    - 'test/controllers/home_controller_test.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-    - 'test/test_helper.rb'
-
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: AllowSafeAssignment.
-Lint/AssignmentInCondition:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Lint/RedundantStringCoercion:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 2
-Lint/ShadowingOuterLocalVariable:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowUnusedKeywordArguments, IgnoreEmptyMethods, IgnoreNotImplementedMethods.
-Lint/UnusedMethodArgument:
-  Exclude:
-    - 'test/test_helper.rb'
-
 # Offense count: 6
 Lint/UselessAssignment:
   Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
+    - 'app/services/import_usda_csv_files.rb'
     - 'test/controllers/food_nutrients_controller_test.rb'
     - 'test/helpers/nokogiri_helper.rb'
     - 'test/test_helper.rb'
@@ -231,7 +17,7 @@ Lint/UselessAssignment:
 # Offense count: 18
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
 Metrics/AbcSize:
-  Max: 156
+  Max: 157
 
 # Offense count: 1
 # Configuration parameters: CountBlocks.
@@ -248,28 +34,6 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Max: 32
 
-# Offense count: 1
-# Configuration parameters: ExpectMatchingDefinition, CheckDefinitionPathHierarchy, CheckDefinitionPathHierarchyRoots, Regex, IgnoreExecutableScripts, AllowedAcronyms.
-# CheckDefinitionPathHierarchyRoots: lib, spec, test, src
-# AllowedAcronyms: CLI, DSL, ACL, API, ASCII, CPU, CSS, DNS, EOF, GUID, HTML, HTTP, HTTPS, ID, IP, JSON, LHS, QPS, RAM, RHS, RPC, SLA, SMTP, SQL, SSH, TCP, TLS, TTL, UDP, UI, UID, UUID, URI, URL, UTF8, VM, XML, XMPP, XSRF, XSS
-Naming/FileName:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-
-# Offense count: 2
-# Configuration parameters: EnforcedStyle, AllowedIdentifiers, AllowedPatterns.
-# SupportedStyles: snake_case, camelCase
-Naming/VariableName:
-  Exclude:
-    - 'test/controllers/food_nutrients_controller_test.rb'
-    - 'test/controllers/foods_controller_test.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: NilOrEmpty, NotPresent, UnlessPresent.
-Rails/Blank:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
 
 # Offense count: 1
 # Configuration parameters: Database, Include.
@@ -279,138 +43,11 @@ Rails/BulkChangeTable:
   Exclude:
     - 'db/migrate/20230312145809_update_foods_table.rb'
 
-# Offense count: 2
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: slashes, arguments
-Rails/FilePath:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-
-# Offense count: 2
-# Configuration parameters: Include.
-# Include: app/models/**/*.rb
-Rails/HasManyOrHasOneDependent:
-  Exclude:
-    - 'app/models/lookup_table.rb'
-
-# Offense count: 2
-# Configuration parameters: IgnoreScopes, Include.
-# Include: app/models/**/*.rb
-Rails/InverseOf:
-  Exclude:
-    - 'app/models/lookup_table.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: strict, flexible
-Rails/TimeZone:
-  Exclude:
-    - 'db/seeds.rb'
-    - 'test/controllers/user_controller_test.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Include.
-# Include: app/models/**/*.rb
-Rails/Validation:
-  Exclude:
-    - 'app/models/lookup_table.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, ProceduralMethods, FunctionalMethods, AllowedMethods, AllowedPatterns, AllowBracesOnProceduralOneLiners, BracesRequiredMethods.
-# SupportedStyles: line_count_based, semantic, braces_for_chaining, always_braces
-# ProceduralMethods: benchmark, bm, bmbm, create, each_with_object, measure, new, realtime, tap, with_object
-# FunctionalMethods: let, let!, subject, watch
-# AllowedMethods: lambda, proc, it
-Style/BlockDelimiters:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: nested, compact
-Style/ClassAndModuleChildren:
-  Exclude:
-    - 'test/channels/application_cable/connection_test.rb'
-    - 'test/test_helper.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Keywords, RequireColon.
-# Keywords: TODO, FIXME, OPTIMIZE, HACK, REVIEW, NOTE
-Style/CommentAnnotation:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
-
 # Offense count: 26
 # Configuration parameters: AllowedConstants.
+# ERROR: Style/Documentation: Missing top-level documentation comment for... 
 Style/Documentation:
   Enabled: false
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, AllowComments.
-# SupportedStyles: empty, nil, both
-Style/EmptyElse:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Style/EmptyLiteral:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-
-# Offense count: 3
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/GlobalStdStream:
-  Exclude:
-    - 'config/environments/development.rb'
-    - 'config/environments/production.rb'
-    - 'config/environments/test.rb'
-
-# Offense count: 6
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: MinBodyLength, AllowConsecutiveConditionals.
-Style/GuardClause:
-  Exclude:
-    - 'db/migrate/20230124225325_create_nutrients.rb'
-    - 'db/migrate/20230124225521_create_foods.rb'
-    - 'db/migrate/20230124230331_create_food_nutrients.rb'
-    - 'db/migrate/20230312131541_lookup_tables.rb'
-    - 'test/test_helper.rb'
-
-# Offense count: 125
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, EnforcedShorthandSyntax, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
-# SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
-# SupportedShorthandSyntax: always, never, either, consistent
-Style/HashSyntax:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-    - 'test/controllers/food_nutrients_controller_test.rb'
-    - 'test/controllers/foods_controller_test.rb'
-    - 'test/controllers/home_controller_test.rb'
-    - 'test/controllers/nutrients_controller_test.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: InverseMethods, InverseBlocks.
-Style/InverseMethods:
-  Exclude:
-    - 'app/controllers/food_nutrients_controller.rb'
-
-# Offense count: 11
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: literals, strict
-Style/MutableConstant:
-  Exclude:
-    - 'app/models/food_nutrient.rb'
 
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).
@@ -418,53 +55,35 @@ Style/MutableConstant:
 Style/NumericLiterals:
   MinDigits: 6
 
-# Offense count: 1
-Style/OptionalArguments:
-  Exclude:
-    - 'test/test_helper.rb'
+# # Offense count: 2
+# # This cop supports unsafe autocorrection (--autocorrect-all).
+# # Configuration parameters: Mode.
+# Style/StringConcatenation:
+#   Exclude:
+#     - 'app/services/Import_usda_csv_files.rb'
 
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: SafeForConstants.
-Style/RedundantFetchBlock:
-  Exclude:
-    - 'config/puma.rb'
+# # Offense count: 2
+# # This cop supports safe autocorrection (--autocorrect).
+# # Configuration parameters: .
+# # SupportedStyles: percent, brackets
+# Style/SymbolArray:
+#   EnforcedStyle: percent
+#   MinSize: 10
 
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantRegexpEscape:
-  Exclude:
-    - 'test/helpers/nokogiri_helper.rb'
+# # Offense count: 5
+# # This cop supports safe autocorrection (--autocorrect).
+# # Configuration parameters: EnforcedStyle, AllowSafeAssignment.
+# # SupportedStyles: require_parentheses, require_no_parentheses, require_parentheses_when_complex
+# Style/TernaryParentheses:
+#   Exclude:
+#     - 'config/initializers/devise.rb'
+#     - 'test/controllers/user_controller_test.rb'
+#     - 'test/helpers/nokogiri_helper.rb'
 
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Mode.
-Style/StringConcatenation:
-  Exclude:
-    - 'app/services/Import_usda_csv_files.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: .
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  EnforcedStyle: percent
-  MinSize: 10
-
-# Offense count: 5
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, AllowSafeAssignment.
-# SupportedStyles: require_parentheses, require_no_parentheses, require_parentheses_when_complex
-Style/TernaryParentheses:
-  Exclude:
-    - 'config/initializers/devise.rb'
-    - 'test/controllers/user_controller_test.rb'
-    - 'test/helpers/nokogiri_helper.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyleForMultiline.
-# SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInArrayLiteral:
-  Exclude:
-    - 'app/models/food_nutrient.rb'
+# # Offense count: 1
+# # This cop supports safe autocorrection (--autocorrect).
+# # Configuration parameters: EnforcedStyleForMultiline.
+# # SupportedStylesForMultiline: comma, consistent_comma, no_comma
+# Style/TrailingCommaInArrayLiteral:
+#   Exclude:
+#     - 'app/models/food_nutrient.rb'

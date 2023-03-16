@@ -11,5 +11,5 @@ User.create(
   full_name: 'Dave Taylor',
   password: 'password',
   password_confirmation: 'password',
-  confirmed_at: Time.now,
+  confirmed_at: Time.now.utc,
 )

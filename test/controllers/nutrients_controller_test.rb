@@ -37,7 +37,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
     # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
-    assert_equal(5+3+2*2+1, links_h[:count])
+    assert_equal(5 + 3 + 2 * 2 + 1, links_h[:count])
 
     # get nutrients index listing with only deactivated nutrients
     get '/nutrients?showing_active=deact'
@@ -47,7 +47,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
     # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
-    assert_equal(5+3+1*2+1, links_h[:count])
+    assert_equal(5 + 3 + 1 * 2 + 1, links_h[:count])
 
     # get nutrients index listing with all nutrients
     get '/nutrients?showing_active=all'
@@ -57,7 +57,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
     # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
-    assert_equal(5+3+3*2+1, links_h[:count])
+    assert_equal(5 + 3 + 3 * 2 + 1, links_h[:count])
 
     # make sure that we have the correct links on the all nutrients page
     assert_page_headers(page, links_h)
@@ -65,34 +65,34 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     @nutrients.each do |nut|
       if nut.active == true
         assert_link_has(links_h, {
-          :link_text => "Edit",
-          :link_url => "/nutrients/#{nut.id}/edit",
-          :page_title => "Edit Nutrient Page",
-          :page_subtitle => "for nutrient: #{nut.name}"
+          link_text: "Edit",
+          link_url: "/nutrients/#{nut.id}/edit",
+          page_title: "Edit Nutrient Page",
+          page_subtitle: "for nutrient: #{nut.name}"
         })
         assert_link_has(links_h, {
-          :link_text => "Deactivate",
-          :link_url => "/nutrients/#{nut.id}",
-          :page_title => 'Nutrients Listing',
+          link_text: "Deactivate",
+          link_url: "/nutrients/#{nut.id}",
+          page_title: 'Nutrients Listing',
         })
       else
         assert_link_has(links_h, {
-          :link_text => "Edit",
-          :link_url => "/nutrients/#{nut.id}/edit",
-          :link_has_classes => 'inactiveLink',
+          link_text: "Edit",
+          link_url: "/nutrients/#{nut.id}/edit",
+          link_has_classes: 'inactiveLink',
         })
         assert_link_has(links_h, {
-          :link_text => "Reactivate",
-          :link_url => "/nutrients/#{nut.id}/reactivate",
-          :page_title => 'Nutrients Listing',
+          link_text: "Reactivate",
+          link_url: "/nutrients/#{nut.id}/reactivate",
+          page_title: 'Nutrients Listing',
         })
       end
     end
     assert_link_has(links_h, {
-      :link_text => "New Nutrient",
-      :link_url => "/nutrients/new",
-      :page_title => "New Nutrient Page",
-      :page_subtitle => "New Nutrient Page",
+      link_text: "New Nutrient",
+      link_url: "/nutrients/new",
+      page_title: "New Nutrient Page",
+      page_subtitle: "New Nutrient Page",
     })
 
   end
@@ -150,21 +150,21 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, "Edit Nutrient Page", "Edit Nutrient Page", "for nutrient: #{@nutrient1.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header plus 2 extra ones below
-    assert_equal(5+2, links_h[:count])
+    assert_equal(5 + 2, links_h[:count])
     # make sure that we have the correct links on the page
     @nutrient = @nutrient1.clone # 'assert_page_headers' uses @nutrient to determine if 'Food' Nutrients link should be dim or not.
     assert_page_headers(page, links_h)
 
     assert_link_has(links_h, {
-      :link_text => "New Nutrient",
-      :link_url => "/nutrients/new",
-      :page_title => "New Nutrient Page",
-      :page_subtitle => "New Nutrient Page",
+      link_text: "New Nutrient",
+      link_url: "/nutrients/new",
+      page_title: "New Nutrient Page",
+      page_subtitle: "New Nutrient Page",
     })
     assert_link_has(links_h, {
-      :link_text => "Deactivate this nutrient",
-      :link_url => "/nutrients/#{@nutrient1.id}",
-      :page_title => 'Nutrients Listing',
+      link_text: "Deactivate this nutrient",
+      link_url: "/nutrients/#{@nutrient1.id}",
+      page_title: 'Nutrients Listing',
     })
   end
 
@@ -207,7 +207,6 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_equal(@changed_nutrient.desc, @updated_nutrient.desc)
     assert_equal(@changed_nutrient.usda_ndb_num, @updated_nutrient.usda_ndb_num)
   end
-
 
   test "should deactivate active nutrient" do
     assert_equal(true, @nutrient1.active)

@@ -12,7 +12,7 @@ class LookupTables < ActiveRecord::Migration[7.0]
 
         t.index :lu_table, name: 'ix_lookup_tables_on_lu_table'
         t.index :lu_code, name: 'ix_lookup_tables_on_lu_code'
-        t.index [:lu_table, :lu_code], name: 'ix_lookup_tables_on_lu_table_lu_code', unique: true
+        t.index %i[lu_table lu_code], name: 'ix_lookup_tables_on_lu_table_lu_code', unique: true
       end
     end
   end

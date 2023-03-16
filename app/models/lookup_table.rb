@@ -3,15 +3,23 @@
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
 class LookupTable < ApplicationRecord
-  # has_many :food_usda_food_cat, class_name: :food, foreign_key: :usda_food_cat_lu_id
-  # has_many :food_wweai_food_cat, class_name: :food, foreign_key: :wweia_food_cat_lu_id
-  has_many :usda_cat, class_name: :food, foreign_key: :usda_food_cat_lu_id
-  has_many :wweia_cat, class_name: :food, foreign_key: :wweia_food_cat_lu_id
+
+  has_many :usda_cat,
+    class_name: :food,
+    foreign_key: :usda_food_cat_lu_id,
+    dependent: :restrict_with_error,
+    inverse_of: 'usda_food_cat_lu'
+
+  has_many :wweia_cat,
+    class_name: :food,
+    foreign_key: :wweia_food_cat_lu_id,
+    dependent: :restrict_with_error,
+    inverse_of: 'wweia_food_cat_lu'
 
   scope :active_lookups, -> { where(active: true) }
   scope :deact_lookups, -> { where(active: false) }
 
-  validates_presence_of :lu_table
-  validates_presence_of :lu_code
+  validates :lu_table, presence: true
+  validates :lu_code, presence: true
 
 end

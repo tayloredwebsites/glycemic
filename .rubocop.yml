@@ -33,7 +33,7 @@ Metrics/ClassLength:
 #    - it discourages descriptive variable naming (extremely important aspect of readability);
 #    - it discourages splitting method call parameters being split into multiple lines (helps in readability);
 #  - Discourages keeping things that belong together, together # I don't care if you dislike this english, it is comprehensible, and I am keeping it and this comment on the same line, because it is a consistent thought in one bullet point.  Maybe I might put child bullet points, but then it would take more lines.  set up wrapping on your editor.
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 #########################################################
@@ -91,6 +91,8 @@ Style/RedundantSelf:
   Enabled: false
 Style/TernaryParentheses:
   EnforcedStyle: require_parentheses
+Style/EmptyElse:
+  Enabled: false
 
 #########################################################
 # allow comma in last argument
@@ -98,6 +100,8 @@ Style/TernaryParentheses:
 Style/TrailingCommaInArguments:
   Enabled: false
 Style/TrailingCommaInHashLiteral:
+  Enabled: false
+Style/TrailingCommaInArrayLiteral:
   Enabled: false
 
 #########################################################
@@ -108,8 +112,10 @@ Style/StringLiterals:
   Enabled: false
 
 #########################################################
-# do not force trailing if on single line condition
+# do not force trailing 'if' on single line condition
 Style/IfUnlessModifier:
+  Enabled: false
+Style/GuardClause:
   Enabled: false
 
 #########################################################
@@ -120,4 +126,14 @@ Style/NegatedIf:
 #########################################################
 # do not force .positive? for > 0 (I think it is quite readable)
 Style/NumericPredicate:
+  Enabled: false
+
+#########################################################
+# no space in defining parameters.
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+#########################################################
+# Allow setting to STDOUT, not the current rails $stdout
+Style/GlobalStdStream:
   Enabled: false
