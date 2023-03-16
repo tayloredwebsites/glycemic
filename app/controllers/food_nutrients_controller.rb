@@ -18,7 +18,7 @@ class FoodNutrientsController < ApplicationController
     Rails.logger.debug("*** params: #{params.inspect}")
     @showing_active = params[:showing_active]
     # set_food_nutrient_from_params('', params['food_id'])
-    food_id = params[:food_id].to_integer(0)
+    food_id = params[:food_id].to_i()
     # find food, regardless if it is active or not
     @food = Food.find_by(id: food_id)
     if @food.blank? || @food.id.blank?
@@ -201,8 +201,8 @@ class FoodNutrientsController < ApplicationController
     # Rails.logger.debug("$$$ set_food_nutrient_from_params - food_nutrient_params: #{food_nutrient_params.inspect}")
     Rails.logger.debug("$$$ set_food_nutrient_from_params - id_param: #{id_param.inspect}")
     Rails.logger.debug("$$$ set_food_nutrient_from_params - food_id_param: #{food_id_param.inspect}")
-    id = id_param.to_integer(0)
-    food_id = food_id_param.to_integer(0)
+    id = id_param.to_i()
+    food_id = food_id_param.to_i()
     set_food_nutrient_from_ids(id, food_id)
   end
 

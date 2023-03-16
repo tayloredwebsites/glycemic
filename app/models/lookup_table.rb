@@ -4,17 +4,13 @@
 
 class LookupTable < ApplicationRecord
 
-  has_many :usda_cat,
-    class_name: :food,
-    foreign_key: :usda_food_cat_lu_id,
-    dependent: :restrict_with_error,
-    inverse_of: 'usda_food_cat_lu'
+  # has_many :usda_cat,
+  #   class_name: :food,
+  #   foreign_key: :usda_food_cat_lu_id
 
-  has_many :wweia_cat,
-    class_name: :food,
-    foreign_key: :wweia_food_cat_lu_id,
-    dependent: :restrict_with_error,
-    inverse_of: 'wweia_food_cat_lu'
+  # has_many :wweia_cat,
+  #   class_name: :food,
+  #   foreign_key: :wweia_food_cat_lu_id
 
   scope :active_lookups, -> { where(active: true) }
   scope :deact_lookups, -> { where(active: false) }

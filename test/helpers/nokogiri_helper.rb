@@ -235,8 +235,9 @@ end
 
 # Get the links on page hashes (:by_text, :by_href, and :count) within one parent hash
 def get_links_hashes(noko_page)
-  ret = Hash.new { |h, k| h[k] = Hash.new {} }
-  page_links = noko_page.css('a')
+  ret = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = []} }
+  # only count links in header and main sections, not the footer
+  page_links = noko_page.css('header a', 'section a')
   # ret[:by_text] = page_links.map{|a| [a.text, "#{a['href']}"]}.to_h
   # allow multiple items to be stored for duplicated link text values (hash of arrays)
   page_links.each do |a|

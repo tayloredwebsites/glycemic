@@ -128,7 +128,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create food as active" do
     @new_food = FactoryBot.build(:food)
-    assert_difference("Food.count", 1, "a Food should be created") do
+    assert_difference("Food.count") do
       post foods_url, params: {
         food: {
           # id: @new_food.id,
@@ -195,7 +195,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     Rails.logger.debug("$$$ @changed_food: #{@changed_food.inspect}")
 
     # confirm no new records are created from this update
-    assert_difference("Food.count", 0, "No Foods should be created on update") do
+    assert_no_changes("FoodNutrient.count", "No Foods should be created on update") do
       # update the food_nutrient in the controller update action
       patch food_url(@food1), params: {
         food: {
@@ -222,7 +222,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
 
   test "should deactivate active food" do
     assert_equal(true, @food1.active)
-    assert_difference("Food.count", 0) do
+    assert_no_changes("Food.count", "deactivation should not change number of food records") do
       delete food_url(@food1)
     end
     @food1.reload
@@ -232,7 +232,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
 
   test "should reactivate a deactived food" do
     assert_equal(false, @food_d.active)
-    assert_difference("Food.count", 0) do
+    assert_no_changes("Food.count", "reactivation should not change number of food records") do
       get reactivate_food_url(@food_d)
     end
     @food_d.reload

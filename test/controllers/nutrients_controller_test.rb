@@ -36,6 +36,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
+    # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
     # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
     assert_equal(5 + 3 + 2 * 2 + 1, links_h[:count])
 
@@ -118,7 +119,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create nutrient as active" do
     @new_nutrient = FactoryBot.build(:nutrient)
-    assert_difference("Nutrient.count", 1, "a nutrient should be created") do
+    assert_difference("Nutrient.count") do
       post nutrients_url, params: {
         nutrient: {
           desc: @new_nutrient.desc,
@@ -184,7 +185,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     Rails.logger.debug("$$$ @changed_nutrient: #{@changed_nutrient.inspect}")
 
     # confirm no new records are created from this update
-    assert_difference("Food.count", 0, "No Foods should be created") do
+    assert_no_changes("Nutrient.count", "reactivation should not change number of nutrient records") do
       # update the nutrient_nutrient in the controller update action
       patch nutrient_url(@nutrient1), params: {
         nutrient: {
@@ -210,7 +211,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
 
   test "should deactivate active nutrient" do
     assert_equal(true, @nutrient1.active)
-    assert_difference("Nutrient.count", 0, "Deactivate should not remove any records") do
+    assert_no_changes("Nutrient.count", "reactivation should not change number of nutrient records") do
       delete nutrient_url(@nutrient1)
     end
     @nutrient1.reload
@@ -220,7 +221,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
 
   test "should reactivate a deactived nutrient" do
     assert_equal(false, @nutrient_d.active)
-    assert_difference("Nutrient.count", 0) do
+    assert_no_changes("Nutrient.count", "reactivation should not change number of nutrient records") do
       get reactivate_nutrient_url(@nutrient_d)
     end
     @nutrient_d.reload

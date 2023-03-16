@@ -127,6 +127,9 @@ class HomeControllerTests
 
     setup do
       assert_emails 1 do
+        # NOTE: if you get the error:
+        #   'Missing host to link to! Please provide the :host parameter...'
+        #   then be sure to set your .env file or server environment variables.
         @unconfirmed_user = FactoryBot.create(:unconfirmed_user)
       end
     end

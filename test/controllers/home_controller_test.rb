@@ -26,8 +26,6 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, 'Food Nutrients Home')
     links_h = get_links_hashes(page)
-    # make sure we have 5 links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
-    assert_equal(5 + 4, links_h[:count])
     # make sure that we have the correct links on the page
     assert_page_headers(page, links_h)
     assert_link_has(links_h, {

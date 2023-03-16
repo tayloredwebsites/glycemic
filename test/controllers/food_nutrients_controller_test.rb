@@ -41,6 +41,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
     links_h = get_links_hashes(page)
+    # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
     # make sure we have links for the header, three for the filter, two for each of the two active nutrient, and one at the bottom
     assert_equal(5 + 3 + 2 * 2 + 1, links_h[:count])
 
@@ -148,7 +149,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     @new_food_nutrient = FactoryBot.build(:food_nutrient)
     Rails.logger.debug("*** food id: #{@food.id}")
     Rails.logger.debug("*** nutrient id: #{@nutrient.id}")
-    assert_difference("FoodNutrient.count", 1, "a Food Nutrient should be created") do
+    assert_difference("FoodNutrient.count") do
       post food_nutrients_url, params: {
         food_nutrient: {
           food_id: @food.id,
@@ -213,8 +214,9 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     get edit_food_nutrient_url(@food_nutrient) # "/food_nutrient/#{@food_nutrient.id}/edit"
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
-    assert_at_page(page, "Food Nutrient Edit Page", "for food: #{@food.name}", "and nutrient: #{@food_nutrient.nutrient.name}")
     links_h = get_links_hashes(page)
+    # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
+    assert_at_page(page, "Food Nutrient Edit Page", "for food: #{@food.name}", "and nutrient: #{@food_nutrient.nutrient.name}")
     # make sure we have links for the header, plus 3 at the bottom
     assert_equal(5 + 3, links_h[:count])
     # make sure that we have the correct links on the page
@@ -279,7 +281,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     Rails.logger.debug("$$$ @changed_nutrient: #{@changed_nutrient.inspect}")
 
     # confirm no new records are created from this update
-    assert_difference("FoodNutrient.count", 0, "No Food Nutrients should be created on update") do
+    assert_no_changes("FoodNutrient.count", "No Food Nutrients should be created on update") do
       # update the food_nutrient in the controller update action
       patch food_nutrient_url(@food_nutrient), params: {
         food_nutrient: {
@@ -323,7 +325,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
 
   test "should deactivate food_nutrient" do
     assert_equal(true, @food_nutrient.active)
-    assert_difference("FoodNutrient.count", 0, 'deactivation should not change number of food nutrient records') do
+    assert_no_changes("FoodNutrient.count", 'deactivation should not change number of food nutrient records') do
       delete food_nutrient_url(@food_nutrient)
     end
     @food_nutrient.reload
@@ -333,7 +335,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
 
   test "should reactivate a deactived food_nutrient" do
     assert_equal(false, @food_nutrient_d.active)
-    assert_difference("FoodNutrient.count", 0) do
+    assert_no_changes("FoodNutrient.count", "reactivation should not change number of food nutrient records") do
       get reactivate_food_nutrient_url(@food_nutrient_d)
     end
     @food_nutrient_d.reload
