@@ -41,7 +41,6 @@ class HomeControllerTests
       delete destroy_user_session_path
       assert_redirected_root_to_sign_in()
 
-
     end
 
     test "Unlock user with 'Didn't receive unlock instructions?' link" do
@@ -57,9 +56,10 @@ class HomeControllerTests
       assert_redirected_to_sign_in()
 
       # lock user
-      @user.locked_at = Time.now
+      @user.locked_at = Time.now.utc
       @user.save
       raise "unable to lock user" if @user.errors.count > 0
+
       Rails.logger.debug("after lock - @user.locked_at: #{@user.locked_at}")
       Rails.logger.debug("after lock - @user.unlock_token: #{@user.unlock_token}")
 
@@ -85,21 +85,21 @@ class HomeControllerTests
       Rails.logger.debug("after lock - @user.locked_at: #{@user.locked_at}")
       Rails.logger.debug("after lock - @user.unlock_token: #{@user.unlock_token}")
       Rails.logger.debug("post the unlock token: #{@user.unlock_token}")
-      Rails.logger.debug("@token?: #{defined?(@token) ? @token.inspect : "@token not defined"}")
+      Rails.logger.debug("@token?: #{(defined?(@token)) ? @token.inspect : "@token not defined"}")
 
       assert_emails 1 do
         post "/users/unlock?unlock_token=#{@user.unlock_token}", params: {
-          "user"=>{
-            "email"=>@user.email,
+          "user" => {
+            "email" => @user.email,
           },
-          "commit"=>"Resend unlock instructions"
+          "commit" => "Resend unlock instructions"
         }
       end
       assert_redirected_to_sign_in()
 
       mail = ActionMailer::Base.deliveries.last
       # Rails.logger.debug("mail.body.raw_source: #{defined?(mail.body.raw_source) ? mail.body.raw_source.inspect : "mail not defined"}")
-      mail_message_body_text = defined?(mail.body.raw_source) ? mail.body.raw_source.inspect : ""
+      mail_message_body_text = (defined?(mail.body.raw_source)) ? mail.body.raw_source.inspect : ""
       # Rails.logger.debug("mail_message_body_text: #{mail_message_body_text.inspect}")
       mail_body_html = Nokogiri::HTML.fragment(mail_message_body_text)
       href = mail_body_html.css('a').first.attribute('href').text
@@ -127,6 +127,9 @@ class HomeControllerTests
 
     setup do
       assert_emails 1 do
+        # NOTE: if you get the error:
+        #   'Missing host to link to! Please provide the :host parameter...'
+        #   then be sure to set your .env file or server environment variables.
         @unconfirmed_user = FactoryBot.create(:unconfirmed_user)
       end
     end
@@ -149,10 +152,10 @@ class HomeControllerTests
       assert_equal(2, page.css('input').count)
       assert_emails 1 do
         post '/users/confirmation', params: {
-          "user"=>{
-            "email"=>@unconfirmed_user.email,
+          "user" => {
+            "email" => @unconfirmed_user.email,
           },
-          "commit"=>"Resend confirmation instructions"
+          "commit" => "Resend confirmation instructions"
         }
       end
       assert_redirected_to_sign_in()
@@ -199,12 +202,12 @@ class HomeControllerTests
 
       assert_emails 1 do
         post '/users', params: {
-          "user"=>{
-            "email"=>"test1@sample.org",
-            "password"=>"password",
-            "password_confirmation"=>"password"
+          "user" => {
+            "email" => "test1@sample.org",
+            "password" => "password",
+            "password_confirmation" => "password"
           },
-          "commit"=>"Sign up"
+          "commit" => "Sign up"
         }
       end
       assert_redirected_root_to_sign_in()

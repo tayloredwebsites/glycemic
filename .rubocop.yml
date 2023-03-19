@@ -1,0 +1,139 @@
+inherit_from: .rubocop_todo.yml
+
+require: rubocop-rails
+
+#########################################################
+# I ignore block and method length rules.  My reasonings:
+#  - I would prefer to see block and method length rules as only a reminder to consider refactoring.
+#  - Block and method length rules are incompatible with declarative programming approaches
+#    - we are not outlawing declarative programming, right?
+#  - Block and method length rules cause scattering of code.  Code should be kept together when:
+#    - we want to keep related thoughts together.
+#    - we want to see the program flow right in front of us;
+#    - when it does not need to be refactored
+#      - I recommend never refactoring until you have two or more code blocks to work with;
+#      - the block and method length rules will cause code to be refactored too early.
+#  - If the reason for these rules is for readable and comprehensible code, then set up rules for that instead.
+#  - There are problems when when block and method length rules are combined with line length rules:
+#    - it discourages descriptive variable naming (extremely important aspect of readability);
+#    - it discourages splitting method call parameters being split into multiple lines (helps in readability);
+Metrics/BlockLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+
+#########################################################
+# I ignore line length rules.  My reasonings:
+#  - I would prefer to see line length rules as only a reminder to:
+#    - break comments into single thoughts
+#    - place parameters on separate lines, which could allow for additional comments.
+#  - Line length rules are a problem when combined with block and method length rules, because:
+#    - it discourages descriptive variable naming (extremely important aspect of readability);
+#    - it discourages splitting method call parameters being split into multiple lines (helps in readability);
+#  - Discourages keeping things that belong together, together # I don't care if you dislike this english, it is comprehensible, and I am keeping it and this comment on the same line, because it is a consistent thought in one bullet point.  Maybe I might put child bullet points, but then it would take more lines.  set up wrapping on your editor.
+Layout/LineLength:
+  Enabled: false
+
+#########################################################
+# prevent comments from getting this error
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+#########################################################
+# prevent rubocop from indenting code extremely deeply (making long lines)
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+# Layout/HashAlignment:
+
+
+#########################################################
+# prevent rubocop hiding empty methods that do not have comments yet
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+#########################################################
+# allow any kind of spacing around code for readability
+# sometimes spacing helps separate out lines of code that belong together
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+Layout/EmptyLinesAroundExceptionHandlingKeywords:
+  Enabled: false
+Layout/EmptyLinesAroundMethodBody:
+  Enabled: false
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
+Layout/EmptyLinesAroundAccessModifier:
+  Enabled: false
+Layout/EmptyLinesAroundArguments:
+  Enabled: false
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: false
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: false
+Layout/ExtraSpacing:
+  Enabled: false
+
+#########################################################
+# try to be more explicit in coding
+Style/DefWithParentheses:
+  Enabled: false
+Style/MethodCallWithoutArgsParentheses:
+  Enabled: false
+Style/RedundantReturn:
+  Enabled: false
+Style/HashSyntax:
+  EnforcedShorthandSyntax: never
+Style/RedundantSelf:
+  Enabled: false
+Style/TernaryParentheses:
+  EnforcedStyle: require_parentheses
+Style/EmptyElse:
+  Enabled: false
+
+#########################################################
+# allow comma in last argument
+#   - especially when in separate lines for Version Control change detection)
+Style/TrailingCommaInArguments:
+  Enabled: false
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+#########################################################
+# remove fussiness about double and single quotes
+Style/StringLiteralsInInterpolation:
+  Enabled: false
+Style/StringLiterals:
+  Enabled: false
+
+#########################################################
+# do not force trailing 'if' on single line condition
+Style/IfUnlessModifier:
+  Enabled: false
+Style/GuardClause:
+  Enabled: false
+
+#########################################################
+# do not force the use of 'unless'
+Style/NegatedIf:
+  Enabled: false
+
+#########################################################
+# do not force .positive? for > 0 (I think it is quite readable)
+Style/NumericPredicate:
+  Enabled: false
+
+#########################################################
+# no space in defining parameters.
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+#########################################################
+# Allow setting to STDOUT, not the current rails $stdout
+Style/GlobalStdStream:
+  Enabled: false

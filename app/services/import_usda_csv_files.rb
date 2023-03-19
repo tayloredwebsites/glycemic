@@ -10,8 +10,8 @@ class ImportUsdaCsvFiles
   end
 
   def initialize()
-    @report = Array.new()
-    @errors = Array.new()
+    @report = []
+    @errors = []
   end
 
   def run()
@@ -24,7 +24,7 @@ class ImportUsdaCsvFiles
     import_wweia_categories()
 
     return @report, @errors
-    
+
   end
 
   def import_usda_categories()
@@ -34,14 +34,14 @@ class ImportUsdaCsvFiles
     @report << msg
     start_rec_count = LookupTable.all.count
     # read in usda categories into lookup tables:
-    filename = Rails.root.join('db','csv_uploads','food_category.csv')
+    filename = Rails.root.join('db/csv_uploads/food_category.csv')
     chunk_size = 10
     chunk_num = 0
-    options = {:chunk_size => chunk_size} # {:key_mapping => {:unwanted_row => nil, :old_row_name => :new_name}}
+    options = { chunk_size: chunk_size } # {:key_mapping => {:unwanted_row => nil, :old_row_name => :new_name}}
     n = SmarterCSV.process(filename, options) do |array|
       array.each_with_index do |row, ix|
         Rails.logger.debug("@@@ read line #{row.inspect}")
-        rec_num = chunk_num*chunk_size + ix + 1
+        rec_num = chunk_num * chunk_size + ix + 1
         msg = ''
         matching = LookupTable.where(lu_table: 'usda_cat', lu_code: row[:code])
         if matching.count == 1
@@ -80,7 +80,7 @@ class ImportUsdaCsvFiles
     end
     diff_num_recs = LookupTable.all.count - start_rec_count
     msg = "# imported #{diff_num_recs} new records from USDA Categories"
-    Rails.logger.info("***" + msg)
+    Rails.logger.info("***#{msg}")
     @report << msg
     Rails.logger.error("ERROR: #{@errors.inspect}") if @errors.count > 0
   end
@@ -92,17 +92,17 @@ class ImportUsdaCsvFiles
     @report << msg
     start_rec_count = LookupTable.all.count
     # read in usda categories into lookup tables:
-    filename = Rails.root.join('db','csv_uploads','wweia_food_category.csv')
+    filename = Rails.root.join('db/csv_uploads/wweia_food_category.csv')
     chunk_size = 10
     chunk_num = 0
-    options = {:chunk_size => chunk_size} # {:key_mapping => {:unwanted_row => nil, :old_row_name => :new_name}}
+    options = { chunk_size: chunk_size } # {:key_mapping => {:unwanted_row => nil, :old_row_name => :new_name}}
     n = SmarterCSV.process(filename, options) do |array|
       # we're passing a block in, to process each resulting hash / =row (the block takes array of hashes)
       # when chunking is not enabled, there is only one hash in each array
       # Rails.logger.debug("@@@ read chunk #{array.inspect}")
       array.each_with_index do |row, ix|
         Rails.logger.debug("@@@ read line #{row.inspect}")
-        rec_num = chunk_num*chunk_size + ix + 1
+        rec_num = chunk_num * chunk_size + ix + 1
         msg = ''
         matching = LookupTable.where(lu_table: 'wweia_cat', lu_code: row[:wweia_food_category])
         if matching.count == 1
@@ -139,10 +139,9 @@ class ImportUsdaCsvFiles
     end
     diff_num_recs = LookupTable.all.count - start_rec_count
     msg = "# imported #{diff_num_recs} new records from WWEIA Categories"
-    Rails.logger.info("***" + msg)
+    Rails.logger.info("***#{msg}")
     @report << msg
     Rails.logger.error("ERROR: #{@errors.inspect}") if @errors.count > 0
   end
-
 
 end

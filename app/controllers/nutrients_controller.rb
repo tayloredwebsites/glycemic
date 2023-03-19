@@ -3,7 +3,7 @@
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
 class NutrientsController < ApplicationController
-  before_action :set_nutrient, only: %i[ show edit update destroy reactivate ]
+  before_action :set_nutrient, only: %i[show edit update destroy reactivate]
 
   # GET /nutrients or /nutrients.json
   def index
@@ -97,13 +97,14 @@ class NutrientsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_nutrient
-      @nutrient = Nutrient.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def nutrient_params
-      params.require(:nutrient).permit(:id, :name, :usda_ndb_num, :desc)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_nutrient
+    @nutrient = Nutrient.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def nutrient_params
+    params.require(:nutrient).permit(:id, :name, :usda_ndb_num, :desc)
+  end
 end
