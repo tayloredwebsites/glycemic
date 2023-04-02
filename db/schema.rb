@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_03_12_145809) do
+ActiveRecord::Schema[7.0].define(version: 2023_03_25_141058) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -35,23 +35,20 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_12_145809) do
 
   create_table "foods", force: :cascade do |t|
     t.string "name", default: "", null: false
-    t.text "desc", default: "", null: false
-    t.integer "usda_fdc_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: true, null: false
     t.integer "recipe_id"
     t.boolean "public", default: true, null: false
-    t.string "usda_upc_num", limit: 14, default: "", null: false
-    t.string "usda_food_cat_lu_id", limit: 4, default: "", null: false
-    t.string "wweia_food_cat_lu_id", limit: 4, default: "", null: false
-    t.string "usda_desc", default: "", null: false
-    t.string "usda_data_type", default: "", null: false
-    t.date "usda_pub_date"
+    t.string "unit", limit: 4, default: "", null: false
+    t.text "samples_json", default: "", null: false
+    t.integer "usda_food_cat_id"
+    t.integer "wweia_food_cat_id"
+    t.index ["name"], name: "ix_foods_on_name", unique: true
     t.index ["public"], name: "ix_foods_on_public"
     t.index ["recipe_id"], name: "ix_foods_on_recipe_id", unique: true
-    t.index ["usda_food_cat_lu_id"], name: "ix_foods_on_usda_cat"
-    t.index ["wweia_food_cat_lu_id"], name: "ix_foods_on_wweia_cat"
+    t.index ["usda_food_cat_id"], name: "ix_foods_on_usda_cat"
+    t.index ["wweia_food_cat_id"], name: "ix_foods_on_wweia_cat"
   end
 
   create_table "lookup_tables", force: :cascade do |t|

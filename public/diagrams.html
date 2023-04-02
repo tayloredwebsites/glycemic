@@ -34,7 +34,6 @@
         integer id PK
         string name
         text desc
-        integer usda_fdc_id
         datetime created_at
         datetime updated_at
         boolean active
@@ -44,8 +43,8 @@
         integer usda_food_cat_lu_id FK
         integer wweia_food_cat_lui_id FK
         string usda_desc
-        string usda_data_type
-        date usda_pub_date
+        string unit
+        text samples_json
       }
       lookup_tables ||--o{ foods : has_usda_food_cat
       lookup_tables ||--o{ foods : has_wweia_food_cat
@@ -82,7 +81,7 @@
         integer food_id FK
         integer alt_food_id_null FK
         decimal portion_amount_8_3
-        string portion_unit
+        string xxx_portion_unit
       }
       tests ||--o{ tests_taken : took_this_test
       tests {
@@ -109,20 +108,23 @@
         string rda_unit
         string usda_nutrient_num
         string usda_nutrient_name
+        string unit
       }
       food_nutrients {
         integer id PK
         integer nutrient_id FK
         integer food_id FK
         decimal portion_amount_8_3
-        string portion_unit
-        decimal amount_8_3
-        string amount_unit
+        string xxx_portion_unit
+        decimal median_8_3
+        decimal variance_8_3
+        string xxx_amount_unit
         datetime created_at
         datetime updated_at
         boolean active
         string usda_nutrient_num
-        integer yyy_usda_fdc_id
+        integer xxx_yyy_usda_fdc_id
+        text samples_json
       }
       nutrients ||--o{ food_nutrients : has_amount_of
       users ||--o{ meals : planned_meals
