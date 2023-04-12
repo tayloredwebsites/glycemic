@@ -33,18 +33,20 @@
       foods {
         integer id PK
         string name
-        text desc
         datetime created_at
         datetime updated_at
         boolean active
         integer recipe_id FK
         boolean public
-        string usda_upc_num
+        string unit
+        string samples_json
         integer usda_food_cat_lu_id FK
         integer wweia_food_cat_lui_id FK
-        string usda_desc
-        string unit
-        text samples_json
+        integer storage_type_lu_id FK
+        integer TODO
+        integer brand_lu_id FK
+        integer parent_food_id FK
+        string child_food_ids_json
       }
       lookup_tables ||--o{ foods : has_usda_food_cat
       lookup_tables ||--o{ foods : has_wweia_food_cat
@@ -66,12 +68,12 @@
       }
       foods ||--o{ recipe_items : how_used_in_recipe
       recipes ||--o{ recipe_items : used_in
-      recipe_items {
+      recipe_steps {
         integer id PK
         integer food_id FK
         integer alt_food_id_null FK
-        string sequencer
-        string item_template
+        string sequence
+        string step_template
       }
       meals ||--o{ portions : combine_into
       foods ||--o{ portions : is_portions_of
@@ -105,25 +107,22 @@
         datetime updated_at
         boolean active
         decimal rda_8_3
-        string rda_unit
+        string unit
         string usda_nutrient_num
         string usda_nutrient_name
-        string unit
       }
       food_nutrients {
         integer id PK
         integer nutrient_id FK
         integer food_id FK
-        decimal portion_amount_8_3
-        string xxx_portion_unit
-        decimal median_8_3
-        decimal variance_8_3
-        string xxx_amount_unit
+        float portion
+        float amount
         datetime created_at
         datetime updated_at
         boolean active
         string usda_nutrient_num
-        integer xxx_yyy_usda_fdc_id
+        float median
+        float variance
         text samples_json
       }
       nutrients ||--o{ food_nutrients : has_amount_of

@@ -10,27 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_03_25_141058) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_11_152703) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "food_nutrients", force: :cascade do |t|
     t.integer "nutrient_id"
     t.integer "food_id"
-    t.boolean "study"
-    t.decimal "study_weight", precision: 4, scale: 2
-    t.integer "avg_rec_id"
-    t.decimal "portion", precision: 6, scale: 2
-    t.string "portion_unit"
-    t.decimal "amount", precision: 6, scale: 2
-    t.string "amount_unit"
-    t.text "desc"
+    t.float "portion"
+    t.float "amount"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: true
+    t.string "usda_nutrient_num", limit: 4, default: "", null: false
+    t.float "median"
+    t.float "variance"
+    t.text "samples_json", default: "", null: false
     t.index ["food_id"], name: "index_food_nutrients_on_food_id"
     t.index ["nutrient_id"], name: "index_food_nutrients_on_nutrient_id"
-    t.index ["study"], name: "index_food_nutrients_on_study"
+    t.index ["usda_nutrient_num"], name: "ix_food_nutrients_on_usda_nutrient_num"
   end
 
   create_table "foods", force: :cascade do |t|
