@@ -38,12 +38,11 @@
         boolean active
         integer recipe_id FK
         boolean public
-        string unit
         string samples_json
         integer usda_food_cat_lu_id FK
         integer wweia_food_cat_lui_id FK
-        integer storage_type_lu_id FK
         integer TODO
+        integer storage_type_lu_id FK
         integer brand_lu_id FK
         integer parent_food_id FK
         string child_food_ids_json
@@ -101,15 +100,12 @@
       nutrients {
         integer id PK
         string name
-        integer usda_ndb_num
-        text desc
+        integer usda_nutrient_id
         datetime created_at
         datetime updated_at
         boolean active
-        decimal rda_8_3
-        string unit
-        string usda_nutrient_num
-        string usda_nutrient_name
+        string unit_code
+        float rda
       }
       food_nutrients {
         integer id PK

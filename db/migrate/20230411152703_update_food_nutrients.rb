@@ -18,12 +18,12 @@ class UpdateFoodNutrients < ActiveRecord::Migration[7.0]
     change_column :food_nutrients, :portion, :float
     change_column :food_nutrients, :amount, :float
     
-    add_column :food_nutrients, :usda_nutrient_num, :string, limit: 4, null: false, default: '' unless column_exists? :food_nutrients, :usda_nutrient_num
+    add_column :food_nutrients, :usda_nutrient_id, :integer, null: false unless column_exists? :food_nutrients, :usda_nutrient_id
     add_column :food_nutrients, :median, :float, null: true, default: nil unless column_exists? :food_nutrients, :median
     add_column :food_nutrients, :variance, :float, null: true, default: nil unless column_exists? :food_nutrients, :variance
     add_column :food_nutrients, :samples_json, :text, null: false, default: '' unless column_exists? :food_nutrients, :samples_json
 
-    add_index :food_nutrients, :usda_nutrient_num, name: 'ix_food_nutrients_on_usda_nutrient_num' unless index_exists?(:food_nutrients, :usda_nutrient_num)
+    add_index :food_nutrients, :usda_nutrient_id, name: 'ix_food_nutrients_on_usda_nutrient_id' unless index_exists?(:food_nutrients, :usda_nutrient_id, name: 'ix_food_nutrients_on_usda_nutrient_id')
   end
 
   def down
@@ -37,7 +37,7 @@ class UpdateFoodNutrients < ActiveRecord::Migration[7.0]
     change_column :food_nutrients, :portion, :decimal, precision: 6, scale: 2
     change_column :food_nutrients, :amount, :decimal, precision: 6, scale: 2
     
-    remove_column :food_nutrients, :usda_nutrient_num if column_exists? :food_nutrients, :usda_nutrient_num
+    remove_column :food_nutrients, :usda_nutrient_id if column_exists? :food_nutrients, :usda_nutrient_id
     remove_column :food_nutrients, :median if column_exists? :food_nutrients, :median
     remove_column :food_nutrients, :variance if column_exists? :food_nutrients, :variance
     remove_column :food_nutrients, :samples_json if column_exists? :food_nutrients, :samples_json

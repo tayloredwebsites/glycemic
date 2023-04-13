@@ -10,25 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_11_152703) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "food_nutrients", force: :cascade do |t|
-    t.integer "nutrient_id"
-    t.integer "food_id"
+    t.integer "nutrient_id", null: false
+    t.integer "food_id", null: false
     t.float "portion"
     t.float "amount"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: true
-    t.string "usda_nutrient_num", limit: 4, default: "", null: false
+    t.integer "usda_nutrient_id", null: false
     t.float "median"
     t.float "variance"
     t.text "samples_json", default: "", null: false
     t.index ["food_id"], name: "index_food_nutrients_on_food_id"
     t.index ["nutrient_id"], name: "index_food_nutrients_on_nutrient_id"
-    t.index ["usda_nutrient_num"], name: "ix_food_nutrients_on_usda_nutrient_num"
+    t.index ["usda_nutrient_id"], name: "ix_food_nutrients_on_usda_nutrient_id"
   end
 
   create_table "foods", force: :cascade do |t|
@@ -38,7 +38,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_152703) do
     t.boolean "active", default: true, null: false
     t.integer "recipe_id"
     t.boolean "public", default: true, null: false
-    t.string "unit", limit: 4, default: "", null: false
     t.text "samples_json", default: "", null: false
     t.integer "usda_food_cat_id"
     t.integer "wweia_food_cat_id"
@@ -63,12 +62,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_152703) do
   end
 
   create_table "nutrients", force: :cascade do |t|
-    t.string "name"
-    t.integer "usda_ndb_num"
-    t.text "desc"
+    t.string "name", null: false
+    t.integer "usda_nutrient_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "active", default: true
+    t.boolean "active", default: true, null: false
+    t.string "unit", limit: 4
+    t.string "unit_code", limit: 8, null: false
+    t.float "rda"
+    t.index ["usda_nutrient_id"], name: "ix_nutrients_on_usda_nutrient_id"
   end
 
   create_table "users", force: :cascade do |t|
