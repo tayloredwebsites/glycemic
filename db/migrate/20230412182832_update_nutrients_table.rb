@@ -10,11 +10,15 @@ class UpdateNutrientsTable < ActiveRecord::Migration[7.0]
 
     remove_column :nutrients, :desc if column_exists? :nutrients, :desc
 
+    remove_column :nutrients, :unit if column_exists? :nutrients, :unit
     add_column :nutrients, :unit_code, :string, limit: 8, null: false unless column_exists? :nutrients, :unit_code
     add_column :nutrients, :rda, :float, null: true unless column_exists? :nutrients, :rda
 
-    remove_index :nutrients, :usda_nutrient_num, name: 'ix_nutrients_on_usda_nutrient_num' if index_exists?(:nutrients, :usda_nutrient_num, name: 'ix_nutrients_on_usda_nutrient_num')
-    add_index :nutrients, :usda_nutrient_id, name: 'ix_nutrients_on_usda_nutrient_id' unless index_exists?(:nutrients, :usda_nutrient_id, name: 'ix_nutrients_on_usda_nutrient_id')
+    remove_index :nutrients, :usda_nutrient_num if index_exists?(:nutrients, :usda_nutrient_num)
+    add_index :nutrients, :usda_nutrient_id unless index_exists?(:nutrients, :usda_nutrient_id)
+    # unique index on nutrient name (and unit code to allow a separate entry for nutrients with different units e.g. calories vs kJ)
+    remove_index :nutrients, :name if index_exists?(:nutrients, :name)
+    add_index :nutrients, [:name, :unit_code], unique: true unless index_exists?(:nutrients, [:name, :unit_code])
   end
 
   def down
@@ -26,10 +30,13 @@ class UpdateNutrientsTable < ActiveRecord::Migration[7.0]
 
     add_column :nutrients, :desc, :text unless column_exists? :nutrients, :desc
 
+    add_column :nutrients, :unit unless column_exists? :nutrients, :unit
     remove_column :nutrients, :unit_code if column_exists? :nutrients, :unit_code
     remove_column :nutrients, :rda if column_exists? :nutrients, :rda
 
     # add_index :nutrients, :usda_nutrient_num, name: 'ix_nutrients_on_usda_nutrient_num' unless index_exists?(:nutrients, :usda_nutrient_num, name: 'ix_nutrients_on_usda_nutrient_num')
-    remove_index :nutrients, :usda_nutrient_id, name: 'ix_nutrients_on_usda_nutrient_id' if index_exists?(:nutrients, :usda_nutrient_id, name: 'ix_nutrients_on_usda_nutrient_id')
+    remove_index :nutrients, :usda_nutrient_id if index_exists?(:nutrients, :usda_nutrient_id)
+    add_index :nutrients, :name unless index_exists?(:nutrients, :name)
+    remove_index :nutrients, [:name, :unit_code] if index_exists?(:nutrients, [:name, :unit_code])
   end
 end

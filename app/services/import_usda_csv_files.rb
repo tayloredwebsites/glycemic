@@ -46,6 +46,19 @@ class ImportUsdaCsvFiles
       'fdc_id' => ':samples_json<fdc_id'
     },
   }.with_indifferent_access
+  
+  IDENT_MAP_NUTRIENT = {
+    'clazz' => Nutrient,
+    'map' => {
+      'id' => ':usda_nutrient_id',
+      'name' => ':name',
+      'unit_name' => ':unit_code',
+    },
+    'ident' => {
+      'name' => ':name',
+      'usda_nutrient_id' => ':usda_nutrient_id'
+    },
+  }.with_indifferent_access
 
   def self.perform()
     serv_obj = self.new()
@@ -65,27 +78,33 @@ class ImportUsdaCsvFiles
     #   check to see if record exists by looking for the record based upon its primary specification fields (primary keys).
     #   If not found, add it, otherwise update all fields except the primary specification fields
 
-    import_csv_into_table(
-      'db/csv_uploads/food_category.csv',
-      LookupTable,
-      IDENT_MAP_USDA_LU,
-    #   method(:set_food_category_fields)
-    )
+    # import_csv_into_table(
+    #   'db/csv_uploads/food_category.csv',
+    #   LookupTable,
+    #   IDENT_MAP_USDA_LU,
+    # #   method(:set_food_category_fields)
+    # )
+
+    # import_csv_into_table(
+    #   'db/csv_uploads/wweia_food_category.csv',
+    #   LookupTable,
+    #   IDENT_MAP_WWEIA_LU,
+    # #   method(:set_wweia_category_fields)
+    # )
+
+    # import_csv_into_table(
+    #   'db/csv_uploads/ff_food.csv',
+    #   Food,
+    #   IDENT_MAP_F_FOOD,
+    #   # method(:set_food_fields)
+    # )
 
     import_csv_into_table(
-      'db/csv_uploads/wweia_food_category.csv',
-      LookupTable,
-      IDENT_MAP_WWEIA_LU,
-    #   method(:set_wweia_category_fields)
-    )
-
-    import_csv_into_table(
-      'db/csv_uploads/ff_food.csv',
-      Food,
-      IDENT_MAP_F_FOOD,
+      'db/csv_uploads/nutrient.csv',
+      Nutrient,
+      IDENT_MAP_NUTRIENT,
       # method(:set_food_fields)
     )
-
 
     return @report, @errors
   end
@@ -114,7 +133,7 @@ class ImportUsdaCsvFiles
     @usda_cats_by_id = load_usda_cats_by_usda_id() if ident_h[:lu_table].blank?
     # Rails.logger.debug("### @usda_cats_by_id: #{@usda_cats_by_id.inspect}")
 
-    @report << ''
+    @report << '*** updated mapped_row:'
     msg = "Start of Importing of #{model_clazz} table"
     Rails.logger.debug("*** msg: #{msg}")
     Rails.logger.debug("*** record layout: #{model_clazz.new.inspect}")
@@ -163,17 +182,17 @@ class ImportUsdaCsvFiles
         if errors.count == 0
 
           msg, set_errors = save_rec_if_changed(model_clazz, ident_where, ident_hc, mapped_row, mapping_h)
-          errors.concat(set_errors)
+          errors.concat(set_errors) if set_errors.present? && set_errors.count > 0
           # TODO - confirm that this is all records that need to be updated
         else
           msg = "ERROR on save row.fdc_id:#{row.inspect} - #{errors.join('; ')}"
           errors << msg
           Rails.logger.error("Error: #{msg}")
         end
-        # Rails.logger.debug("### rec: #{rec.inspect}")
+        Rails.logger.debug("###### msg: #{msg.inspect}")
         # Rails.logger.debug("### errors: #{errors.inspect}")
-        @report << msg
-        @errors.append(errors) if errors.count > 0
+        @report << msg if msg.present?
+        @errors.concat(errors) if errors.present? && errors.count > 0
       end
       chunk_num += 1
     end
@@ -205,6 +224,9 @@ class ImportUsdaCsvFiles
       rec = model_clazz.new()
       msg, set_errors = set_fields_and_save(rec, mapped_row, mapping_h)
     end
+    # @report << msg
+    # @errors.append(set_errors) if set_errors.present? && set_errors.count > 0
+    return msg, set_errors
   end
 
   # method to fill in the record from the mapped row and save to the database
@@ -241,7 +263,7 @@ class ImportUsdaCsvFiles
         rec.write_attribute(fld, new_val)
       end
     end
-    if errors_a.count == 0
+    if errors_a.count == 0 && rec.changed?
       rec.save 
       if rec.errors.count > 0
         msg = "Error saving mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}: #{rec.errors.full_messages.join('; ')}"
@@ -249,7 +271,8 @@ class ImportUsdaCsvFiles
         raise "halt"
         errors_a << msg
       else
-        Rails.logger.debug "*** updated mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}"
+        msg = "*** updated mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}"
+        Rails.logger.debug msg
       end
     end
     return msg, errors_a
