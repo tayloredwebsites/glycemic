@@ -11,7 +11,7 @@ class UpdateFoodNutrients < ActiveRecord::Migration[7.0]
     remove_column :food_nutrients, :study if column_exists? :food_nutrients, :study
     remove_column :food_nutrients, :study_weight if column_exists? :food_nutrients, :study_weight
     remove_column :food_nutrients, :avg_rec_id if column_exists? :food_nutrients, :avg_rec_id
-    remove_column :food_nutrients, :portion_unit if column_exists? :food_nutrients, :portion_unit
+    # remove_column :food_nutrients, :portion_unit_code if column_exists? :food_nutrients, :portion_unit_code
     remove_column :food_nutrients, :amount_unit if column_exists? :food_nutrients, :amount_unit
     remove_column :food_nutrients, :desc if column_exists? :food_nutrients, :desc
 
@@ -30,7 +30,7 @@ class UpdateFoodNutrients < ActiveRecord::Migration[7.0]
     add_column :food_nutrients, :study, :boolean unless column_exists? :food_nutrients, :study
     add_column :food_nutrients, :study_weight, :decimal, precision: 4, scale: 2 unless column_exists? :food_nutrients, :study_weight
     add_column :food_nutrients, :avg_rec_id, :integer unless column_exists? :food_nutrients, :avg_rec_id
-    add_column :food_nutrients, :portion_unit, :string, limit: 4 unless column_exists? :food_nutrients, :portion_unit
+    # add_column :food_nutrients, :portion_unit_code, :string, limit: 8 unless column_exists? :food_nutrients, :portion_unit_code
     add_column :food_nutrients, :amount_unit, :string, limit: 4 unless column_exists? :food_nutrients, :amount_unit
     add_column :food_nutrients, :desc, :text unless column_exists? :food_nutrients, :desc
 

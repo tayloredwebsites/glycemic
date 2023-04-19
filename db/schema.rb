@@ -22,6 +22,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: true
+    t.string "portion_unit_code", limit: 8
     t.integer "usda_nutrient_id", null: false
     t.float "median"
     t.float "variance"
@@ -69,6 +70,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
     t.boolean "active", default: true, null: false
     t.string "unit_code", limit: 8, null: false
     t.float "rda"
+    t.integer "use_me_id"
     t.index ["name", "unit_code"], name: "index_nutrients_on_name_and_unit_code", unique: true
     t.index ["usda_nutrient_id"], name: "ix_nutrients_on_usda_nutrient_id"
   end
