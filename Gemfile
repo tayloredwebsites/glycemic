@@ -100,6 +100,9 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  # fix object doesn't support #inspect in IRB
+  gem 'pry-rails', '~> 0.3.9'
 end
 
 group :test do

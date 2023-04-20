@@ -5,6 +5,13 @@
 require 'smarter_csv'
 class ImportUsdaCsvFiles
 
+  REGEX_BETWEEN_BRACKETS = /\[(.*?)\]/m
+  REGEX_BEFORE_BRACKETS = /(.*)\[/m
+  REGEX_AFTER_BRACKETS = /\](.*)/m
+  REGEX_BETWEEN_PAREN = /\((.*?)\)/m
+  REGEX_BEFORE_PAREN = /(.*)\(/m
+  REGEX_AFTER_PAREN = /\)(.*)/m
+
   IDENT_MAP_USDA_LU = {
     'clazz' => LookupTable,
     'map' => {
@@ -35,7 +42,7 @@ class ImportUsdaCsvFiles
   IDENT_MAP_F_FOOD = {
     'clazz' => Food,
     'map' => {
-      'fdc_id' => ':samples_json<fdc_id',
+      'fdc_id' => ':usda_fdc_id',
       'data_type' => ':samples_json<fdc_id<data_type',
       'description' => ':name',
       'food_category_id' => ':usda_food_cat_id',
@@ -60,51 +67,80 @@ class ImportUsdaCsvFiles
     },
   }.with_indifferent_access
 
-  def self.perform()
-    serv_obj = self.new()
-    serv_obj.run()
-  end
+  # IDENT_MAP_FOOD_NUTRIENT = {
+  #   'clazz' => FoodNutrient,
+  #   'map' => {
+  #     'fdc_id' => ':food[usda_fdc_id=fdc_id]>:food_id',
+  #     'nutrient_id' => [':usda_nutrient_id', ':nutrient[usda_nutrient_id]>:nutrient_id'],
+  #     'amount' => 'variance(:amount, :variance, :samples_json)',
+  #   },
+  #   'ident' => {
+  #     'food_id' => ':food_id',
+  #     'nutrient_id' => ':nutrient_id'
+  #   },
+  # }.with_indifferent_access
 
   def initialize()
     @report = []
     @errors = []
   end
 
+  def self.perform1()
+    serv_obj = self.new()
+    serv_obj.run(1)
+  end
+
+  def self.perform2()
+    serv_obj = self.new()
+    serv_obj.run(2)
+  end
+
 
   # method to do all of the uploads of the usda csv files to initialize the database
-  def run()
+  def run(step_num)
 
     # NOTE: all of the uploads should be rerunnable.
     #   check to see if record exists by looking for the record based upon its primary specification fields (primary keys).
     #   If not found, add it, otherwise update all fields except the primary specification fields
 
-    # import_csv_into_table(
-    #   'db/csv_uploads/food_category.csv',
-    #   LookupTable,
-    #   IDENT_MAP_USDA_LU,
-    # #   method(:set_food_category_fields)
-    # )
+    if step_num == 1
+      import_csv_into_table(
+        'db/csv_uploads/food_category.csv',
+        LookupTable,
+        IDENT_MAP_USDA_LU,
+      #   method(:set_food_category_fields)
+      )
 
-    # import_csv_into_table(
-    #   'db/csv_uploads/wweia_food_category.csv',
-    #   LookupTable,
-    #   IDENT_MAP_WWEIA_LU,
-    # #   method(:set_wweia_category_fields)
-    # )
+      import_csv_into_table(
+        'db/csv_uploads/wweia_food_category.csv',
+        LookupTable,
+        IDENT_MAP_WWEIA_LU,
+      #   method(:set_wweia_category_fields)
+      )
 
-    # import_csv_into_table(
-    #   'db/csv_uploads/ff_food.csv',
-    #   Food,
-    #   IDENT_MAP_F_FOOD,
-    #   # method(:set_food_fields)
-    # )
+      import_csv_into_table(
+        'db/csv_uploads/ff_food.csv',
+        Food,
+        IDENT_MAP_F_FOOD,
+        # method(:set_food_fields)
+      )
 
-    import_csv_into_table(
-      'db/csv_uploads/nutrient.csv',
-      Nutrient,
-      IDENT_MAP_NUTRIENT,
-      # method(:set_food_fields)
-    )
+      import_csv_into_table(
+        'db/csv_uploads/nutrient.csv',
+        Nutrient,
+        IDENT_MAP_NUTRIENT,
+        # method(:set_food_fields)
+      )
+    elsif step_num == 2
+      import_csv_into_table(
+        'db/csv_uploads/ff_food_nutrient.csv',
+        FoodNutrient,
+        IDENT_MAP_FOOD_NUTRIENT,
+        # method(:set_food_fields)
+      )
+    else
+      raise "invalid step number"
+    end
 
     return @report, @errors
   end
@@ -320,7 +356,7 @@ class ImportUsdaCsvFiles
       # note no append / json fields allowed here.
       Rails.logger.debug("^^^ row - k: #{k.inspect} v: #{v.inspect}")
       # check if row field is mapped, and if so, use the mapped field name for the where clause
-      action, to_json_fields_a = get_mapping_type(mapping_h, k)
+      action, to_json_fields_a = set_maps_for_row_field(mapping_h, k, row)
       Rails.logger.debug("### get_mapping_type - action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
       Rails.logger.debug("### mapping_h[k]: #{mapping_h[k]}")
       if action == 'set' && mapping_h[k].present?
@@ -374,6 +410,8 @@ class ImportUsdaCsvFiles
     map_v = mapping_h[k]
     if map_v.present?
       # parse out the mapping and return the field(s) to go to
+      if map_v.is_a(Array)
+        Rails.logger.debug("Mapping is an array")
       mv_split = []
       if map_v[0] == ':'
         map_2 = map_v[1..]
@@ -387,6 +425,152 @@ class ImportUsdaCsvFiles
     return action, mv_split
   end
 
+
+  # # method to obtain all mappings for an input row field using the mapping hash
+  # #
+  # # @param - mapping_h = the mapping hash for this upload
+  # # @param - rf = the field from the uploaded row
+  # # @param - row = the uploaded row for finding values for the mapping
+  # # @return - none - updates the @mapped_row instance variable
+  # #    with the mappings for this input row field
+  # def set_maps_for_row_field(mapping_h, rf, row)
+  #   # lookup the mappings for this field
+  #   Rails.logger.debug("### rf: #{rf}, mapping_h[rf]: #{mapping_h[rf]}")
+  #   map_v = mapping_h[rf]
+  #   rf_mappings = []
+  #   if map_v.present?
+  #     # parse out the mapping and return the field(s) to go to
+  #     if map_v.is_a?(Array)
+  #       Rails.logger.debug("### Mapping is an array")
+  #       rf_mappings = map_v
+  #     else
+  #       rf_mappings = [ map_v ]
+  #     end
+  #     # loop through the mappings for this field
+  #     rf_mappings.each do |a_map|
+  #       mv_split = []
+  #       if map_v[0] == ':'
+  #         map_2 = map_v[1..]
+  #         lookup_field_name = map_2[REGEX_BETWEEN_BRACKETS, 1]
+  #         if lookup_field_name.present?
+  #           # we have a field lookup for a value in another table
+  #           # we need to get the model class name before the brackets
+  #           lookup_clazz = map_2[REGEX_BEFORE_BRACKETS, 1].camelize #.constantize
+  #           # we need to set the looked up value into this field
+  #           after_brackets = map_2[REGEX_AFTER_BRACKETS, 1]
+  #           if after_brackets[0..1] == '>:' && after_brackets.length > 2
+  #             # we have the set field name after these characters
+  #             lookup_field_a = lookup_field_name.split('=')
+  #             if lookup_field_a.size == 2
+  #               set_field_name = lookup_field_a[0]
+  #               set_field_match = lookup_field_a[1]
+  #               set_field_match_val = row[set_field_match.to_sym]
+  #             else
+  #               raise "invalid arguments for field name in mapping: #{map_2.inspect}, #{after_brackets_a.inspect}"
+  #             end
+  #           else
+  #             raise "invalid field name in mapping: #{map_2.inspect}, #{afer_brackets.inspect}"
+  #           end
+  #           Rails.logger.debug("### set_maps... set_field_name: #{set_field_name.inspect} = lookup_clazz: #{lookup_clazz.inspect}, lookup_field_name: #{set_field_name} =  #{set_field_match_val}")
+  #           # Lookup the value in the table
+  #           recs = lookup_clazz.constantize.where("#{set_field_name} = ?", set_field_match_val)
+  #           if recs.size == 1
+  #             # we matched the lookup field exactly, lets use it
+  #             rec = recs.first
+  #             Rails.logger.debug("### matched lookup exactly: rec.id: #{rec.id} to go in field #{set_field_name}")
+  #             @mapped_row[set_field_name] = rec.id
+  #           else
+  #             raise "cannot find match for lookup #{recs.size}"
+  #           end
+  #           @mapped_row.inspect
+  #         else
+  #           # we have a mapping to a field in this table
+  #           mv_split = map_2.split('<')
+  #           # # get_ident_for_row functionality for single field set
+  #           # Rails.logger.debug("$$$ row for #{k.inspect} is an identifier, and mapped to #{mapping_h[k]}")
+  #           # row_field = mapping_h[k] # replace the uploaded field to the mapped database field
+  #           # row_field = row_field[1..] if row_field[0] == ':' # ignore any leading : in the mapping definition
+
+  #           # # map_row functionality for single field set
+  #           # Rails.logger.debug("set field: #{to_json_fields_a[0]} to value #{row[fld.to_sym]}")
+  #           # mapped_row[to_json_fields_a[0]] = row[fld.to_sym]
+     
+  #           # # get_ident_for_row functionality for hash
+  #           # Rails.logger.debug("Is an identifier : put in where clause. setting #{k.inspect} #{row_field.inspect} to #{v}")
+  #           # f_type = get_field_type(model_clazz, row_field)
+  #           # case f_type
+  #           # when 'integer', :integer
+  #           #   ident_hc[row_field] = v.to_i
+  #           #   ident_where_a << "#{row_field} = :#{row_field}"
+  #           # when 'string', :string
+  #           #   ident_hc[row_field] = v.to_s
+  #           #   ident_where_a << "#{row_field} = :#{row_field}"
+  #           # else
+  #           #   raise "halt missing field type: #{f_type.inspect}"
+  #           # end
+  
+  #           # # map_row functionality for hash
+  #           # Rails.logger.debug("add to json/hash field: #{key} to #{row[fld.to_sym]}")
+  #           # # mapped_row[key] = row[fld]
+  #           # field_with_json = to_json_fields_a[0]
+  #           # Rails.logger.debug("### field_with_json: #{field_with_json.inspect}")
+  #           # mapped_row[field_with_json] = HashWithIndifferentAccess.new() if mapped_row[field_with_json].nil?
+  #           # Rails.logger.debug("### mapped_row for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
+  #           # json_item_key1 = to_json_fields_a[1]
+  #           # Rails.logger.debug("### json_item_key1.to_sym: #{ json_item_key1.to_sym }")
+  #           # mapped_json_item_key1 = row[json_item_key1.to_sym]
+  #           # Rails.logger.debug("### mapped_json_item_key1: #{ mapped_json_item_key1.inspect }")
+  #           # Rails.logger.debug("map mapped_row[mapped_json_item_key1]: #{mapped_row[field_with_json][mapped_json_item_key1].inspect}")
+  #           # if mapped_row[field_with_json][mapped_json_item_key1].nil?
+  #           #   mapped_row[field_with_json][mapped_json_item_key1] = HashWithIndifferentAccess.new()
+  #           #   Rails.logger.debug("### mapped_row  for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
+  #           # end
+  #           # if to_json_fields_a.length == 2
+  #           #   Rails.logger.debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
+  #           #   mapped_row[field_with_json][mapped_json_item_key1][json_item_key1] = row[fld.to_sym]
+  #           # else
+  #           #   json_item_key2 = to_json_fields_a[2]
+  #           #   Rails.logger.debug("### json_item_key2: #{ json_item_key2.inspect }")
+  #           #   Rails.logger.debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
+  #           #   mapped_row[field_with_json][mapped_json_item_key1][json_item_key2] = row[fld.to_sym]
+  #           # end
+    
+  #         end
+  #       else
+  #         # check if we have text between parenthesis
+  #         in_paren = map_2[REGEX_BETWEEN_PAREN, 1]
+  #         if in_paren.present?
+  #           # custom coded functionality
+  #           Rails.logger.debug("### in parenthesis: #{in_paren.inspect}")
+  #           case map_2[REGEX_BEFORE_PAREN, 1]
+  #           when 'variance'
+  #             # get the field names for the mean, variance, and json array of values
+  #             field_a = map_2[REGEX_BETWEEN_PAREN, 1]
+  #           else
+  #             raise 'invalid functionality in mapping'
+  #           end
+  #         else
+  #           # otherwise we have a constant
+  #           # Rails.logger.debug("$$$ row for #{k.inspect} is not a database identifier field")
+  #           # row_field = k
+
+  #           # # map_row functionality
+  #           # Rails.logger.debug("$$$ CONSTANT set field: #{fld} to value #{val}")
+  #           # mapped_row[fld] = val
+  #           # # rec.write_attribute(to_field, set_field_type(ident_map['clazz'], key, row[fld]))
+  #         end
+  #       end
+  #       Rails.logger.debug("### mv_split: #{mv_split.inspect}")
+  #       raise "we need to finish mapping code"
+  #       action = {0 => 'constant', 1 => 'set', 2 => 'hash', 3 => 'hash'}[mv_split.length]
+  #     end
+  #   else
+  #     action = 'none'
+  #   end
+  #   raise 'Stopping after first set_maps_for_row_field'
+  # end
+
+
   # method to map the uploaded row into the fields that will go into the record
   #
   # @param - ident_map = the identifiers and mapping hash for this upload
@@ -398,13 +582,13 @@ class ImportUsdaCsvFiles
     Rails.logger.debug("*********************************************************")
     Rails.logger.debug "*** row: #{row.inspect}"
 
-    mapped_row = HashWithIndifferentAccess.new()
+    @mapped_row = HashWithIndifferentAccess.new()
     
     # loop through mapping and set the fields
     # do not allow ident (matching) fields to be changed.
     ident_map['map'].each do |fld, val|
       Rails.logger.debug("### mapping: #{fld.inspect} => #{val.inspect}")
-      action, to_json_fields_a = get_mapping_type(ident_map['map'], fld)
+      set_maps_for_row_field(ident_map['map'], fld, row)
       key = fld
       Rails.logger.debug("map_row for #{key} - has action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
       case action

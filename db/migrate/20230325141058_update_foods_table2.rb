@@ -4,7 +4,7 @@ class UpdateFoodsTable2 < ActiveRecord::Migration[7.0]
   def up
     remove_column :foods, :desc if column_exists? :foods, :desc
     remove_column :foods, :usda_pub_date if column_exists? :foods, :usda_pub_date
-    remove_column :foods, :usda_fdc_id if column_exists? :foods, :usda_fdc_id
+    # remove_column :foods, :usda_fdc_id if column_exists? :foods, :usda_fdc_id
     remove_column :foods, :usda_data_type if column_exists? :foods, :usda_data_type
     remove_column :foods, :usda_upc_num if column_exists? :foods, :usda_upc_num
     remove_column :foods, :usda_desc if column_exists? :foods, :usda_desc
@@ -31,10 +31,10 @@ class UpdateFoodsTable2 < ActiveRecord::Migration[7.0]
   def down
     add_column :foods, :desc, :string, default: "", null: false unless column_exists? :foods, :desc
     add_column :foods, :usda_pub_date, :date unless column_exists? :foods, :usda_pub_date
-    add_column :foods, :usda_fdc_id, :integer unless column_exists? :foods, :usda_fdc_id
+    # add_column :foods, :usda_fdc_id, :integer unless column_exists? :foods, :usda_fdc_id
     add_column :foods, :usda_data_type, :string, default: "", null: false unless column_exists? :foods, :usda_data_type
-    add_column :foods, :usda_upc_num unless column_exists? :foods, :usda_upc_num
-    add_column :foods, :usda_desc unless column_exists? :foods, :usda_desc
+    add_column :foods, :usda_upc_num, :string unless column_exists? :foods, :usda_upc_num
+    add_column :foods, :usda_desc, :text unless column_exists? :foods, :usda_desc
     remove_column :foods, :unit if column_exists? :foods, :unit
     remove_column :foods, :samples_json if column_exists? :foods, :samples_json
 

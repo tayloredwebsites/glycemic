@@ -39,6 +39,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
     t.boolean "active", default: true, null: false
     t.integer "recipe_id"
     t.boolean "public", default: true, null: false
+    t.integer "usda_fdc_id"
     t.text "samples_json", default: "", null: false
     t.integer "usda_food_cat_id"
     t.integer "wweia_food_cat_id"

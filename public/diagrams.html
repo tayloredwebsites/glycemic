@@ -38,9 +38,10 @@
         boolean active
         integer recipe_id FK
         boolean public
+        integer usda_fdc_id
         string samples_json
-        integer usda_food_cat_lu_id FK
-        integer wweia_food_cat_lui_id FK
+        integer usda_food_cat_id FK
+        integer wweia_food_cat_id FK
         integer TODO
         integer storage_type_lu_id FK
         integer brand_lu_id FK
@@ -106,6 +107,7 @@
         boolean active
         string unit_code
         float rda
+        integer use_me_id FK
       }
       food_nutrients {
         integer id PK
@@ -116,8 +118,9 @@
         datetime created_at
         datetime updated_at
         boolean active
-        string usda_nutrient_num
-        float median
+        string portion_unit_code
+        integer usda_nutrient_id
+        float xxxmedianxxx
         float variance
         text samples_json
       }

@@ -1,6 +1,7 @@
 namespace :import_usda_csv_files do
-  task perform: :environment do
-    report, errors = ImportUsdaCsvFiles.perform()
+
+  task perform1: :environment do
+    report, errors = ImportUsdaCsvFiles.perform1()
     puts ""
     puts "Import Csv Files Report"
     report.each do |line|
@@ -12,6 +13,7 @@ namespace :import_usda_csv_files do
       puts err_line
     end
   end
+
   task fix_dup_nutrients: :environment do
     puts ""
     puts "point duplicate nutrient records to single active one"
@@ -45,7 +47,20 @@ namespace :import_usda_csv_files do
     else
       raise "Missing kJ Energy record"
     end
-
-
   end
+
+  task perform2: :environment do
+    report, errors = ImportUsdaCsvFiles.perform2()
+    puts ""
+    puts "Import Csv Files Report"
+    report.each do |line|
+      puts line
+    end
+    puts ""
+    puts "Import Csv Files Errors:"
+    errors.each do |err_line|
+      puts err_line
+    end
+  end
+
 end
