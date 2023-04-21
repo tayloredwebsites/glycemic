@@ -40,10 +40,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
     t.integer "recipe_id"
     t.boolean "public", default: true, null: false
     t.integer "usda_fdc_id"
-    t.text "samples_json", default: "", null: false
+    t.text "samples_json", default: ""
     t.integer "usda_food_cat_id"
     t.integer "wweia_food_cat_id"
-    t.index ["name"], name: "ix_foods_on_name", unique: true
+    t.index ["name"], name: "ix_foods_on_name"
     t.index ["public"], name: "ix_foods_on_public"
     t.index ["recipe_id"], name: "ix_foods_on_recipe_id", unique: true
     t.index ["usda_food_cat_id"], name: "ix_foods_on_usda_cat"

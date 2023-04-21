@@ -39,18 +39,21 @@ class ImportUsdaCsvFiles
     },
   }.with_indifferent_access
   
+  # initial load of food items, with all in by their fdc_id, allowing duplicate names
+  # TODO: combine these into unique(ly named) foods
   IDENT_MAP_F_FOOD = {
     'clazz' => Food,
     'map' => {
+      'samples_json' =>  '',
       'fdc_id' => ':usda_fdc_id',
-      'data_type' => ':samples_json<fdc_id<data_type',
+      # 'data_type' => ':samples_json<fdc_id<data_type',
       'description' => ':name',
       'food_category_id' => ':usda_food_cat_id',
-      'publication_date' => ':samples_json<fdc_id<pub_date',
+      # 'publication_date' => ':samples_json<fdc_id<pub_date',
     },
     'ident' => {
-      'name' => ':name',
-      'fdc_id' => ':samples_json<fdc_id'
+      # 'name' => ':name',
+      # 'fdc_id' => ':samples_json<fdc_id'
     },
   }.with_indifferent_access
   
@@ -213,7 +216,10 @@ class ImportUsdaCsvFiles
           end
         end
 
-        errors << "Missing where clause for row: #{mapped_row.inspect}" if ident_hc.length == 0
+        # allow no matching (all records are added)
+        # errors << "Missing where clause for row: #{mapped_row.inspect}" if ident_hc.length == 0
+        # do not allow adding blank
+        errors << "blank name for row: #{row}" if mapped_row[:name].blank?
 
         if errors.count == 0
 
@@ -247,7 +253,12 @@ class ImportUsdaCsvFiles
   #   errors_a: array of error messages to be appended to error report
   def save_rec_if_changed(model_clazz, ident_where, ident_hc, mapped_row, mapping_h)
     # get the matching records from the database
-    matching = model_clazz.where(ident_where, ident_hc)
+    # if no matching criterion, do not look up matching, and always add
+    if ident_hc.length == 0
+      matching = []
+    else
+      matching = model_clazz.where(ident_where, ident_hc)
+    end
 
     if matching.count == 1
       # update the existing record
@@ -356,7 +367,7 @@ class ImportUsdaCsvFiles
       # note no append / json fields allowed here.
       Rails.logger.debug("^^^ row - k: #{k.inspect} v: #{v.inspect}")
       # check if row field is mapped, and if so, use the mapped field name for the where clause
-      action, to_json_fields_a = set_maps_for_row_field(mapping_h, k, row)
+      action, to_json_fields_a = get_mapping_type(mapping_h, k, row)
       Rails.logger.debug("### get_mapping_type - action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
       Rails.logger.debug("### mapping_h[k]: #{mapping_h[k]}")
       if action == 'set' && mapping_h[k].present?
@@ -404,14 +415,12 @@ class ImportUsdaCsvFiles
   #   action: 'set' when a single field is set in the database record
   #   action: 'hash' the hash keys for a json field
   #   mv_split: the single value field, or the json field with its hash keys
-  def get_mapping_type(mapping_h, k)
+  def get_mapping_type(mapping_h, k, row)
     # lookup the mapping for this field
     Rails.logger.debug("### k: #{k}, mapping_h[k]: #{mapping_h[k]}")
     map_v = mapping_h[k]
-    if map_v.present?
+    if !map_v.nil?
       # parse out the mapping and return the field(s) to go to
-      if map_v.is_a(Array)
-        Rails.logger.debug("Mapping is an array")
       mv_split = []
       if map_v[0] == ':'
         map_2 = map_v[1..]
@@ -582,13 +591,13 @@ class ImportUsdaCsvFiles
     Rails.logger.debug("*********************************************************")
     Rails.logger.debug "*** row: #{row.inspect}"
 
-    @mapped_row = HashWithIndifferentAccess.new()
+    @mapped_row = mapped_row = HashWithIndifferentAccess.new()
     
     # loop through mapping and set the fields
     # do not allow ident (matching) fields to be changed.
     ident_map['map'].each do |fld, val|
       Rails.logger.debug("### mapping: #{fld.inspect} => #{val.inspect}")
-      set_maps_for_row_field(ident_map['map'], fld, row)
+      action, to_json_fields_a = get_mapping_type(ident_map['map'], fld, row)
       key = fld
       Rails.logger.debug("map_row for #{key} - has action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
       case action
