@@ -10,42 +10,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_22_165418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "food_nutrients", force: :cascade do |t|
-    t.integer "nutrient_id", null: false
     t.integer "food_id", null: false
-    t.float "portion"
+    t.integer "nutrient_id", null: false
     t.float "amount"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.boolean "active", default: true
-    t.string "portion_unit_code", limit: 8
-    t.integer "usda_nutrient_id", null: false
-    t.float "median"
     t.float "variance"
     t.text "samples_json", default: "", null: false
-    t.index ["food_id"], name: "index_food_nutrients_on_food_id"
-    t.index ["nutrient_id"], name: "index_food_nutrients_on_nutrient_id"
-    t.index ["usda_nutrient_id"], name: "ix_food_nutrients_on_usda_nutrient_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["food_id"], name: "ix_food_nutrients_on_food"
+    t.index ["nutrient_id"], name: "ix_food_nutrients_on_nutrient"
+  end
+
+  create_table "food_portion_grams", force: :cascade do |t|
+    t.integer "food_id", null: false
+    t.string "portion_unit", null: false
+    t.float "portion_grams", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["food_id", "portion_unit"], name: "ix_food_portion_grams_on_food_portion_unit"
   end
 
   create_table "foods", force: :cascade do |t|
     t.string "name", default: "", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "active", default: true, null: false
-    t.integer "recipe_id"
-    t.boolean "public", default: true, null: false
-    t.integer "usda_fdc_id"
-    t.text "samples_json", default: ""
+    t.string "food_portion_unit", default: "G", null: false
+    t.float "food_portion_amount", default: 100.0, null: false
     t.integer "usda_food_cat_id"
     t.integer "wweia_food_cat_id"
-    t.index ["name"], name: "ix_foods_on_name"
-    t.index ["public"], name: "ix_foods_on_public"
-    t.index ["recipe_id"], name: "ix_foods_on_recipe_id", unique: true
+    t.text "usda_fdc_ids_json"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "ix_foods_on_name", unique: true
     t.index ["usda_food_cat_id"], name: "ix_foods_on_usda_cat"
     t.index ["wweia_food_cat_id"], name: "ix_foods_on_wweia_cat"
   end
@@ -66,14 +67,44 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
   create_table "nutrients", force: :cascade do |t|
     t.string "name", null: false
     t.integer "usda_nutrient_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "usda_nutrient_num", limit: 8, null: false
     t.boolean "active", default: true, null: false
     t.string "unit_code", limit: 8, null: false
     t.float "rda"
-    t.integer "use_me_id"
-    t.index ["name", "unit_code"], name: "index_nutrients_on_name_and_unit_code", unique: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "unit_code"], name: "ix_nutrients_on_name_and_unit_code", unique: true
     t.index ["usda_nutrient_id"], name: "ix_nutrients_on_usda_nutrient_id"
+    t.index ["usda_nutrient_num"], name: "ix_nutrients_on_usda_nutrient_num"
+  end
+
+  create_table "usda_food_nutrients", force: :cascade do |t|
+    t.integer "usda_food_id", null: false
+    t.integer "nutrient_id", null: false
+    t.integer "usda_nutrient_id"
+    t.integer "usda_nutrient_num"
+    t.float "amount"
+    t.integer "data_points"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["nutrient_id"], name: "ix_usda_food_nutrients_on_nutrient"
+    t.index ["usda_food_id"], name: "ix_usda_food_nutrients_on_food"
+    t.index ["usda_nutrient_id"], name: "ix_usda_food_nutrients_on_usda_nutrient"
+    t.index ["usda_nutrient_num"], name: "ix_usda_food_nutrients_on_usda_nutrient_num"
+  end
+
+  create_table "usda_foods", force: :cascade do |t|
+    t.string "name", default: "", null: false
+    t.integer "usda_fdc_id"
+    t.integer "usda_food_cat_id"
+    t.integer "wweia_food_cat_id"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "ix_usda_foods_on_name"
+    t.index ["usda_food_cat_id"], name: "ix_usda_foods_on_usda_cat"
+    t.index ["wweia_food_cat_id"], name: "ix_usda_foods_on_wweia_cat"
   end
 
   create_table "users", force: :cascade do |t|
@@ -91,9 +122,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_13_184349) do
     t.integer "failed_attempts", default: 0, null: false
     t.string "unlock_token"
     t.datetime "locked_at"
+    t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "active", default: true
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

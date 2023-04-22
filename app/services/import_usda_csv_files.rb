@@ -22,7 +22,7 @@ class ImportUsdaCsvFiles
     },
     'ident' => {
       'lu_table' => ':lu_table',
-      'lu_code' => ':lu_code'
+      'lu_code' => ':lu_code',
     },
   }.with_indifferent_access
 
@@ -35,42 +35,43 @@ class ImportUsdaCsvFiles
     },
     'ident' => {
       'lu_table' => ':lu_table',
-      'lu_code' => ':lu_code'
+      'lu_code' => ':lu_code',
     },
   }.with_indifferent_access
-  
-  # initial load of food items, with all in by their fdc_id, allowing duplicate names
-  # TODO: combine these into unique(ly named) foods
-  IDENT_MAP_F_FOOD = {
-    'clazz' => Food,
-    'map' => {
-      'samples_json' =>  '',
-      'fdc_id' => ':usda_fdc_id',
-      # 'data_type' => ':samples_json<fdc_id<data_type',
-      'description' => ':name',
-      'food_category_id' => ':usda_food_cat_id',
-      # 'publication_date' => ':samples_json<fdc_id<pub_date',
-    },
-    'ident' => {
-      # 'name' => ':name',
-      # 'fdc_id' => ':samples_json<fdc_id'
-    },
-  }.with_indifferent_access
-  
+
   IDENT_MAP_NUTRIENT = {
     'clazz' => Nutrient,
     'map' => {
       'id' => ':usda_nutrient_id',
       'name' => ':name',
       'unit_name' => ':unit_code',
+      'nutrient_nbr' => ':usda_nutrient_num',
     },
     'ident' => {
       'name' => ':name',
-      'usda_nutrient_id' => ':usda_nutrient_id'
+      'usda_nutrient_id' => ':usda_nutrient_id',
     },
   }.with_indifferent_access
 
-  # IDENT_MAP_FOOD_NUTRIENT = {
+  # # initial load of food items, with all in by their fdc_id, allowing duplicate names
+  # # TODO: combine these into unique(ly named) foods
+  # IDENT_MAP_F_USDA_FOOD = {
+  #   'clazz' => UsdaFood,
+  #   'map' => {
+  #     'samples_json' =>  '',
+  #     'fdc_id' => ':usda_fdc_id',
+  #     # 'data_type' => ':samples_json<fdc_id<data_type',
+  #     'description' => ':name',
+  #     'food_category_id' => ':usda_food_cat_id',
+  #     # 'publication_date' => ':samples_json<fdc_id<pub_date',
+  #   },
+  #   'ident' => {
+  #     # 'name' => ':name',
+  #     # 'fdc_id' => ':samples_json<fdc_id',
+  #   },
+  # }.with_indifferent_access
+  
+  # IDENT_MAP_USDA_FOOD_NUTRIENT = {
   #   'clazz' => FoodNutrient,
   #   'map' => {
   #     'fdc_id' => ':food[usda_fdc_id=fdc_id]>:food_id',
@@ -79,7 +80,7 @@ class ImportUsdaCsvFiles
   #   },
   #   'ident' => {
   #     'food_id' => ':food_id',
-  #     'nutrient_id' => ':nutrient_id'
+  #     'nutrient_id' => ':nutrient_id',
   #   },
   # }.with_indifferent_access
 
@@ -120,14 +121,6 @@ class ImportUsdaCsvFiles
         IDENT_MAP_WWEIA_LU,
       #   method(:set_wweia_category_fields)
       )
-
-      import_csv_into_table(
-        'db/csv_uploads/ff_food.csv',
-        Food,
-        IDENT_MAP_F_FOOD,
-        # method(:set_food_fields)
-      )
-
       import_csv_into_table(
         'db/csv_uploads/nutrient.csv',
         Nutrient,
@@ -135,6 +128,18 @@ class ImportUsdaCsvFiles
         # method(:set_food_fields)
       )
     elsif step_num == 2
+      import_csv_into_table(
+        'db/csv_uploads/ff_food.csv',
+        Food,
+        IDENT_MAP_F_FOOD,
+        # method(:set_food_fields)
+      )
+      import_csv_into_table(
+        'db/csv_uploads/nutrient.csv',
+        Nutrient,
+        IDENT_MAP_NUTRIENT,
+        # method(:set_food_fields)
+      )
       import_csv_into_table(
         'db/csv_uploads/ff_food_nutrient.csv',
         FoodNutrient,
@@ -218,8 +223,8 @@ class ImportUsdaCsvFiles
 
         # allow no matching (all records are added)
         # errors << "Missing where clause for row: #{mapped_row.inspect}" if ident_hc.length == 0
-        # do not allow adding blank
-        errors << "blank name for row: #{row}" if mapped_row[:name].blank?
+        # # TODO: do not allow adding blank foods or usda_foods
+        # errors << "blank name for row: #{row}" if mapped_row[:name].blank?
 
         if errors.count == 0
 
