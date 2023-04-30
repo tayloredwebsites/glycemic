@@ -116,8 +116,6 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 -Run the following rake tasks
 
       bin/rails import_usda_csv_files::perform1
-      bin/rails import_usda_csv_files::fix_dup_nutrients
-      bin/rails import_usda_csv_files::perform1
 
    
 #### Jira
