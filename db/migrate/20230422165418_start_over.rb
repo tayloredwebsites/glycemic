@@ -15,22 +15,20 @@ class StartOver < ActiveRecord::Migration[7.0]
       t.index ['wweia_food_cat_id'], name: 'ix_foods_on_wweia_cat'
     end
 
-    create_table 'usda_foods', force: :cascade do |t|
-      t.string 'name', default: '', null: false
-      t.integer 'usda_fdc_id'
+    create_table 'ff_foods', force: :cascade do |t|
+      t.string 'name', default: '', null: true
+      t.integer 'fdc_id'
       t.integer 'usda_food_cat_id'
       t.integer 'wweia_food_cat_id'
       t.boolean 'active', default: true, null: false
       t.timestamps null: false
-      t.index ['name'], name: 'ix_usda_foods_on_name'
-      t.index ['usda_food_cat_id'], name: 'ix_usda_foods_on_usda_cat'
-      t.index ['wweia_food_cat_id'], name: 'ix_usda_foods_on_wweia_cat'
     end
 
     create_table 'nutrients', force: :cascade do |t|
       t.string 'name', null: false
       t.integer 'usda_nutrient_id', null: false
       t.string 'usda_nutrient_num', limit: 8, null: false
+      t.integer 'use_this_id', null: true
       t.boolean 'active', default: true, null: false
       t.string 'unit_code', limit: 8, null: false
       t.float 'rda'
@@ -52,19 +50,19 @@ class StartOver < ActiveRecord::Migration[7.0]
       t.index ['nutrient_id'], name: 'ix_food_nutrients_on_nutrient'
     end
   
-    create_table 'usda_food_nutrients', force: :cascade do |t|
-      t.integer 'usda_food_id', null: false
-      t.integer 'nutrient_id', null: false
-      t.integer 'usda_nutrient_id'
+    create_table 'ff_food_nutrients', force: :cascade do |t|
+      t.integer 'fdc_id', null: false
+      t.integer 'nutrient_id'
+      t.integer 'usda_nutrient_id', null: false
       t.integer 'usda_nutrient_num'
       t.float 'amount'
       t.integer 'data_points'
       t.boolean 'active', default: true
       t.timestamps null: false
-      t.index ['usda_food_id'], name: 'ix_usda_food_nutrients_on_food'
-      t.index ['nutrient_id'], name: 'ix_usda_food_nutrients_on_nutrient'
-      t.index ['usda_nutrient_id'], name: 'ix_usda_food_nutrients_on_usda_nutrient'
-      t.index ['usda_nutrient_num'], name: 'ix_usda_food_nutrients_on_usda_nutrient_num'
+      t.index ['fdc_id'], name: 'ix_ff_food_nutrients_on_fdc_id'
+      t.index ['nutrient_id'], name: 'ix_ff_food_nutrients_on_nutrient'
+      t.index ['usda_nutrient_id'], name: 'ix_ff_food_nutrients_on_usda_nutrient'
+      t.index ['usda_nutrient_num'], name: 'ix_ff_food_nutrients_on_usda_nutrient_num'
     end
   
     create_table 'food_portion_grams', force: :cascade do |t|

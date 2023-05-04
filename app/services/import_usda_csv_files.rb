@@ -53,103 +53,103 @@ class ImportUsdaCsvFiles
     },
   }.with_indifferent_access
 
-  # # initial load of food items, with all in by their fdc_id, allowing duplicate names
-  # # TODO: combine these into unique(ly named) foods
-  # IDENT_MAP_F_USDA_FOOD = {
-  #   'clazz' => UsdaFood,
-  #   'map' => {
-  #     'samples_json' =>  '',
-  #     'fdc_id' => ':usda_fdc_id',
-  #     # 'data_type' => ':samples_json<fdc_id<data_type',
-  #     'description' => ':name',
-  #     'food_category_id' => ':usda_food_cat_id',
-  #     # 'publication_date' => ':samples_json<fdc_id<pub_date',
-  #   },
-  #   'ident' => {
-  #     # 'name' => ':name',
-  #     # 'fdc_id' => ':samples_json<fdc_id',
-  #   },
-  # }.with_indifferent_access
+  # initial load of usda foundation food items into a separate USDA file
+  # - with all in by their fdc_id, allowing duplicate names
+  # upload file layout
+  # "fdc_id","data_type","description","food_category_id","publication_date"
+  # "319874","sample_food","HUMMUS, SABRA CLASSIC","16","2019-04-01"
+  IDENT_MAP_FF_FOOD = {
+    'clazz' => FfFood,
+    'map' => {
+      'fdc_id' => ':fdc_id',
+      'description' => ':name',
+      'food_category_id' => ':usda_food_cat_id',
+    },
+    'ident' => {
+      'fdc_id' => ':fdc_id' # records are unique by fdc_id, so this allows reruns
+    }, 
+  }.with_indifferent_access
   
-  # IDENT_MAP_USDA_FOOD_NUTRIENT = {
-  #   'clazz' => FoodNutrient,
-  #   'map' => {
-  #     'fdc_id' => ':food[usda_fdc_id=fdc_id]>:food_id',
-  #     'nutrient_id' => [':usda_nutrient_id', ':nutrient[usda_nutrient_id]>:nutrient_id'],
-  #     'amount' => 'variance(:amount, :variance, :samples_json)',
-  #   },
-  #   'ident' => {
-  #     'food_id' => ':food_id',
-  #     'nutrient_id' => ':nutrient_id',
-  #   },
-  # }.with_indifferent_access
+  # initial load of usda foundation food nutrient items into a separate USDA file
+  # 
+
+  # "id","fdc_id","nutrient_id","amount","data_points","derivation_id","min","max","median","footnote","min_year_acqured"
+  # "2201847","319877","1051","56.3","1","1","","","","",""
+
+  # t.integer "fdc_id", null: false
+  # t.integer "nutrient_id", null: false
+  # t.integer "usda_nutrient_id"
+  # t.integer "usda_nutrient_num"
+  # t.float "amount"
+  # t.integer "data_points"
+  # t.boolean "active", default: true
+
+  IDENT_MAP_FF_FOOD_NUTRIENT = {
+    'clazz' => FfFoodNutrient,
+    'map' => {
+      'fdc_id' => ':fdc_id',
+      'nutrient_id' => ':usda_nutrient_id',
+      'amount' => ':amount',
+      'data_points' => ':data_points',
+    },
+    'ident' => {
+
+    },
+  }.with_indifferent_access
 
   def initialize()
     @report = []
     @errors = []
   end
 
-  def self.perform1()
+  def self.perform(step_num)
     serv_obj = self.new()
-    serv_obj.run(1)
+    serv_obj.run(step_num)
   end
-
-  def self.perform2()
-    serv_obj = self.new()
-    serv_obj.run(2)
-  end
-
 
   # method to do all of the uploads of the usda csv files to initialize the database
   def run(step_num)
 
+    # TODO: accept step_num as a Range (e.g. 1..5), and call the steps specified in the range
+    #  - refactor to pull case statement out of this method
+
     # NOTE: all of the uploads should be rerunnable.
     #   check to see if record exists by looking for the record based upon its primary specification fields (primary keys).
     #   If not found, add it, otherwise update all fields except the primary specification fields
-
-    if step_num == 1
+    case step_num
+    when 1
       import_csv_into_table(
         'db/csv_uploads/food_category.csv',
         LookupTable,
         IDENT_MAP_USDA_LU,
-      #   method(:set_food_category_fields)
       )
-
       import_csv_into_table(
         'db/csv_uploads/wweia_food_category.csv',
         LookupTable,
         IDENT_MAP_WWEIA_LU,
-      #   method(:set_wweia_category_fields)
       )
       import_csv_into_table(
         'db/csv_uploads/nutrient.csv',
         Nutrient,
         IDENT_MAP_NUTRIENT,
-        # method(:set_food_fields)
       )
-    elsif step_num == 2
+    when 2
+      fix_dup_nutrition_records()
+    when 3
       import_csv_into_table(
         'db/csv_uploads/ff_food.csv',
-        Food,
-        IDENT_MAP_F_FOOD,
-        # method(:set_food_fields)
+        FfFood,
+        IDENT_MAP_FF_FOOD,
       )
-      import_csv_into_table(
-        'db/csv_uploads/nutrient.csv',
-        Nutrient,
-        IDENT_MAP_NUTRIENT,
-        # method(:set_food_fields)
-      )
+    when 4
       import_csv_into_table(
         'db/csv_uploads/ff_food_nutrient.csv',
-        FoodNutrient,
-        IDENT_MAP_FOOD_NUTRIENT,
-        # method(:set_food_fields)
+        FfFoodNutrient,
+        IDENT_MAP_FF_FOOD_NUTRIENT,
       )
     else
       raise "invalid step number"
     end
-
     return @report, @errors
   end
 
@@ -158,7 +158,7 @@ class ImportUsdaCsvFiles
   # @param filename is the csv file to be uploaded (including path from rails root)
   # @param model_clazz - the Model that the the fields are to be added/updated
   # @param ident - hash of: mapping from rec to row; ident to find matching record in database
-  # @param set_fields is the callback method to properly update the model fields from the csv fields
+  # deprecated @param set_fields is the callback method to properly update the model fields from the csv fields
   # @return - none
   # @example
   #   see run() method for examples
@@ -232,7 +232,7 @@ class ImportUsdaCsvFiles
           errors.concat(set_errors) if set_errors.present? && set_errors.count > 0
           # TODO - confirm that this is all records that need to be updated
         else
-          msg = "ERROR on save row.fdc_id:#{row.inspect} - #{errors.join('; ')}"
+          msg = "ERROR on save: row - errors:#{row.inspect} - #{errors.join('; ')}"
           errors << msg
           Rails.logger.error("Error: #{msg}")
         end
@@ -251,6 +251,41 @@ class ImportUsdaCsvFiles
     # Rails.logger.debug("### @report: #{@report.inspect}")
   end
 
+  def fix_dup_nutrition_records()
+    Rails.logger.debug ""
+    Rails.logger.debug "point duplicate nutrient records to single active one"
+    Rails.logger.debug "see dups in console using 'Nutrient.select(:name, :unit_code).group_by(&:name)'"
+    n1a = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'MG')
+    if n1a.present?
+      n1b = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'G')
+      if n1b.present?
+        Rails.logger.debug "setting G Oligosaccharides record id: #{n1b.id} to point to  #{n1a.id}"
+        n1b.active = false
+        n1b.use_this_id = n1a.id
+        n1b.save
+      else
+        raise "Missing G Oligosaccharides record"
+      end
+    else
+      raise "Missing MG Oligosaccharides record"
+    end
+
+    n2a = Nutrient.find_by(name: "Energy", unit_code: 'kJ')
+    if n2a.present?
+      n2b = Nutrient.find_by(name: "Energy", unit_code: 'KCAL')
+      if n2b.present?
+        Rails.logger.debug "setting KCAL Energy record id: #{n2b.id} to point to  #{n2a.id}"
+        n2b.active = false
+        n2b.use_this_id = n2a.id
+        n2b.save
+      else
+        raise "Missing KCAL Energy record"
+      end
+    else
+      raise "Missing kJ Energy record"
+    end
+  end
+  
   # method to find the matching record in the database, and update it (or create anew)
   #   calls set fields to do the update
   # @return - [ msg, errors_a]
@@ -318,7 +353,7 @@ class ImportUsdaCsvFiles
     if errors_a.count == 0 && rec.changed?
       rec.save 
       if rec.errors.count > 0
-        msg = "Error saving mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}: #{rec.errors.full_messages.join('; ')}"
+        msg = "Error saving mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}: #{rec.errors.full_messages.join('; ')}, #{rec.inspect}"
         Rails.logger.error("ERROR: #{msg}")
         raise "halt"
         errors_a << msg
