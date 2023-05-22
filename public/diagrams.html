@@ -21,112 +21,66 @@
     <div class="header">Copyright (C) 2023 tayloredwebsites.com. Freely shared and licensed under <a href="https://opensource.org/license/agpl-v3/" target="_blank">AGPL-3.0-only</a></div>
     <pre class="mermaid">
       erDiagram
-      meals {
+      food_nutrients {
         integer id PK
-        integer user_id FK
-        string name
-        integer base_recipe_id_null
+        integer food_id
+        integer nutrient_id
+        float amount
         boolean active
-        boolean public
+        float variance
+        text samples_json
+        float portion
       }
-      foods ||--o{ food_nutrients : contains
+
+      food_portion_grams {
+        integer food_id
+        string portion_unit
+        float portion_grams
+      }
+
       foods {
         integer id PK
         string name
-        datetime created_at
-        datetime updated_at
+        string food_portion_unit
+        float food_portion_amount
+        integer usda_food_cat_id
+        integer wweia_food_cat_id
+        text usda_fdc_ids_json
         boolean active
-        integer recipe_id FK
-        boolean public
-        integer usda_fdc_id
-        string samples_json
-        integer usda_food_cat_id FK
-        integer wweia_food_cat_id FK
         integer TODO
+        integer alt_name_for_id FK
+        boolean has_components
         integer storage_type_lu_id FK
         integer brand_lu_id FK
-        integer parent_food_id FK
-        string child_food_ids_json
+      }
+      foods ||--o{ food_nutrients : contains
+      foods ||--o{ food_components_xx : used_in
+      foods ||--o{ food_eaten_xx: food_was_eaten_at
+
+      lookup_tables {
+        integer id PK
+        string lu_table
+        integer lu_id
+        string lu_code
+        text lu_desc
+        boolean active
       }
       lookup_tables ||--o{ foods : has_usda_food_cat
       lookup_tables ||--o{ foods : has_wweia_food_cat
-        lookup_tables {
-        integer id PK
-        string lu_table
-        integer id
-        string code
-        string desc
-      }
-      recipes ||--o{ foods : makes
-      recipes {
-        integer id PK
-        integer user_id FK
-        string recipe_name
-        integer base_recipe_id_null
-        string recipe_display_template
-        boolean public
-      }
-      foods ||--o{ recipe_items : how_used_in_recipe
-      recipes ||--o{ recipe_items : used_in
-      recipe_steps {
-        integer id PK
-        integer food_id FK
-        integer alt_food_id_null FK
-        string sequence
-        string step_template
-      }
-      meals ||--o{ portions : combine_into
-      foods ||--o{ portions : is_portions_of
-      portions {
-        integer id PK
-        integer meal_id FK
-        integer food_id FK
-        integer alt_food_id_null FK
-        decimal portion_amount_8_3
-        string xxx_portion_unit
-      }
-      tests ||--o{ tests_taken : took_this_test
-      tests {
-        integer id PK
-        string name
-        string description
-      }
-      users ||--o{ tests_taken : user_took_test
-      tests_taken {
-        integer id PK
-        integer user_id FK
-        integer test_id FK
-        datetime when_taken
-      }
+
       nutrients {
         integer id PK
         string name
         integer usda_nutrient_id
-        datetime created_at
-        datetime updated_at
+        string usda_nutrient_num
+        integer use_this_id
         boolean active
         string unit_code
         float rda
-        integer use_me_id FK
-      }
-      food_nutrients {
-        integer id PK
-        integer nutrient_id FK
-        integer food_id FK
-        float portion
-        float amount
-        datetime created_at
-        datetime updated_at
-        boolean active
-        string portion_unit_code
-        integer usda_nutrient_id
-        float xxxmedianxxx
-        float variance
-        text samples_json
       }
       nutrients ||--o{ food_nutrients : has_amount_of
-      users ||--o{ meals : planned_meals
-      users ||--o{ recipes : has_recipe
+      nutrients ||--o{ usda_food_nutrients : has_amount_of
+
       users {
         string email
         string username
@@ -146,13 +100,80 @@
         datetime updated_at    
         boolean active
       }
-      users ||--o{ meals_eaten : ate
-      meals_eaten {
+      users ||--o{ tests_taken_xx : user_took_test
+      users ||--o{ food_eaten_xx : user_ate
+
+      usda_foods {
+        integer id PK
+        string name
+        integer fdc_id
+        integer usda_food_cat_id FK
+        integer wweia_food_cat_id FK
+        boolean active
+      }
+      usda_foods ||--o{ usda_food_nutrients : has_nutrients
+      usda_foods ||--o{ foods : matches_name
+
+      usda_food_nutrients {
+        integer id PK
+        integer fdc_id FK
+        integer nutrient_id FK
+        integer usda_nutrient_id
+        integer usda_nutrient_num
+        float amount
+        integer data_points
+        boolean active
+      }
+      usda_food_nutrients ||--o{ nutrients : matches_nutrient
+      usda_food_nutrients ||--o{ food_nutrients : matches_food_and_nutrient
+  
+      goals_xx {
+        integer id PK
+        goal_name string
+        text goal_description
+        string good_ranges
+        string ok_ranges
+        string caution_ranges
+      }
+      goals_xx ||--o{ goal_nutrients_xx : calculated_by
+
+      goal_nutrients_xx {
+        integer id PK
+        integer nutrient_id
+        string nutrient_goal_factoring
+      }
+
+      food_components_xx {
+        integer id PK
+        integer food_id FK
+        float portion_amount
+        string sequence
+        string step_template
+      }
+      food_components_xx ||--o{ foods : is_made_from
+
+      tests_xx {
+        integer id PK
+        string name
+        string description
+      }
+      tests_xx ||--o{ tests_taken_xx : took_this_test
+
+      tests_taken_xx {
         integer id PK
         integer user_id FK
-        integer meal_id FK
+        integer test_id FK
+        datetime when_taken
+      }
+      
+      food_eaten_xx {
+        integer id PK
+        integer user_id FK
+        integer food_id FK
+        float portion_amount
         datetime when_eaten
       }
+  
         
     </pre>
     <script type="module">

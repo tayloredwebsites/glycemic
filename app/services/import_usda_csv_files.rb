@@ -58,15 +58,17 @@ class ImportUsdaCsvFiles
   # upload file layout
   # "fdc_id","data_type","description","food_category_id","publication_date"
   # "319874","sample_food","HUMMUS, SABRA CLASSIC","16","2019-04-01"
-  IDENT_MAP_FF_FOOD = {
-    'clazz' => FfFood,
+  IDENT_MAP_USDA_FOOD = {
+    'clazz' => UsdaFood,
     'map' => {
       'fdc_id' => ':fdc_id',
+      'data_type' => ':usda_data_type',
       'description' => ':name',
       'food_category_id' => ':usda_food_cat_id',
     },
     'ident' => {
-      'fdc_id' => ':fdc_id' # records are unique by fdc_id, so this allows reruns
+      'fdc_id' => ':fdc_id', # records are unique by fdc_id, so this allows reruns
+      'usda_data_type' => ':usda_data_type', # hopefully these are not identifiers, but just in case
     }, 
   }.with_indifferent_access
   
@@ -84,8 +86,8 @@ class ImportUsdaCsvFiles
   # t.integer "data_points"
   # t.boolean "active", default: true
 
-  IDENT_MAP_FF_FOOD_NUTRIENT = {
-    'clazz' => FfFoodNutrient,
+  IDENT_MAP_USDA_FOOD_NUTRIENT = {
+    'clazz' => UsdaFoodNutrient,
     'map' => {
       'fdc_id' => ':fdc_id',
       'nutrient_id' => ':usda_nutrient_id',
@@ -93,7 +95,8 @@ class ImportUsdaCsvFiles
       'data_points' => ':data_points',
     },
     'ident' => {
-
+      'fdc_id' => ':fdc_id',
+      'nutrient_id' => ':usda_nutrient_id',
     },
   }.with_indifferent_access
 
@@ -138,14 +141,14 @@ class ImportUsdaCsvFiles
     when 3
       import_csv_into_table(
         'db/csv_uploads/ff_food.csv',
-        FfFood,
-        IDENT_MAP_FF_FOOD,
+        UsdaFood,
+        IDENT_MAP_USDA_FOOD,
       )
     when 4
       import_csv_into_table(
         'db/csv_uploads/ff_food_nutrient.csv',
-        FfFoodNutrient,
-        IDENT_MAP_FF_FOOD_NUTRIENT,
+        UsdaFoodNutrient,
+        IDENT_MAP_USDA_FOOD_NUTRIENT,
       )
     else
       raise "invalid step number"
@@ -285,6 +288,46 @@ class ImportUsdaCsvFiles
       raise "Missing kJ Energy record"
     end
   end
+
+  def load_foods_from_ff
+    FfFood.all.each do |ff|
+      matching_recs = Food.where(name: ff.name)
+      if matching_recs.count == 0
+        rec = Food.new
+      elsif matching_recs.count == 1
+        rec = matching_recs.first
+      else
+        raise "duplicate name found in foods table"
+      end
+      # set the fields appropriately
+      # save the record
+      # report any errors
+      # output report record
+    end
+  end
+  
+  # def load_food_nutrients_from_ff
+  #   FfFoodNutrient.all.each do |ffn|
+  #     # begin a transaction
+  #     # first find the ff_food record from fdc_id, then the corresponding food_id
+  #     # confirm the food record has the fdc_id recorded in it already
+  #     # next find the nutrient id
+  #     # then find the matching food_nutrient record matching the food_id and nutrient_id
+  #     matching_recs = FoodNutrient.where(food_id: food_id., nutrient_id: nutrient_id)
+  #     if matching_recs.count == 0
+  #       rec = FoodNutrient.new
+  #     elsif matching_recs.count == 1
+  #       rec = matching_recs.first
+  #     else
+  #       raise "duplicate food nutrient found in food nutrients table"
+  #     end
+  #     # append the sample data on the end of the samples_json field
+  #     # recompute the mean and save it in the amount field
+  #     # recompute the variance from the samples_json field
+  #     #  { }
+  #     # output report record
+  #   end
+  # end
   
   # method to find the matching record in the database, and update it (or create anew)
   #   calls set fields to do the update

@@ -15,13 +15,15 @@ class StartOver < ActiveRecord::Migration[7.0]
       t.index ['wweia_food_cat_id'], name: 'ix_foods_on_wweia_cat'
     end
 
-    create_table 'ff_foods', force: :cascade do |t|
+    create_table 'usda_foods', force: :cascade do |t|
       t.string 'name', default: '', null: true
+      t.string 'usda_data_type', default: '', null: false
       t.integer 'fdc_id'
       t.integer 'usda_food_cat_id'
       t.integer 'wweia_food_cat_id'
       t.boolean 'active', default: true, null: false
       t.timestamps null: false
+      t.index ['fdc_id'], unique: true, name: 'ix_usda_foods_on_fdc_id'
     end
 
     create_table 'nutrients', force: :cascade do |t|
@@ -50,7 +52,7 @@ class StartOver < ActiveRecord::Migration[7.0]
       t.index ['nutrient_id'], name: 'ix_food_nutrients_on_nutrient'
     end
   
-    create_table 'ff_food_nutrients', force: :cascade do |t|
+    create_table 'usda_food_nutrients', force: :cascade do |t|
       t.integer 'fdc_id', null: false
       t.integer 'nutrient_id'
       t.integer 'usda_nutrient_id', null: false
@@ -59,10 +61,11 @@ class StartOver < ActiveRecord::Migration[7.0]
       t.integer 'data_points'
       t.boolean 'active', default: true
       t.timestamps null: false
-      t.index ['fdc_id'], name: 'ix_ff_food_nutrients_on_fdc_id'
-      t.index ['nutrient_id'], name: 'ix_ff_food_nutrients_on_nutrient'
-      t.index ['usda_nutrient_id'], name: 'ix_ff_food_nutrients_on_usda_nutrient'
-      t.index ['usda_nutrient_num'], name: 'ix_ff_food_nutrients_on_usda_nutrient_num'
+      t.index ['fdc_id'], name: 'ix_usda_food_nutrients_on_fdc_id'
+      t.index ['nutrient_id'], name: 'ix_usda_food_nutrients_on_nutrient'
+      t.index ['fdc_id', 'nutrient_id'], name: 'ix_usda_food_nutrients_on_fdc_nutrient', unique: true
+      t.index ['usda_nutrient_id'], name: 'ix_usda_food_nutrients_on_usda_nutrient'
+      t.index ['usda_nutrient_num'], name: 'ix_usda_food_nutrients_on_usda_nutrient_num'
     end
   
     create_table 'food_portion_grams', force: :cascade do |t|

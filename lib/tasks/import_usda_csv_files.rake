@@ -8,7 +8,7 @@ namespace :import_usda_csv_files do
       puts line
     end
     puts ""
-    puts "Import Csv Files Errors:"
+    puts "perform1 Import Csv Files Errors (#{errors.count}):"
     errors.each do |err_line|
       puts err_line
     end
@@ -57,7 +57,7 @@ namespace :import_usda_csv_files do
       puts line
     end
     puts ""
-    puts "Import Csv Files Errors:"
+    puts "perform2 Import Csv Files Errors (#{errors.count}):"
     errors.each do |err_line|
       puts err_line
     end
@@ -71,7 +71,7 @@ namespace :import_usda_csv_files do
       puts line
     end
     puts ""
-    puts "Import Csv Files Errors: #{errors.count}"
+    puts "perform3 Import Csv Files Errors (#{errors.count}):"
     errors.each do |err_line|
       puts err_line
     end
@@ -85,7 +85,7 @@ namespace :import_usda_csv_files do
       puts line
     end
     puts ""
-    puts "Import Csv Files Errors: #{errors.count}"
+    puts "perform4 Import Csv Files Errors (#{errors.count}):"
     errors.each do |err_line|
       puts err_line
     end

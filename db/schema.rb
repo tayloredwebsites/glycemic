@@ -14,32 +14,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_22_165418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "ff_food_nutrients", force: :cascade do |t|
-    t.integer "fdc_id", null: false
-    t.integer "nutrient_id"
-    t.integer "usda_nutrient_id", null: false
-    t.integer "usda_nutrient_num"
-    t.float "amount"
-    t.integer "data_points"
-    t.boolean "active", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["fdc_id"], name: "ix_ff_food_nutrients_on_fdc_id"
-    t.index ["nutrient_id"], name: "ix_ff_food_nutrients_on_nutrient"
-    t.index ["usda_nutrient_id"], name: "ix_ff_food_nutrients_on_usda_nutrient"
-    t.index ["usda_nutrient_num"], name: "ix_ff_food_nutrients_on_usda_nutrient_num"
-  end
-
-  create_table "ff_foods", force: :cascade do |t|
-    t.string "name", default: ""
-    t.integer "fdc_id"
-    t.integer "usda_food_cat_id"
-    t.integer "wweia_food_cat_id"
-    t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "food_nutrients", force: :cascade do |t|
     t.integer "food_id", null: false
     t.integer "nutrient_id", null: false
@@ -103,6 +77,34 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_22_165418) do
     t.index ["name", "unit_code"], name: "ix_nutrients_on_name_and_unit_code", unique: true
     t.index ["usda_nutrient_id"], name: "ix_nutrients_on_usda_nutrient_id"
     t.index ["usda_nutrient_num"], name: "ix_nutrients_on_usda_nutrient_num"
+  end
+
+  create_table "usda_food_nutrients", force: :cascade do |t|
+    t.integer "fdc_id", null: false
+    t.integer "nutrient_id"
+    t.integer "usda_nutrient_id", null: false
+    t.integer "usda_nutrient_num"
+    t.float "amount"
+    t.integer "data_points"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["fdc_id"], name: "ix_usda_food_nutrients_on_fdc_id"
+    t.index ["nutrient_id"], name: "ix_usda_food_nutrients_on_nutrient"
+    t.index ["usda_nutrient_id"], name: "ix_usda_food_nutrients_on_usda_nutrient"
+    t.index ["usda_nutrient_num"], name: "ix_usda_food_nutrients_on_usda_nutrient_num"
+  end
+
+  create_table "usda_foods", force: :cascade do |t|
+    t.string "name", default: ""
+    t.string "usda_data_type", default: "", null: false
+    t.integer "fdc_id"
+    t.integer "usda_food_cat_id"
+    t.integer "wweia_food_cat_id"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["fdc_id"], name: "ix_usda_foods_on_fdc_id", unique: true
   end
 
   create_table "users", force: :cascade do |t|

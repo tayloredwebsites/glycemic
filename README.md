@@ -69,13 +69,32 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 
 ### Developer Installation Instructions
 
-#### Linux (Mint 20.3 Cinnamon 5.2.7 )
+#### Linux (Mint 20.3)
 - TODO Instructions to install postgres12
 - TODO Instructions to install rbenv
 - TODO Instructions to install ruby 3.1.3
 - TODO Instructions to install bundler
 - TODO Instructions to install rails 7.0.4
 - TODO Instructions to configure rails
+
+#### Upload Nutrition Data
+Run the following rake tasks to load up the database tables from the .csv files from the USDA
+
+1. load up the two category lookup tables and the nutrients table
+
+      bin/rails import_usda_csv_files:perform1
+
+1. run the fixes for duplicate nutrients
+
+      bin/rails import_usda_csv_files:perform2
+
+1.  load the ff_foods.csv into the usda_foods table
+
+      bin/rails import_usda_csv_files:perform3
+
+1. load the ff_food_nutrients.csv into the usda_food_nutrients table
+
+      bin/rails import_usda_csv_files:perform4
 
 ### Tips and Hints
 
@@ -86,37 +105,44 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 - PostgreSQL Database commands
     - log in using postgres user
 
-        sudo -i -u postgres
+          sudo -i -u postgres
+
     - list databases
 
           \l
           glycemic_development | <mydbusername>     | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
           glycemic_test        | <mydbusername>     | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ 
     - create admin user <mydbusername>
 
           createuser -s -r <mydbusername>
-- Database Backups & Restores (
-    - stored in (rails root)/db/backups/
-    - database backups
 
-          pg_dump --username <mydbusername> --password --dbname glycemic_development --format=custom --file db/backups/2023-01-22d-initial2users.sql
+#### Database Backups & Restores
+
+ - locate the postgres database files directory (can be accessed by root or postgres user)
+
+          sudo -u postgres psql -c "show data_directory;"
+
+- database backups (custom / compressed to postgres data folder as postgres user).
+    - see: https://stackoverflow.com/questions/69901663/postgres-backup-as-tar-gz
+    - Note: we are saving in our own dbbackups folder in the parent of the database files directory
+
+          sudo -u postgres pg_dump --dbname glycemic_development --format=c --file /var/lib/postgresql/dbbackups/glycemic/2023-05-19-steps1-3.sql
+
     - database restores
 
-          pg_restore --verbose --clean --no-acl --no-owner --dbname glycemic_development db/backups/2023-01-22d-initial2users.sql
+          sudo -u postgres pg_restore --verbose --clean --no-acl --no-owner --dbname glycemic_development /var/lib/postgresql/dbbackups/glycemic/2023-05-19-steps1-3.sql
 
-#### Database
+#### Database Diagram
+
 - Database diagram - is located in the site's public directory, which is generated using [Mermaid.js](https://mermaid.js.org/)
-- Database initialization in Rails
 
-      bin/rails db:create
+- Database initialization/rebuild in Rails
+
+      bin/rails db:reset
       Created database 'glycemic_development'
       Created database 'glycemic_test'
-      
-#### Upload Nutrition Data
--Run the following rake tasks
 
-      bin/rails import_usda_csv_files::perform1
 
-   
 #### Jira
 - Team members will be given access to the [Jira board](https://tayloredwebsites.atlassian.net/jira/software/projects/GLYC/boards/1)
