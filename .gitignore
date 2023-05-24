@@ -37,6 +37,9 @@
 /db/backups/*
 *.md.backup
 
+# ignore lock files
+.~*
+
 # ignore spreadsheets in docs folder
 /docs/*.ods*
 /docs/*.xls*
