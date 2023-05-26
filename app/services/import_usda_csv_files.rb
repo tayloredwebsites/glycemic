@@ -244,6 +244,7 @@ class ImportUsdaCsvFiles
         @report << msg if msg.present?
         @errors.concat(errors) if errors.present? && errors.count > 0
       end
+      # raise "halt after first block of record for debugging"
       chunk_num += 1
     end
     diff_num_recs = model_clazz.all.count - start_rec_count
@@ -393,6 +394,12 @@ class ImportUsdaCsvFiles
         rec.write_attribute(fld, new_val)
       end
     end
+    # check if record is valid before saving
+    if errors_a.count == 0 && rec.invalid?
+      msg = "Invalid mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}: #{rec.errors.full_messages.join('; ')}, #{rec.inspect}"
+      Rails.logger.error(msg)
+      errors_a << msg
+    end
     if errors_a.count == 0 && rec.changed?
       rec.save 
       if rec.errors.count > 0
@@ -446,6 +453,7 @@ class ImportUsdaCsvFiles
     # build the where clause and fill the ident_h with current row values for finding matching record
     ident_where_a = []
     ident_hc = HashWithIndifferentAccess.new()
+    # loop through record fields
     row.each do |k,v|
       # note no append / json fields allowed here.
       Rails.logger.debug("^^^ row - k: #{k.inspect} v: #{v.inspect}")
@@ -454,7 +462,7 @@ class ImportUsdaCsvFiles
       Rails.logger.debug("### get_mapping_type - action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
       Rails.logger.debug("### mapping_h[k]: #{mapping_h[k]}")
       if action == 'set' && mapping_h[k].present?
-        Rails.logger.debug("$$$ row for #{k.inspect} is an identifier, and mapped to #{mapping_h[k]}")
+        Rails.logger.debug("$$$ row for #{k.inspect} is #{ident_h[k].blank? ? "not" : ''} an identifier (#{ident_h[k]}), and mapped to #{mapping_h[k]}")
         row_field = mapping_h[k] # replace the uploaded field to the mapped database field
         row_field = row_field[1..] if row_field[0] == ':' # ignore any leading : in the mapping definition
       else
@@ -462,7 +470,8 @@ class ImportUsdaCsvFiles
         row_field = k
       end
       Rails.logger.debug("### ident_h[row_field]: #{ident_h[row_field]}")
-      if ident_h[row_field].present?
+      Rails.logger.debug("### ident_h[k]: #{ident_h[k]}")
+      if ident_h[k].present?
         if action == 'hash'
           Rails.logger.debug("Is a JSON identifier : do not put in where clause.")
         else
@@ -470,14 +479,16 @@ class ImportUsdaCsvFiles
           f_type = get_field_type(model_clazz, row_field)
           case f_type
           when 'integer', :integer
-            ident_hc[row_field] = v.to_i
-            ident_where_a << "#{row_field} = :#{row_field}"
+            ident_hc[k] = v.to_i
+            ident_where_a << "#{row_field} = :#{k}"
           when 'string', :string
-            ident_hc[row_field] = v.to_s
-            ident_where_a << "#{row_field} = :#{row_field}"
+            ident_hc[k] = v.to_s
+            ident_where_a << "#{row_field} = :#{k}"
           else
             raise "halt missing field type: #{f_type.inspect}"
           end
+          Rails.logger.debug("### updated ident_hc: #{ident_hc.inspect}")
+          Rails.logger.debug("### updated ident_where: #{ident_where_a.inspect}")
         end
       else
         Rails.logger.debug("Not Matched : not in ident")
