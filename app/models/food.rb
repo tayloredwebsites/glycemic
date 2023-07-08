@@ -13,6 +13,6 @@ class Food < ApplicationRecord
   # belongs_to :usda_food_cat_lu, class_name: :lookup_tables
   # belongs_to :wweia_food_cat_lu, class_name: :lookup_tables
 
-  serialize :samples_json, JSON
+  serialize :usda_fdc_ids_json, JSON
 
 end

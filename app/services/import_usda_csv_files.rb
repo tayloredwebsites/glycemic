@@ -150,6 +150,8 @@ class ImportUsdaCsvFiles
         UsdaFoodNutrient,
         IDENT_MAP_USDA_FOOD_NUTRIENT,
       )
+    when 5
+      load_foods_from_usda()
     else
       raise "invalid step number"
     end
@@ -255,81 +257,6 @@ class ImportUsdaCsvFiles
     # Rails.logger.debug("### @report: #{@report.inspect}")
   end
 
-  def fix_dup_nutrition_records()
-    Rails.logger.debug ""
-    Rails.logger.debug "point duplicate nutrient records to single active one"
-    Rails.logger.debug "see dups in console using 'Nutrient.select(:name, :unit_code).group_by(&:name)'"
-    n1a = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'MG')
-    if n1a.present?
-      n1b = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'G')
-      if n1b.present?
-        Rails.logger.debug "setting G Oligosaccharides record id: #{n1b.id} to point to  #{n1a.id}"
-        n1b.active = false
-        n1b.use_this_id = n1a.id
-        n1b.save
-      else
-        raise "Missing G Oligosaccharides record"
-      end
-    else
-      raise "Missing MG Oligosaccharides record"
-    end
-
-    n2a = Nutrient.find_by(name: "Energy", unit_code: 'kJ')
-    if n2a.present?
-      n2b = Nutrient.find_by(name: "Energy", unit_code: 'KCAL')
-      if n2b.present?
-        Rails.logger.debug "setting KCAL Energy record id: #{n2b.id} to point to  #{n2a.id}"
-        n2b.active = false
-        n2b.use_this_id = n2a.id
-        n2b.save
-      else
-        raise "Missing KCAL Energy record"
-      end
-    else
-      raise "Missing kJ Energy record"
-    end
-  end
-
-  def load_foods_from_ff
-    FfFood.all.each do |ff|
-      matching_recs = Food.where(name: ff.name)
-      if matching_recs.count == 0
-        rec = Food.new
-      elsif matching_recs.count == 1
-        rec = matching_recs.first
-      else
-        raise "duplicate name found in foods table"
-      end
-      # set the fields appropriately
-      # save the record
-      # report any errors
-      # output report record
-    end
-  end
-  
-  # def load_food_nutrients_from_ff
-  #   FfFoodNutrient.all.each do |ffn|
-  #     # begin a transaction
-  #     # first find the ff_food record from fdc_id, then the corresponding food_id
-  #     # confirm the food record has the fdc_id recorded in it already
-  #     # next find the nutrient id
-  #     # then find the matching food_nutrient record matching the food_id and nutrient_id
-  #     matching_recs = FoodNutrient.where(food_id: food_id., nutrient_id: nutrient_id)
-  #     if matching_recs.count == 0
-  #       rec = FoodNutrient.new
-  #     elsif matching_recs.count == 1
-  #       rec = matching_recs.first
-  #     else
-  #       raise "duplicate food nutrient found in food nutrients table"
-  #     end
-  #     # append the sample data on the end of the samples_json field
-  #     # recompute the mean and save it in the amount field
-  #     # recompute the variance from the samples_json field
-  #     #  { }
-  #     # output report record
-  #   end
-  # end
-  
   # method to find the matching record in the database, and update it (or create anew)
   #   calls set fields to do the update
   # @return - [ msg, errors_a]
@@ -765,5 +692,202 @@ class ImportUsdaCsvFiles
     ret_val = ''
     return model_clazz.column_for_attribute(field_name).type
   end
+
+  def fix_dup_nutrition_records()
+    Rails.logger.info("*********************************************************")
+    Rails.logger.info("FIX DUPLICATE NUTRITION RECORDS")
+    Rails.logger.info("*********************************************************")
+
+    @report << "FIX DUPLICATE NUTRITION RECORDS"
+
+    Rails.logger.debug "point duplicate nutrient records to single active one"
+    Rails.logger.debug "see dups in console using 'Nutrient.select(:name, :unit_code).group_by(&:name)'"
+    n1a = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'MG')
+    if n1a.present?
+      n1b = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'G')
+      if n1b.present?
+        Rails.logger.debug "setting G Oligosaccharides record id: #{n1b.id} to point to  #{n1a.id}"
+        n1b.active = false
+        n1b.use_this_id = n1a.id
+        n1b.save
+      else
+        raise "Missing G Oligosaccharides record"
+      end
+    else
+      raise "Missing MG Oligosaccharides record"
+    end
+
+    n2a = Nutrient.find_by(name: "Energy", unit_code: 'kJ')
+    if n2a.present?
+      n2b = Nutrient.find_by(name: "Energy", unit_code: 'KCAL')
+      if n2b.present?
+        Rails.logger.debug "setting KCAL Energy record id: #{n2b.id} to point to  #{n2a.id}"
+        n2b.active = false
+        n2b.use_this_id = n2a.id
+        n2b.save
+      else
+        raise "Missing KCAL Energy record"
+      end
+    else
+      raise "Missing kJ Energy record"
+    end
+  end
+
+  def load_foods_from_usda
+    Rails.logger.info("*********************************************************")
+    Rails.logger.info("LOAD FOODS FROM USDA")
+    Rails.logger.info("*********************************************************")
+      
+    # coding this to be rerunnable (no transactions)
+
+    # load in existing food category mapping
+    @usda_cats_by_id = load_usda_cats_by_usda_id()
+    # Rails.logger.debug("### @usda_cats_by_id: #{@usda_cats_by_id.inspect}")
+
+    @report << "LOAD FOODS FROM USDA"
+    # msg = "Start of Importing of #{model_clazz} table"
+    # Rails.logger.debug("*** msg: #{msg}")
+    # Rails.logger.debug("*** record layout: #{model_clazz.new.inspect}")
+    # @report << msg
+
+    exit_msg = ''
+    UsdaFood.all.each do |uf|
+      break if exit_msg.present?
+      reset_error_flag()
+      log_error("ERROR: missing fdc_id in UsdaFood: #{uf.inspect}") if uf.fdc_id.blank?
+    # get or create the matching food record
+      matching_recs = Food.where(name: uf.name)
+      if matching_recs.count == 0
+        f = Food.new
+        f.name = uf.name
+        f.usda_fdc_ids_json = []
+      elsif matching_recs.count == 1
+        f = matching_recs.first
+        log_error("ERROR: mismatched name food.name: #{f.name} != usda_food.name: #{uf.name}") if f.name != uf.name
+      else
+        f = matching_recs.first
+        log_error("SYSTEM ERROR: duplicate food name found in foods table usda_food.name: #{uf.name}, count: #{matching_recs.count}")
+      end
+      Rails.logger.debug("### Food record: #{f.inspect}")
+
+      # check matching food category, or set it if new
+      if f.usda_food_cat_id.blank?
+        f.usda_food_cat_id = uf.usda_food_cat_id
+      elsif f.usda_food_cat_id != uf.usda_food_cat_id
+        log_error("ERROR: Mismatching food category id.  Food rec #{f.id} has #{f.usda_food_cat_id}, UsdaFood rec #{uf.id} has #{uf.usda_food_cat_id}")
+      end
+      # TODO: set food record's wweia_food_cat_id when needed
+
+      if !error_flagged?()
+        # update the food record's fdc_id json field
+        Rails.logger.debug("### Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
+        f.usda_fdc_ids_json << uf.fdc_id.to_s unless f.usda_fdc_ids_json.include?(uf.fdc_id.to_s)
+        Rails.logger.debug("### Updated Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
+        f.save
+      end
+      log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
+      f.reload()
+      Rails.logger.debug("### Food record: #{f.inspect}")
+
+      if !error_flagged?() # && exit_msg.blank?
+        Rails.logger.debug("### no error saving food record")
+        # Get all of the UsdaFoodNutrients for this UsdaFood by matching fdc_id (USDA food identifier)
+        UsdaFoodNutrient.where(fdc_id: uf.fdc_id).each do |ufn|
+          # see if the nutrient is already updated in the FoodNutrient record
+          Rails.logger.debug("### processing ufn: #{ufn.inspect}")
+          nut = Nutrient.find_by(usda_nutrient_id: ufn.usda_nutrient_id)
+          if nut.blank?
+            log_error("ERROR: Unable to find usda_nutrient_id for UsdaFood id: #{uf.id}, UsdaFoodNutrient id: #{ufn.usda_nutrient_id}")
+          else
+            # check for matching FoodNutrient record, or create a new one
+            fn = FoodNutrient.find_by(food_id: f.id, nutrient_id: nut.id)
+            Rails.logger.debug("matching food nutrient: #{fn.inspect}")
+            if fn.present?
+              # confirm the food nutrient record matches this usda food nutrient
+              log_error("ERROR: Invalid food_id for FoodNutrient id: #{fn.id}, fn.food_id: #{fn.food_id} != f.id: #{f.id}") if fn.food_id != f.id
+              log_error("ERROR: Invalid nutrient_id for FoodNutrient id: #{fn.id}, fn.food_id: #{fn.food_id} != f.id: #{f.id}") if fn.nutrient_id != f.id
+            else
+              # initialize a new food nutrient record
+              fn = FoodNutrient.new()
+              fn.food_id = f.id
+              fn.nutrient_id = nut.id
+              fn.samples_json = {}
+            end
+            # update the food nutrient from this Usda food nutrient record
+            # create json for samples.json field
+            usda_samp = {
+              'amount': ufn.amount.to_s,
+              'data_points': ufn.data_points.to_s,
+              'weight': '1.0',
+              'active': true,
+              'notes': '',
+              'time_entered': Time.now,
+              # 'user_entered': '',
+            }
+            # add/update food nutrient data to samples.json field hash
+            fn.samples_json["fdc,#{ufn.fdc_id.to_s}"] = usda_samp
+            fn.save
+            fn.reload
+            Rails.logger.debug("### updated fn.samples_json: #{fn.samples_json.inspect}")
+            # compute mean from the updated samples.json field
+            sum_weighted_amt = 0.0
+            n = 0
+            fn.samples_json.each do |key, samp|
+              Rails.logger.debug("### samp: #{samp.inspect}")
+              sum_weighted_amt += samp['amount'].to_f * samp['weight'].to_f * samp['data_points'].to_f
+              n += (samp['data_points'].present?) ? samp['data_points'].to_i : 1
+              Rails.logger.debug("### sum_weighted_amt: #{sum_weighted_amt} #{sum_weighted_amt.inspect}")
+              Rails.logger.debug("### n: #{n} #{n.inspect}")
+            end
+            mean = fn.amount = sum_weighted_amt / n
+            Rails.logger.debug("### mean: #{mean} #{mean.inspect}")
+            # compute sample var from the updated samples.json field
+            sum_diff_mean_sq = 0.0
+            fn.samples_json.each do |key, samp|
+              Rails.logger.debug("### samp['amount']: #{samp['amount']} #{samp['amount'].inspect}")
+              sum_diff_mean_sq += (samp['amount'].to_f - mean) ** 2
+              Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
+            end
+            Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
+            Rails.logger.debug("### n: #{n} #{n.inspect}")
+            fn.variance = (n > 1) ? sum_diff_mean_sq / (n - 1) : 0
+          end
+          Rails.logger.debug("### fn: #{fn.inspect}")
+          
+          Rails.logger.debug("### About to save.  log_error(: #{get_last_error().inspect}")
+          if !error_flagged?()
+            # save the record
+            Rails.logger.debug("### Save fn #{fn.inspect}")
+            fn.save
+            # report any errors
+            log_error("ERROR saving FoodNutrient: #{fn.id}, fn.food_id: #{fn.food_id} fn.errors: #{fn.errors.full_messages.join('; ')}") if fn.errors.count > 0
+          end
+          log_error('Halt after updating first food nutrient record')
+          break
+        end
+      end
+    end
+  end
+
+  def log_error(msg)
+    @errors << msg
+    Rails.logger.error(msg)
+    @err_msg = msg
+  end
+
+  def reset_error_flag()
+    @err_msg = ''
+    prior_errors_count = @errors.count
+  end
+
+  def error_flagged?()
+    # @err_msg.present?
+    @errors.count > prior_errors_count
+  end
+
+  def get_last_error()
+    @err_msg
+  end
+
 
 end

@@ -34,4 +34,8 @@ class FoodNutrient < ApplicationRecord
   scope :deact_food_nutrients, -> { where(active: false) }
   # scope :all_food_nutrients, -> { where(active: [true, false]) }
   # scope :all_food_nutrients, -> {}
+
+  # automatically convert samples_json (hash) field to JSON string in the database
+  serialize :samples_json, JSON
+  
 end
