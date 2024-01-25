@@ -3,6 +3,7 @@
 ## Diet Support Program
 
 ### Purpose and Goals
+
 The program is being designed to help you plan your diet, and to give you feedback to better help you meet your nutritional related objectives.:
 - Objectives you might want to monitor:
     - calorie intake -for its possible impact on weight.
@@ -32,6 +33,7 @@ The program is being designed to help you plan your diet, and to give you feedba
     - Eventually, it it hoped that we will be able to provide statistical analysis of your diet and test results.
 
 ### Development Plan
+
 DONE
 - Ability to enter foods, nutrients, and the nutrients in a food.
 
@@ -50,6 +52,7 @@ NEXT STEPS
 - Ability to enter tests, so statistical analysis of your diet on your tests could be done
 
 ### Testing
+
 - This diet_support program has been developed with concurrent automated testing (test driven and/or tested as developed).  This helps ensure that the software will have minimal bugs.
 - TODO - set up Github CI, to ensure that all pull requests have a clean automated test run before merging into the code base.
 
@@ -63,6 +66,7 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 
 
 ### System Dependencies
+
 - Rails 7
 - PostgreSQL 12
 - ruby 3.1
@@ -70,6 +74,7 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 ### Developer Installation Instructions
 
 #### Linux (Mint 20.3)
+
 - TODO Instructions to install postgres12
 - TODO Instructions to install rbenv
 - TODO Instructions to install ruby 3.1.3
@@ -78,60 +83,94 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 - TODO Instructions to configure rails
 
 #### Upload Nutrition Data
+
 Run the following rake tasks to load up the database tables from the .csv files from the USDA
+
+1. If necessary create the development and test databases:
+        bin/rails db:create
 
 1. load up the two category lookup tables and the nutrients table
 
-      bin/rails import_usda_csv_files:perform1
+        bin/rails import_usda_csv_files:perform1
 
 1. run the fixes for duplicate nutrients
 
-      bin/rails import_usda_csv_files:perform2
+        bin/rails import_usda_csv_files:perform2
 
 1.  load the ff_foods.csv into the usda_foods table
 
-      bin/rails import_usda_csv_files:perform3
+        bin/rails import_usda_csv_files:perform3
 
 1. load the ff_food_nutrients.csv into the usda_food_nutrients table
 
-      bin/rails import_usda_csv_files:perform4
+        bin/rails import_usda_csv_files:perform4
 
 ### Tips and Hints
 
 #### Markdown
+
 - [Markdown Syntax](https://www.markdownguide.org/basic-syntax)
 
 #### PostgreSQL
+
 - PostgreSQL Database commands
     - log in using postgres user
 
           sudo -i -u postgres
 
+    - bring up psql
+
+          psql
+    	      
     - list databases
 
           \l
-          glycemic_development | <mydbusername>     | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
-          glycemic_test        | <mydbusername>     | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+        - glycemic_development | {mydbusername}     | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+        - glycemic_test        | {mydbusername}     | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
  
     - create admin user <mydbusername>
 
-          createuser -s -r <mydbusername>
+          createuser -s -r {mydbusername}
 
 #### Database Backups & Restores
 
- - locate the postgres database files directory (can be accessed by root or postgres user)
+- determine and create if necessary your directory archiving backups folder
+	- this will be referred to as {backupFolder} 
+- locate the postgres database files directory (can be accessed by root or postgres user)
 
-          sudo -u postgres psql -c "show data_directory;"
+        sudo -iu postgres
+        psql
+        show data_directory;
 
-- database backups (custom / compressed to postgres data folder as postgres user).
-    - see: https://stackoverflow.com/questions/69901663/postgres-backup-as-tar-gz
-    - Note: we are saving in our own dbbackups folder in the parent of the database files directory
+	- /var/lib/postgresql/12/main
 
-          sudo -u postgres pg_dump --dbname glycemic_development --format=c --file /var/lib/postgresql/dbbackups/glycemic/2023-05-19-steps1-3.sql
+- create a postgres owned backup folder under the postgresql folder.
 
-    - database restores
+        sudo -iu postgres
+        mkdir -p {pgBackupsFolder}
+        
+	- e.g.: /var/lib/postgresql/dbbackups/diet/
+	
+- database backups (compressed to postgres data folder as postgres user).
 
-          sudo -u postgres pg_restore --verbose --clean --no-acl --no-owner --dbname glycemic_development /var/lib/postgresql/dbbackups/glycemic/2023-05-19-steps1-3.sql
+        sudo -iu postgres
+        pg_dump --format=tar --dbname=glycemic_development | gzip > {pgBackupsFolder}/{yyyy-mm-ddn-desc}.tar.gz
+        exit
+
+- save database backups to cloud or other safe location
+        sudo cp {pgBackupsFolder}/{yyyy-mm-ddn-desc}.tar.gz {backup_folder}
+        sudo chown {username}:{username} {backup_folder}/*
+        ls -al {backup_folder}
+
+- database restores
+	- be sure to shut down all web servers and rails consoles
+
+          sudo -iu postgres
+          gunzip < {pgBackupsFolder}/{yyyy-mm-ddn-desc}.tar.gz | pg_restore --clean --dbname=glycemic_development
+
+- Notes on backups and restores:
+    - if you need to restore a database backup that is not gzipped, then use restore command without the gunzip (everything after the | )
+    - if you need to restore from your safe backup location, I recommend copying the backup to the {pgBackupsFolder} to avoid authorization issues.
 
 #### Database Diagram
 
@@ -145,4 +184,5 @@ Run the following rake tasks to load up the database tables from the .csv files 
 
 
 #### Jira
+
 - Team members will be given access to the [Jira board](https://tayloredwebsites.atlassian.net/jira/software/projects/GLYC/boards/1)
