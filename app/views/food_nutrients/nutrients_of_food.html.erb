@@ -38,10 +38,9 @@
         <td><%= fn.id %></td>
         <td><%= fn.nutrient_id %> - <%= fn.nutrient.name if fn.nutrient_id.present? %></td>
         <td><%= fn.food_id %> - <%= fn.food.name if fn.food_id.present? %></td>
-        <td><%= fn.study %>  <%= fn.study_weight %></td>
-        <td><%= fn.portion %> <%= fn.portion_unit %></td>
-        <td><%= fn.amount %> <%= fn.amount_unit %></td>
-        <td><%= fn.desc %></td>
+        <td><%# fn.portion %> <%# fn.portion_unit %></td>
+        <td><%= fn.amount %> <%= fn.nutrient.unit_code %></td>
+        <td><%= fn.nutrient.name %></td>
         <td>
           <% if fn.active == true %>
             <a href="/food_nutrients/<%= fn.id %>/edit">Edit</a>

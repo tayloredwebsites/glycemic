@@ -13,7 +13,7 @@
 
   <div>
     <%= form.label :id, style: "display: block" %>
-    <%= @nutrient.id %>
+    <%= form.id %>
   </div>
 
   <div>
@@ -22,13 +22,18 @@
   </div>
 
   <div>
-    <%= form.label :usda_ndb_num, style: "display: block" %>
-    <%= form.number_field :usda_ndb_num %>
+    <%= form.label :usda_nutrient_id, style: "display: block" %>
+    <%= form.number_field :usda_nutrient_id %>
   </div>
 
   <div>
-    <%= form.label :desc, style: "display: block" %>
-    <%= form.text_area :desc %>
+    <%= form.label :usda_nutrient_num, style: "display: block" %>
+    <%= form.number_field :usda_nutrient_num %>
+  </div>
+
+  <div>
+    <%= form.label :unit_code, style: "display: block" %>
+    <%= form.text_area :unit_code %>
   </div>
 
   <div>

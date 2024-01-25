@@ -3,11 +3,19 @@
 <% content_for :subheader, "#{@nutrient.present? ? 'for nutrient: '+@nutrient.name : ''}" %>
 
 
-<%= render "form", nutrient: @nutrient %>
+<%= render "nutrients/form", nutrient: @nutrient %>
 
 <br>
 
 <ul>
   <li><a href="/nutrients/new">New Nutrient</a></li>
+  <li><a href="/nutrients/<%= @nutrient.id %>">View this nutrient</a></li>
   <li><a href="/nutrients/<%=@nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Deactivate this nutrient</a></li>
 </ul>
+    <% if @nutrient.active == true %>
+      <a href="/nutrients/<%= @nutrient.id %>/edit">Edit</a>
+      <a href="/nutrients/<%= @nutrient.id%>" data-turbo-method="delete">Deactivate</a>
+    <% else %>
+      <a href="/nutrients/<%= @nutrient.id %>/edit" class="inactiveLink">Edit</a>
+      <a href="/nutrients/<%= @nutrient.id%>/reactivate">Reactivate</a>
+    <% end %>

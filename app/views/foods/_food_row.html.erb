@@ -1,8 +1,8 @@
 <tr id="food_id_<%= food.id %>">
   <td><%= food.id %></td>
   <td><%= food.name %></td>
-  <td><%= food.usda_fdc_id %></td>
-  <td><%= food.desc %></td>
+  <td><%# food.usda_fdc_id %></td>
+  <td><%= food.name %></td>
   <td>
     <% if food.active == true %>
       <a href="/foods/<%= food.id %>/edit">Edit</a>

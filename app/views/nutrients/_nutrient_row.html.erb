@@ -1,8 +1,9 @@
 <tr id="nutrient_id_<%= nutrient.id %>">
   <td><%= nutrient.id %></td>
+  <td><%= nutrient.usda_nutrient_id %></td>
+  <td><%= nutrient.usda_nutrient_num %></td>
   <td><%= nutrient.name %></td>
-  <td><%= nutrient.usda_ndb_num %></td>
-  <td><%= nutrient.desc %></td>
+  <td><%= nutrient.unit_code %></td>
   <td>
     <% if nutrient.active == true %>
       <a href="/nutrients/<%= nutrient.id %>/edit">Edit</a>

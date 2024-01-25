@@ -1,10 +1,14 @@
-<tr id="<%= dom_id nutrient %>">
-  <td><%= nutrient.id %></td>
-  <td><%= nutrient.name %></td>
-  <td><%= nutrient.usda_ndb_num %></td>
-  <td><%= nutrient.desc %></td>
-  <td>
-    <a href="/nutrients/<%=nutrient.id%>/edit">Edit</a>
-    <a href="/nutrients/<%=nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a>
-  </td>
-</tr>
+<ul class="viewItems">
+  <li><span class="viewLabel">Id</span><span class="viewValue"><%= nutrient.id %></span></li>
+  <li><span class="viewLabel">USDA Id</span><span class="viewValue"><%= nutrient.usda_nutrient_id %></span></li>
+  <li><span class="viewLabel">USDA Nbr</span><span class="viewValue"><%= nutrient.usda_nutrient_num %></span></li>
+  <li><span class="viewLabel">Name</span><span class="viewValue"><%= nutrient.name %></span></li>
+  <li><span class="viewLabel">Unit</span><span class="viewValue"><%= nutrient.unit_code %></span></li>
+  <% if nutrient.active == true %>
+    <li><a href="/nutrients/<%= nutrient.id %>/edit">Edit</a></li>
+    <li><a href="/nutrients/<%=nutrient.id%>" data-turbo-method="delete">Deactivate</a></li>
+  <% else %>
+    <li><a href="/nutrients/<%= nutrient.id %>/edit" class="inactiveLink">Edit</a></li>
+    <li><a href="/nutrients/<%=nutrient.id%>/reactivate">Reactivate</a></li>
+  <% end %>
+</ul>
