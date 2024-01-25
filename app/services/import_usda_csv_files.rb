@@ -752,31 +752,44 @@ class ImportUsdaCsvFiles
 
     exit_msg = ''
     UsdaFood.all.each do |uf|
+      Rails.logger.debug("**************")
+      Rails.logger.debug("*** New UsdaFood record: #{uf.inspect}")
       break if exit_msg.present?
       reset_error_flag()
       log_error("ERROR: missing fdc_id in UsdaFood: #{uf.inspect}") if uf.fdc_id.blank?
+      log_error("ERROR: Blank food name in UsdaFood: #{uf.inspect}") if uf.name.blank?
     # get or create the matching food record
-      matching_recs = Food.where(name: uf.name)
-      if matching_recs.count == 0
-        f = Food.new
-        f.name = uf.name
-        f.usda_fdc_ids_json = []
-      elsif matching_recs.count == 1
-        f = matching_recs.first
-        log_error("ERROR: mismatched name food.name: #{f.name} != usda_food.name: #{uf.name}") if f.name != uf.name
-      else
-        f = matching_recs.first
-        log_error("SYSTEM ERROR: duplicate food name found in foods table usda_food.name: #{uf.name}, count: #{matching_recs.count}")
+      if !error_flagged?()
+        matching_recs = Food.where(name: uf.name)
+        if matching_recs.count == 0
+          f = Food.new
+          f.name = uf.name
+          f.usda_fdc_ids_json = []
+        elsif matching_recs.count == 1
+          f = matching_recs.first
+          log_error("ERROR: mismatched name food.name: #{f.name} != usda_food.name: #{uf.name}") if f.name != uf.name
+        else
+          f = matching_recs.first
+          log_error("SYSTEM ERROR: duplicate food name found in foods table usda_food.name: #{uf.name}, count: #{matching_recs.count}")
+        end
+        Rails.logger.debug("### Found Food record: #{f.inspect}")
+        # check matching food category, or set it if new
+        if f.usda_food_cat_id.blank?
+          f.usda_food_cat_id = uf.usda_food_cat_id
+        elsif f.usda_food_cat_id != uf.usda_food_cat_id
+          if (f.usda_food_cat_id == 9 && uf.usda_food_cat_id == 11) ||
+            (f.usda_food_cat_id == 11 && uf.usda_food_cat_id == 9)
+            # food is saved as both 9 - "Fruits and Fruit Juices" and as 11 - "Vegetables and Vegetable Products"
+            # set food record as 11 "Vegetables and Vegetable Products"
+            f.usda_food_cat_id = 11
+          elsif f.usda_food_cat_id.present? && uf.usda_food_cat_id.blank?
+            # Usda Food record is missing category, use the existing food record category
+          else
+            log_error("ERROR: Mismatching food category id.  Food rec #{f.id} has #{f.usda_food_cat_id}, UsdaFood rec #{uf.id} has #{uf.usda_food_cat_id}")
+          end
+        end
+        # TODO: set food record's wweia_food_cat_id when needed
       end
-      Rails.logger.debug("### Food record: #{f.inspect}")
-
-      # check matching food category, or set it if new
-      if f.usda_food_cat_id.blank?
-        f.usda_food_cat_id = uf.usda_food_cat_id
-      elsif f.usda_food_cat_id != uf.usda_food_cat_id
-        log_error("ERROR: Mismatching food category id.  Food rec #{f.id} has #{f.usda_food_cat_id}, UsdaFood rec #{uf.id} has #{uf.usda_food_cat_id}")
-      end
-      # TODO: set food record's wweia_food_cat_id when needed
 
       if !error_flagged?()
         # update the food record's fdc_id json field
@@ -784,17 +797,18 @@ class ImportUsdaCsvFiles
         f.usda_fdc_ids_json << uf.fdc_id.to_s unless f.usda_fdc_ids_json.include?(uf.fdc_id.to_s)
         Rails.logger.debug("### Updated Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
         f.save
+        log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
+        f.reload()
+        Rails.logger.debug("### Food record: #{f.inspect}")
       end
-      log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
-      f.reload()
-      Rails.logger.debug("### Food record: #{f.inspect}")
 
       if !error_flagged?() # && exit_msg.blank?
         Rails.logger.debug("### no error saving food record")
         # Get all of the UsdaFoodNutrients for this UsdaFood by matching fdc_id (USDA food identifier)
         UsdaFoodNutrient.where(fdc_id: uf.fdc_id).each do |ufn|
+          Rails.logger.debug("**************")
+          Rails.logger.debug("*** New UsdaFoodNutrient record: #{ufn.inspect}")
           # see if the nutrient is already updated in the FoodNutrient record
-          Rails.logger.debug("### processing ufn: #{ufn.inspect}")
           nut = Nutrient.find_by(usda_nutrient_id: ufn.usda_nutrient_id)
           if nut.blank?
             log_error("ERROR: Unable to find usda_nutrient_id for UsdaFood id: #{uf.id}, UsdaFoodNutrient id: #{ufn.usda_nutrient_id}")
@@ -805,7 +819,7 @@ class ImportUsdaCsvFiles
             if fn.present?
               # confirm the food nutrient record matches this usda food nutrient
               log_error("ERROR: Invalid food_id for FoodNutrient id: #{fn.id}, fn.food_id: #{fn.food_id} != f.id: #{f.id}") if fn.food_id != f.id
-              log_error("ERROR: Invalid nutrient_id for FoodNutrient id: #{fn.id}, fn.food_id: #{fn.food_id} != f.id: #{f.id}") if fn.nutrient_id != f.id
+              log_error("ERROR: Invalid nutrient_id for FoodNutrient id: #{fn.id}, fn.nutrient_id: #{fn.nutrient_id} != nut.id: #{nut.id}") if fn.nutrient_id != nut.id
             else
               # initialize a new food nutrient record
               fn = FoodNutrient.new()
@@ -833,23 +847,23 @@ class ImportUsdaCsvFiles
             sum_weighted_amt = 0.0
             n = 0
             fn.samples_json.each do |key, samp|
-              Rails.logger.debug("### samp: #{samp.inspect}")
+              # Rails.logger.debug("### samp: #{samp.inspect}")
               sum_weighted_amt += samp['amount'].to_f * samp['weight'].to_f * samp['data_points'].to_f
               n += (samp['data_points'].present?) ? samp['data_points'].to_i : 1
-              Rails.logger.debug("### sum_weighted_amt: #{sum_weighted_amt} #{sum_weighted_amt.inspect}")
-              Rails.logger.debug("### n: #{n} #{n.inspect}")
+              # Rails.logger.debug("### sum_weighted_amt: #{sum_weighted_amt} #{sum_weighted_amt.inspect}")
+              # Rails.logger.debug("### n: #{n} #{n.inspect}")
             end
             mean = fn.amount = sum_weighted_amt / n
             Rails.logger.debug("### mean: #{mean} #{mean.inspect}")
             # compute sample var from the updated samples.json field
             sum_diff_mean_sq = 0.0
             fn.samples_json.each do |key, samp|
-              Rails.logger.debug("### samp['amount']: #{samp['amount']} #{samp['amount'].inspect}")
+              # Rails.logger.debug("### samp['amount']: #{samp['amount']} #{samp['amount'].inspect}")
               sum_diff_mean_sq += (samp['amount'].to_f - mean) ** 2
-              Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
+              # Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
             end
-            Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
-            Rails.logger.debug("### n: #{n} #{n.inspect}")
+            # Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
+            # Rails.logger.debug("### n: #{n} #{n.inspect}")
             fn.variance = (n > 1) ? sum_diff_mean_sq / (n - 1) : 0
           end
           Rails.logger.debug("### fn: #{fn.inspect}")
@@ -862,11 +876,14 @@ class ImportUsdaCsvFiles
             # report any errors
             log_error("ERROR saving FoodNutrient: #{fn.id}, fn.food_id: #{fn.food_id} fn.errors: #{fn.errors.full_messages.join('; ')}") if fn.errors.count > 0
           end
-          log_error('Halt after updating first food nutrient record')
-          break
-        end
+          # log_error('Halt after updating first food nutrient record')
+          # raise "Halt"
+        end # Loop trough UsdaFoodNutrient records
       end
-    end
+    end # Loop through UsdaFood records
+
+    return @report, @errors
+    
   end
 
   def log_error(msg)
@@ -877,12 +894,12 @@ class ImportUsdaCsvFiles
 
   def reset_error_flag()
     @err_msg = ''
-    prior_errors_count = @errors.count
+    @prior_errors_count = @errors.count
   end
 
   def error_flagged?()
     # @err_msg.present?
-    @errors.count > prior_errors_count
+    @errors.count > @prior_errors_count
   end
 
   def get_last_error()
