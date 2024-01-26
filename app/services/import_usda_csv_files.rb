@@ -711,7 +711,8 @@ class ImportUsdaCsvFiles
         n1b.use_this_id = n1a.id
         n1b.save
       else
-        raise "Missing G Oligosaccharides record"
+        # raise "Missing G Oligosaccharides record"
+        Rails.logger.error("Missing G Oligosaccharides record")
       end
     else
       raise "Missing MG Oligosaccharides record"
@@ -726,7 +727,8 @@ class ImportUsdaCsvFiles
         n2b.use_this_id = n2a.id
         n2b.save
       else
-        raise "Missing KCAL Energy record"
+        # raise "Missing KCAL Energy record"
+        Rails.logger.error "Missing KCAL Energy record"
       end
     else
       raise "Missing kJ Energy record"
