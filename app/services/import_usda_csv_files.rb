@@ -931,6 +931,40 @@ class ImportUsdaCsvFiles
     
   end
 
+  def deact_empty_foods()
+    Rails.logger.info("*********************************************************")
+    Rails.logger.info("DEACTIVATE EMPTY FOODS")
+    Rails.logger.info("*********************************************************")
+
+    @report << "DEACTIVATE EMPTY FOODS"
+
+    exit_msg = ''
+
+    # Loop through all UsdaFood records (to properly put it in a Food record)
+    Food.all.each do |f|
+      log_debug("**************")
+      log_debug("*** Food record: #{f.inspect}")
+      break if exit_msg.present?
+      reset_error_flag()
+      save_food_rec = false
+
+      if f.food_nutrients.count == 0
+        log_debug("*** Food record with no nutrients: #{f.id} #{f.name}")
+        f.active = false
+        save_food_rec = true
+        f.save
+        log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
+        f.reload()
+        log_debug("### Deactivated Food record: #{f.id} #{f.name}")
+        @report << "Deactivated food record for #{f.id} #{f.name}"git gug
+      end
+      
+    end
+
+    return
+
+  end
+
   def log_debug(msg)
     @debug << msg
     log_debug(msg) if @debug_mode
