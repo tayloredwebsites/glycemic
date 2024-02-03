@@ -122,54 +122,54 @@
         boolean active
       }
       %% users ||--o{ tests_taken_xx : user_took_test
-        %% users ||--o{ food_eaten_xx : user_ate
+      %% users ||--o{ food_eaten_xx : user_ate
 
       %% food_components_recipe_ingredient {
-        %%   integer id PK
-        %%   integer food_id FK
-        %%   float portion_amount
-        %%   string sequence
-        %%   string step_template
+        %%  integer id PK
+        %%  integer food_id FK
+        %%  float portion_amount
+        %%  string sequence
+        %%  string step_template
       %% }
       %% food_components_xx ||--o{ foods : is_made_from
 
       %% goals_xx {
-        %%   integer id PK
-        %%   goal_name string
-        %%   text goal_description
-        %%   string good_ranges
-        %%   string ok_ranges
-        %%   string caution_ranges
+        %%  integer id PK
+        %%  goal_name string
+        %%  text goal_description
+        %%  string good_ranges
+        %%  string ok_ranges
+        %%  string caution_ranges
       %% }
       %% goals_xx ||--o{ goal_nutrients_xx : calculated_by
 
       %% goal_nutrients_xx {
-        %%   integer id PK
-        %%   integer nutrient_id
-        %%   string nutrient_goal_factoring
+        %%  integer id PK
+        %%  integer nutrient_id
+        %%  string nutrient_goal_factoring
       %% }
   
       %% tests_xx {
-        %%   integer id PK
-        %%   string name
-        %%   string description
+        %%  integer id PK
+        %%  string name
+        %%  string description
       %% }
       %% tests_xx ||--o{ tests_taken_xx : took_this_test
 
       %% tests_taken_xx {
-        %%   integer id PK
-        %%   integer user_id FK
-        %%   integer test_id FK
-        %%   datetime when_taken
+        %%  integer id PK
+        %%  integer user_id FK
+        %%  integer test_id FK
+        %%  datetime when_taken
       %% }
       
       %% food_eaten_xx {
-        %%   integer id PK
-        %%   integer user_id FK
-        %%   integer food_id FK
-        %%   float portion_amount
-        %%   datetime when_eaten
-      %%   }
+        %%  integer id PK
+        %%  integer user_id FK
+        %%  integer food_id FK
+        %%  float portion_amount
+        %%  datetime when_eaten
+      %%  }
   
         
     </pre>
