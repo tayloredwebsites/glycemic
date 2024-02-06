@@ -186,8 +186,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     # put in some changes
     # @changed_food.id = -1  # this is the record to be updated
     @changed_food.name = "A new name for the food"
-    @changed_food.desc = 'has been changed'
-    @changed_food.usda_fdc_id = 75
+    @changed_food.usda_fdc_ids_json = [ 75 ]
     # @changed_food.created_at = Date.tomorrow # should not be a permitted param
     # @changed_changed_foodnutrient.updated_at = Date.tomorrow # should not be a permitted param
 

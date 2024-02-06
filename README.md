@@ -140,6 +140,7 @@ Run the following rake tasks to load up the database tables from the .csv files 
 
 - determine and create if necessary your directory archiving backups folder
 	- this will be referred to as {backupFolder} 
+    
 - locate the postgres database files directory (can be accessed by root or postgres user)
 
         sudo -iu postgres

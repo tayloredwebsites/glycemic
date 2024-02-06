@@ -97,6 +97,8 @@ group :development, :test do
   # breakpoints - put 'binding.pry' line in code to open debugger at that point 
   gem 'pry-byebug', '~> 3.10.1'
 
+  gem 'faker', '~> 3.2.3'
+
 end
 
 group :development do
