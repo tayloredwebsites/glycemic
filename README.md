@@ -86,24 +86,28 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 
 Run the following rake tasks to load up the database tables from the .csv files from the USDA
 
-1. If necessary create the development and test databases:
-        bin/rails db:create
+1. If necessary create or reset the development and test databases:
+        bin/rails db:reset
 
 1. load up the two category lookup tables and the nutrients table
 
-        bin/rails import_usda_csv_files:perform1
+      bin/rails import_usda_csv_files:perform[1]
 
 1. run the fixes for duplicate nutrients
 
-        bin/rails import_usda_csv_files:perform2
+      bin/rails import_usda_csv_files:perform[2]
 
 1.  load the ff_foods.csv into the usda_foods table
 
-        bin/rails import_usda_csv_files:perform3
+      bin/rails import_usda_csv_files:perform[3]
 
 1. load the ff_food_nutrients.csv into the usda_food_nutrients table
 
-        bin/rails import_usda_csv_files:perform4
+      bin/rails import_usda_csv_files:perform[4]
+
+1. load the Food and FoodNutrients table from the UsdaFood and UsdaFoodNutrient tables
+
+      bin/rails import_usda_csv_files:perform[5]
 
 ### Tips and Hints
 
@@ -136,6 +140,7 @@ Run the following rake tasks to load up the database tables from the .csv files 
 
 - determine and create if necessary your directory archiving backups folder
 	- this will be referred to as {backupFolder} 
+    
 - locate the postgres database files directory (can be accessed by root or postgres user)
 
         sudo -iu postgres

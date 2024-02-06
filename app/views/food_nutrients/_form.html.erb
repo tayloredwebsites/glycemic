@@ -28,21 +28,11 @@
   <div>
     <%= form.label :portion %>
     <%= form.text_field :portion %>
-    <select id="portion_unit" style="width: 60px" name="food_nutrient[portion_unit]">
-      <% FoodNutrient::MEASUREMENTS.each do |m| %>
-        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.nutrient.unit_code == m ? ' selected' : '' %>><%= m %></option>
-      <% end %>
-    </select>
   </div>
 
   <div>
     <%= form.label :amount %>
     <%= form.text_field :amount %>
-    <select id="amount_unit" style="width: 60px" name="food_nutrient[amount_unit]">
-      <% FoodNutrient::MEASUREMENTS.each do |m| %>
-        <option label="<%= m %>" value="<%= m %>" <%= food_nutrient.amount_unit == m ? ' selected' : '' %>><%= m %></option>
-      <% end %>
-    </select>
   </div>
 
   <div>

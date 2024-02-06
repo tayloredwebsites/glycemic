@@ -21,19 +21,18 @@
     <div class="header">Copyright (C) 2023 tayloredwebsites.com. Freely shared and licensed under <a href="https://opensource.org/license/agpl-v3/" target="_blank">AGPL-3.0-only</a></div>
     <pre class="mermaid">
       erDiagram
+
       food_nutrients {
         integer id PK
-        integer food_id
-        integer nutrient_id
+        integer food_id FK
+        integer nutrient_id FK
         float amount
         boolean active
         float variance
-        text samples_json
-        float portion
       }
 
       food_portion_grams {
-        integer food_id
+        integer food_id PK
         string portion_unit
         float portion_grams
       }
@@ -43,19 +42,15 @@
         string name
         string food_portion_unit
         float food_portion_amount
-        integer usda_food_cat_id
-        integer wweia_food_cat_id
+        integer usda_food_cat_id FK
+        integer wweia_food_cat_id FK
         text usda_fdc_ids_json
         boolean active
-        integer TODO
-        integer alt_name_for_id FK
-        boolean has_components
-        integer storage_type_lu_id FK
-        integer brand_lu_id FK
       }
+
       foods ||--o{ food_nutrients : contains
-      foods ||--o{ food_components_xx : used_in
-      foods ||--o{ food_eaten_xx: food_was_eaten_at
+      %% foods ||--o{ food_components_xx : used_in
+      %% foods ||--o{ food_eaten_xx: food_was_eaten_at
 
       lookup_tables {
         integer id PK
@@ -67,7 +62,7 @@
       }
       lookup_tables ||--o{ foods : has_usda_food_cat
       lookup_tables ||--o{ foods : has_wweia_food_cat
-
+    
       nutrients {
         integer id PK
         string name
@@ -81,7 +76,33 @@
       nutrients ||--o{ food_nutrients : has_amount_of
       nutrients ||--o{ usda_food_nutrients : has_amount_of
 
+      usda_food_nutrients {
+        integer id PK
+        integer fdc_id FK
+        integer nutrient_id FK
+        integer usda_nutrient_id
+        integer usda_nutrient_num
+        float amount
+        integer data_points
+        boolean active
+      }
+      usda_food_nutrients ||--o{ nutrients : matches_nutrient
+      usda_food_nutrients ||--o{ food_nutrients : matches_food_and_nutrient
+
+      usda_foods {
+        integer id PK
+        string name
+        string usda_data_type
+        integer fdc_id
+        integer usda_food_cat_id FK
+        integer wweia_food_cat_id FK
+        boolean active
+      }
+      usda_foods ||--o{ usda_food_nutrients : has_nutrients
+      usda_foods ||--o{ foods : matches_name
+    
       users {
+        integer id PK
         string email
         string username
         string full_name
@@ -100,79 +121,55 @@
         datetime updated_at    
         boolean active
       }
-      users ||--o{ tests_taken_xx : user_took_test
-      users ||--o{ food_eaten_xx : user_ate
+      %% users ||--o{ tests_taken_xx : user_took_test
+      %% users ||--o{ food_eaten_xx : user_ate
 
-      usda_foods {
-        integer id PK
-        string name
-        integer fdc_id
-        integer usda_food_cat_id FK
-        integer wweia_food_cat_id FK
-        boolean active
-      }
-      usda_foods ||--o{ usda_food_nutrients : has_nutrients
-      usda_foods ||--o{ foods : matches_name
+      %% food_components_recipe_ingredient {
+        %%  integer id PK
+        %%  integer food_id FK
+        %%  float portion_amount
+        %%  string sequence
+        %%  string step_template
+      %% }
+      %% food_components_xx ||--o{ foods : is_made_from
 
-      usda_food_nutrients {
-        integer id PK
-        integer fdc_id FK
-        integer nutrient_id FK
-        integer usda_nutrient_id
-        integer usda_nutrient_num
-        float amount
-        integer data_points
-        boolean active
-      }
-      usda_food_nutrients ||--o{ nutrients : matches_nutrient
-      usda_food_nutrients ||--o{ food_nutrients : matches_food_and_nutrient
+      %% goals_xx {
+        %%  integer id PK
+        %%  goal_name string
+        %%  text goal_description
+        %%  string good_ranges
+        %%  string ok_ranges
+        %%  string caution_ranges
+      %% }
+      %% goals_xx ||--o{ goal_nutrients_xx : calculated_by
+
+      %% goal_nutrients_xx {
+        %%  integer id PK
+        %%  integer nutrient_id
+        %%  string nutrient_goal_factoring
+      %% }
   
-      goals_xx {
-        integer id PK
-        goal_name string
-        text goal_description
-        string good_ranges
-        string ok_ranges
-        string caution_ranges
-      }
-      goals_xx ||--o{ goal_nutrients_xx : calculated_by
+      %% tests_xx {
+        %%  integer id PK
+        %%  string name
+        %%  string description
+      %% }
+      %% tests_xx ||--o{ tests_taken_xx : took_this_test
 
-      goal_nutrients_xx {
-        integer id PK
-        integer nutrient_id
-        string nutrient_goal_factoring
-      }
-
-      food_components_xx {
-        integer id PK
-        integer food_id FK
-        float portion_amount
-        string sequence
-        string step_template
-      }
-      food_components_xx ||--o{ foods : is_made_from
-
-      tests_xx {
-        integer id PK
-        string name
-        string description
-      }
-      tests_xx ||--o{ tests_taken_xx : took_this_test
-
-      tests_taken_xx {
-        integer id PK
-        integer user_id FK
-        integer test_id FK
-        datetime when_taken
-      }
+      %% tests_taken_xx {
+        %%  integer id PK
+        %%  integer user_id FK
+        %%  integer test_id FK
+        %%  datetime when_taken
+      %% }
       
-      food_eaten_xx {
-        integer id PK
-        integer user_id FK
-        integer food_id FK
-        float portion_amount
-        datetime when_eaten
-      }
+      %% food_eaten_xx {
+        %%  integer id PK
+        %%  integer user_id FK
+        %%  integer food_id FK
+        %%  float portion_amount
+        %%  datetime when_eaten
+      %%  }
   
         
     </pre>

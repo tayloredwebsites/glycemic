@@ -176,8 +176,6 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # put in some changes
     # @changed_nutrient.id = -1  # this is the record to be updated
     @changed_nutrient.name = "A new name for the nutrient"
-    @changed_nutrient.desc = 'has been changed'
-    @changed_nutrient.usda_ndb_num = 75
     # @changed_nutrient.created_at = Date.tomorrow # should not be a permitted param
     # @changed_changed_nutrient.updated_at = Date.tomorrow # should not be a permitted param
 
@@ -191,8 +189,6 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
         nutrient: {
           # id: @nutrient.id, # note: this is passed in params
           name: @changed_nutrient.name,
-          desc: @changed_nutrient.desc,
-          usda_ndb_num: @changed_nutrient.usda_ndb_num,
         }
       }
     end
@@ -205,7 +201,6 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     Rails.logger.debug("$$$ @updated_nutrient: #{@updated_nutrient.inspect}")
 
     assert_equal(@changed_nutrient.name, @updated_nutrient.name)
-    assert_equal(@changed_nutrient.desc, @updated_nutrient.desc)
     assert_equal(@changed_nutrient.usda_ndb_num, @updated_nutrient.usda_ndb_num)
   end
 

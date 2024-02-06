@@ -68,6 +68,7 @@ class FoodNutrientsController < ApplicationController
   def create
     set_food_nutrient_from_params('', food_nutrient_params['food_id']) # set a new FoodNutrient for this Food
     @food_nutrient = FoodNutrient.new(food_nutrient_params)
+    @food_nutrient.samples_json = "" if  @food_nutrient.samples_json.nil?
 
     respond_to do |format|
       if @food_nutrient.save

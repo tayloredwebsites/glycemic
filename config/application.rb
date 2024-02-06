@@ -22,5 +22,14 @@ module Glycemic
     # add rubocop disables to rails notes
     config.annotations.register_tags('rubocop:disable')
 
+    # turn off pry in rails console (IRB=true rails console)
+    # https://stackoverflow.com/questions/25145937/how-to-i-start-a-rails-console-with-pry-turned-off#32130014
+    console do
+      if ENV['IRB']
+        require 'irb'
+        config.console = IRB
+      end
+    end
+    
   end
 end

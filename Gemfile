@@ -74,8 +74,7 @@ gem 'smarter_csv',
 gem 'rubocop-rails',
   '~> 2.18.0'
 
-group :development,
-  :test do
+group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug',
     platforms: %i[
@@ -87,6 +86,19 @@ group :development,
   # store authentication_keys safely
   gem 'dotenv-rails',
     '~> 2.8.1'
+
+  # Pry added to fix object doesn't support #inspect in IRB
+  gem 'pry-rails', '~> 0.3.9'
+
+  # turn off pager in .pryrc (so pry output in console doesn't stop and give a : prompt)
+  # if defined?(PryByebug)
+  #   Pry.config.pager = false
+  # end
+  # breakpoints - put 'binding.pry' line in code to open debugger at that point 
+  gem 'pry-byebug', '~> 3.10.1'
+
+  gem 'faker', '~> 3.2.3'
+
 end
 
 group :development do
@@ -100,9 +112,6 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
-
-  # fix object doesn't support #inspect in IRB
-  gem 'pry-rails', '~> 0.3.9'
 end
 
 group :test do

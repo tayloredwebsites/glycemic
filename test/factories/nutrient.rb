@@ -5,7 +5,8 @@
 FactoryBot.define do
   factory :nutrient do
     sequence(:name) { |n| "nutrient #{n}" }
-    sequence(:usda_ndb_num) { |n| n }
-    sequence(:desc) { |n| "Nutrient Description #{n}" }
+    sequence(:usda_nutrient_id) { |n| n+300 }
+    sequence(:usda_nutrient_num) { |n| "#{n}" }
+    unit_code {"g"}
   end
 end

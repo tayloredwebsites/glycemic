@@ -3,6 +3,10 @@
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
 require 'smarter_csv'
+
+# code for importing USDA CSF files
+# how to call this code:
+# report, errors, debug, audit = ImportUsdaCsvFiles.perform(report_num, deb_arg)
 class ImportUsdaCsvFiles
 
   REGEX_BETWEEN_BRACKETS = /\[(.*?)\]/m
@@ -103,9 +107,15 @@ class ImportUsdaCsvFiles
   def initialize()
     @report = []
     @errors = []
+    @debug = []
+    @audit = []
+    @food_rec_count = Food.all.count
+    log_debug("Food Records at start: #@food_rec_count")
   end
 
-  def self.perform(step_num)
+  def self.perform(step_num, debug_mode=false)
+    # debug mode (print out debugging statements) only if passed in as true
+    @debug_mode = (debug_mode == false) ? false : (debug_mode == true) ? true : false
     serv_obj = self.new()
     serv_obj.run(step_num)
   end
@@ -113,9 +123,7 @@ class ImportUsdaCsvFiles
   # method to do all of the uploads of the usda csv files to initialize the database
   def run(step_num)
 
-    # TODO: accept step_num as a Range (e.g. 1..5), and call the steps specified in the range
-    #  - refactor to pull case statement out of this method
-
+    log_debug("debug mode: #{@debug_mode}")
     # NOTE: all of the uploads should be rerunnable.
     #   check to see if record exists by looking for the record based upon its primary specification fields (primary keys).
     #   If not found, add it, otherwise update all fields except the primary specification fields
@@ -152,10 +160,12 @@ class ImportUsdaCsvFiles
       )
     when 5
       load_foods_from_usda()
+    when 6
+      deact_empty_foods()
     else
       raise "invalid step number"
     end
-    return @report, @errors
+    return @report, @errors, @debug, @audit
   end
 
   # method to read any csv import file into any table
@@ -168,24 +178,24 @@ class ImportUsdaCsvFiles
   # @example
   #   see run() method for examples
   def import_csv_into_table(filename, model_clazz, ident_map) #, set_fields_xxx)
-    Rails.logger.debug("*********************************************************")
-    Rails.logger.debug("IMPORT CSV INTO TABLE")
-    Rails.logger.debug("*********************************************************")
+    log_debug("*********************************************************")
+    log_debug("IMPORT CSV INTO TABLE")
+    log_debug("*********************************************************")
 
     # TODO - remove dynamic set field methods after replacing with new set_fields method
     # load in usda categories if not loading lookup tables
     ident_h = ident_map['ident']
     mapping_h = ident_map['map']
     clazz = ident_map['clazz']
-    Rails.logger.debug("&&& clazz: #{clazz.inspect}")
+    log_debug("&&& clazz: #{clazz.inspect}")
     # load in existing food category mapping if lookup tables have been loaded (previously)
     @usda_cats_by_id = load_usda_cats_by_usda_id() if ident_h[:lu_table].blank?
-    # Rails.logger.debug("### @usda_cats_by_id: #{@usda_cats_by_id.inspect}")
+    # log_debug("### @usda_cats_by_id: #{@usda_cats_by_id.inspect}")
 
     @report << '*** updated mapped_row:'
     msg = "Start of Importing of #{model_clazz} table"
-    Rails.logger.debug("*** msg: #{msg}")
-    Rails.logger.debug("*** record layout: #{model_clazz.new.inspect}")
+    log_debug("*** msg: #{msg}")
+    log_debug("*** record layout: #{model_clazz.new.inspect}")
     @report << msg
     start_rec_count = model_clazz.all.count
     # read in usda categories into lookup tables:
@@ -195,7 +205,7 @@ class ImportUsdaCsvFiles
     options = { chunk_size: chunk_size } # {:key_mapping => {:unwanted_row => nil, :old_row_name => :new_name}}
     n = SmarterCSV.process(filename, options) do |array|
       array.each_with_index do |row, ix|
-        Rails.logger.debug("@@@ row: #{row.inspect}")
+        log_debug("@@@ row: #{row.inspect}")
         rec_num = chunk_num * chunk_size + ix + 1
         msg = ''
         errors = []
@@ -203,25 +213,25 @@ class ImportUsdaCsvFiles
         # create a row with field names are mapped to the record field names
         #   values in the mapped row will be the actual values from the input row
         mapped_row = map_row(ident_map, row)
-        Rails.logger.debug("### mapped_row: #{mapped_row.inspect}")
+        log_debug("### mapped_row: #{mapped_row.inspect}")
         
         # create the where string and matching hash to find all matching records (see ident hash)
         ident_hc, ident_where = get_ident_for_row(ident_map, row, mapped_row)
-        # Rails.logger.debug("### ident_hc: #{ident_hc.inspect}")
-        # Rails.logger.debug("### ident_where: #{ident_where.inspect}")
+        # log_debug("### ident_hc: #{ident_hc.inspect}")
+        # log_debug("### ident_where: #{ident_where.inspect}")
 
         # ensure that for has all of the matching fields
         ident_h.each do |fk, fv|
-          Rails.logger.debug("%%% checking identifier: #{fk.inspect}, #{fv.inspect}")
+          log_debug("%%% checking identifier: #{fk.inspect}, #{fv.inspect}")
           if fv[0] == ':' && fv.split('<').length > 1
-            Rails.logger.debug("%%% we have a JSON identifier, skip for database where clause validation")
+            log_debug("%%% we have a JSON identifier, skip for database where clause validation")
           else
             if ident_hc[fk].nil? || ident_hc[fk].blank?
               msg = "missing match field for row: #{row.inspect}"
-              Rails.logger.debug("%%% #{msg}")
+              log_debug("%%% #{msg}")
               # errors << msg
             else
-              Rails.logger.debug("%%% we have a matching where clause item: #{ident_hc[fk]}")
+              log_debug("%%% we have a matching where clause item: #{ident_hc[fk]}")
             end
           end
         end
@@ -241,8 +251,8 @@ class ImportUsdaCsvFiles
           errors << msg
           Rails.logger.error("Error: #{msg}")
         end
-        Rails.logger.debug("###### msg: #{msg.inspect}")
-        # Rails.logger.debug("### errors: #{errors.inspect}")
+        log_debug("###### msg: #{msg.inspect}")
+        # log_debug("### errors: #{errors.inspect}")
         @report << msg if msg.present?
         @errors.concat(errors) if errors.present? && errors.count > 0
       end
@@ -254,7 +264,7 @@ class ImportUsdaCsvFiles
     Rails.logger.info("***#{msg}")
     @report << msg
     # Rails.logger.error("ERRORs: #{@errors.inspect}") if @errors.count > 0
-    # Rails.logger.debug("### @report: #{@report.inspect}")
+    # log_debug("### @report: #{@report.inspect}")
   end
 
   # method to find the matching record in the database, and update it (or create anew)
@@ -273,12 +283,12 @@ class ImportUsdaCsvFiles
 
     if matching.count == 1
       # update the existing record
-      Rails.logger.debug("@@@ matching #{matching.first.inspect}")
+      log_debug("@@@ matching #{matching.first.inspect}")
       rec = matching.first
       msg, set_errors = set_fields_and_save(rec, mapped_row, mapping_h)
     else
       # add a new record
-      Rails.logger.debug("@@@ no matches")
+      log_debug("@@@ no matches")
       rec = model_clazz.new()
       msg, set_errors = set_fields_and_save(rec, mapped_row, mapping_h)
     end
@@ -296,28 +306,28 @@ class ImportUsdaCsvFiles
   #   msg: success or failure method to go to report
   #   errors_a: array of error messages to be appended to error report
   def set_fields_and_save(rec, mapped_row, mapping_h)
-    Rails.logger.debug("*********************************************************")
-    Rails.logger.debug("SET FIELDS AND SAVE")
-    Rails.logger.debug("*********************************************************")
+    log_debug("*********************************************************")
+    log_debug("SET FIELDS AND SAVE")
+    log_debug("*********************************************************")
 
     # TODO - note that the syntax for identifying hash entries has the key followed by <:
     #  make sure to look for duplicate fdc_id keys in the json field, then add key/value
     #  do not allow blank food names
 
-    Rails.logger.debug "*** mapped_row: #{mapped_row.inspect}"
+    log_debug "*** mapped_row: #{mapped_row.inspect}"
 
     errors_a = []
     
     # loop through mapped_row and set the fields
     mapped_row.each do |fld, new_val|
-      Rails.logger.debug("### updating record value for field: #{fld} with value #{new_val}")
+      log_debug("### updating record value for field: #{fld} with value #{new_val}")
       existing_rec_val = rec.read_attribute(fld)
       if existing_rec_val.present? && existing_rec_val != new_val && mapping_h[fld].present?
           msg = "ERROR: cannot change field to match records with.  #{fld.inspect}: #{mapping_h[fld].inspect}, Row: #{mapped_row.inspect}"
           Rails.logger.error(msg)
           errors_a << msg
       else
-        Rails.logger.debug("changing value for #{fld} from #{existing_rec_val} to #{new_val}")
+        log_debug("changing value for #{fld} from #{existing_rec_val} to #{new_val}")
         rec.write_attribute(fld, new_val)
       end
     end
@@ -336,7 +346,7 @@ class ImportUsdaCsvFiles
         errors_a << msg
       else
         msg = "*** updated mapped_row: #{mapped_row.inspect}, rec_id: #{rec.id}"
-        Rails.logger.debug msg
+        log_debug msg
       end
     end
     return msg, errors_a
@@ -361,20 +371,20 @@ class ImportUsdaCsvFiles
   # @param initial ident_h hash from initial call for csv file upload
   # @return - [ <updated ident hash with values from row>, <where clause to get matching records> ]
   def get_ident_for_row(ident_map, row, mapped_row)
-    Rails.logger.debug("*********************************************************")
-    Rails.logger.debug("GET ident FOR ROW")
-    Rails.logger.debug("*********************************************************")
+    log_debug("*********************************************************")
+    log_debug("GET ident FOR ROW")
+    log_debug("*********************************************************")
     mapping_h = ident_map['map']
     ident_h = ident_map['ident']
     model_clazz = ident_map['clazz']
-    Rails.logger.debug("xxx get_ident_for_row mapping_h #{mapping_h.inspect}")
-    Rails.logger.debug("xxx get_ident_for_row ident_h #{ident_h.inspect}")
-    Rails.logger.debug("xxx get_ident_for_row mapped_row #{mapped_row.inspect}")
-    Rails.logger.debug("xxx get_ident_for_row model_clazz #{model_clazz.inspect}")
+    log_debug("xxx get_ident_for_row mapping_h #{mapping_h.inspect}")
+    log_debug("xxx get_ident_for_row ident_h #{ident_h.inspect}")
+    log_debug("xxx get_ident_for_row mapped_row #{mapped_row.inspect}")
+    log_debug("xxx get_ident_for_row model_clazz #{model_clazz.inspect}")
     ident_h.each do |fk,fv|
-      Rails.logger.debug("### ident_h: fk: #{fk},  #{fv}")
+      log_debug("### ident_h: fk: #{fk},  #{fv}")
     end
-    Rails.logger.debug("xxx get_ident_for_row row #{row.inspect}")
+    log_debug("xxx get_ident_for_row row #{row.inspect}")
     mapped_ident = HashWithIndifferentAccess.new()
 
     # build the where clause and fill the ident_h with current row values for finding matching record
@@ -383,26 +393,26 @@ class ImportUsdaCsvFiles
     # loop through record fields
     row.each do |k,v|
       # note no append / json fields allowed here.
-      Rails.logger.debug("^^^ row - k: #{k.inspect} v: #{v.inspect}")
+      log_debug("^^^ row - k: #{k.inspect} v: #{v.inspect}")
       # check if row field is mapped, and if so, use the mapped field name for the where clause
       action, to_json_fields_a = get_mapping_type(mapping_h, k, row)
-      Rails.logger.debug("### get_mapping_type - action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
-      Rails.logger.debug("### mapping_h[k]: #{mapping_h[k]}")
+      log_debug("### get_mapping_type - action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
+      log_debug("### mapping_h[k]: #{mapping_h[k]}")
       if action == 'set' && mapping_h[k].present?
-        Rails.logger.debug("$$$ row for #{k.inspect} is #{ident_h[k].blank? ? "not" : ''} an identifier (#{ident_h[k]}), and mapped to #{mapping_h[k]}")
+        log_debug("$$$ row for #{k.inspect} is #{ident_h[k].blank? ? "not" : ''} an identifier (#{ident_h[k]}), and mapped to #{mapping_h[k]}")
         row_field = mapping_h[k] # replace the uploaded field to the mapped database field
         row_field = row_field[1..] if row_field[0] == ':' # ignore any leading : in the mapping definition
       else
-        Rails.logger.debug("$$$ row for #{k.inspect} is not a database identifier field")
+        log_debug("$$$ row for #{k.inspect} is not a database identifier field")
         row_field = k
       end
-      Rails.logger.debug("### ident_h[row_field]: #{ident_h[row_field]}")
-      Rails.logger.debug("### ident_h[k]: #{ident_h[k]}")
+      log_debug("### ident_h[row_field]: #{ident_h[row_field]}")
+      log_debug("### ident_h[k]: #{ident_h[k]}")
       if ident_h[k].present?
         if action == 'hash'
-          Rails.logger.debug("Is a JSON identifier : do not put in where clause.")
+          log_debug("Is a JSON identifier : do not put in where clause.")
         else
-          Rails.logger.debug("Is an identifier : put in where clause. setting #{k.inspect} #{row_field.inspect} to #{v}")
+          log_debug("Is an identifier : put in where clause. setting #{k.inspect} #{row_field.inspect} to #{v}")
           f_type = get_field_type(model_clazz, row_field)
           case f_type
           when 'integer', :integer
@@ -414,16 +424,16 @@ class ImportUsdaCsvFiles
           else
             raise "halt missing field type: #{f_type.inspect}"
           end
-          Rails.logger.debug("### updated ident_hc: #{ident_hc.inspect}")
-          Rails.logger.debug("### updated ident_where: #{ident_where_a.inspect}")
+          log_debug("### updated ident_hc: #{ident_hc.inspect}")
+          log_debug("### updated ident_where: #{ident_where_a.inspect}")
         end
       else
-        Rails.logger.debug("Not Matched : not in ident")
+        log_debug("Not Matched : not in ident")
       end
     end
-    Rails.logger.debug("$$$ ident_hc: #{ident_hc.inspect}")
+    log_debug("$$$ ident_hc: #{ident_hc.inspect}")
     ident_where = ident_where_a.join(' AND ')
-    Rails.logger.debug("$$$ ident_where: #{ident_where.inspect}")
+    log_debug("$$$ ident_where: #{ident_where.inspect}")
     return ident_hc, ident_where # , mapped_row
   end
 
@@ -438,7 +448,7 @@ class ImportUsdaCsvFiles
   #   mv_split: the single value field, or the json field with its hash keys
   def get_mapping_type(mapping_h, k, row)
     # lookup the mapping for this field
-    Rails.logger.debug("### k: #{k}, mapping_h[k]: #{mapping_h[k]}")
+    log_debug("### k: #{k}, mapping_h[k]: #{mapping_h[k]}")
     map_v = mapping_h[k]
     if !map_v.nil?
       # parse out the mapping and return the field(s) to go to
@@ -447,7 +457,7 @@ class ImportUsdaCsvFiles
         map_2 = map_v[1..]
         mv_split = map_2.split('<')
       end
-      Rails.logger.debug("### mv_split: #{mv_split.inspect}")
+      log_debug("### mv_split: #{mv_split.inspect}")
       action = {0 => 'constant', 1 => 'set', 2 => 'hash', 3 => 'hash'}[mv_split.length]
     else
       action = 'none'
@@ -465,13 +475,13 @@ class ImportUsdaCsvFiles
   # #    with the mappings for this input row field
   # def set_maps_for_row_field(mapping_h, rf, row)
   #   # lookup the mappings for this field
-  #   Rails.logger.debug("### rf: #{rf}, mapping_h[rf]: #{mapping_h[rf]}")
+  #   log_debug("### rf: #{rf}, mapping_h[rf]: #{mapping_h[rf]}")
   #   map_v = mapping_h[rf]
   #   rf_mappings = []
   #   if map_v.present?
   #     # parse out the mapping and return the field(s) to go to
   #     if map_v.is_a?(Array)
-  #       Rails.logger.debug("### Mapping is an array")
+  #       log_debug("### Mapping is an array")
   #       rf_mappings = map_v
   #     else
   #       rf_mappings = [ map_v ]
@@ -501,13 +511,13 @@ class ImportUsdaCsvFiles
   #           else
   #             raise "invalid field name in mapping: #{map_2.inspect}, #{afer_brackets.inspect}"
   #           end
-  #           Rails.logger.debug("### set_maps... set_field_name: #{set_field_name.inspect} = lookup_clazz: #{lookup_clazz.inspect}, lookup_field_name: #{set_field_name} =  #{set_field_match_val}")
+  #           log_debug("### set_maps... set_field_name: #{set_field_name.inspect} = lookup_clazz: #{lookup_clazz.inspect}, lookup_field_name: #{set_field_name} =  #{set_field_match_val}")
   #           # Lookup the value in the table
   #           recs = lookup_clazz.constantize.where("#{set_field_name} = ?", set_field_match_val)
   #           if recs.size == 1
   #             # we matched the lookup field exactly, lets use it
   #             rec = recs.first
-  #             Rails.logger.debug("### matched lookup exactly: rec.id: #{rec.id} to go in field #{set_field_name}")
+  #             log_debug("### matched lookup exactly: rec.id: #{rec.id} to go in field #{set_field_name}")
   #             @mapped_row[set_field_name] = rec.id
   #           else
   #             raise "cannot find match for lookup #{recs.size}"
@@ -517,16 +527,16 @@ class ImportUsdaCsvFiles
   #           # we have a mapping to a field in this table
   #           mv_split = map_2.split('<')
   #           # # get_ident_for_row functionality for single field set
-  #           # Rails.logger.debug("$$$ row for #{k.inspect} is an identifier, and mapped to #{mapping_h[k]}")
+  #           # log_debug("$$$ row for #{k.inspect} is an identifier, and mapped to #{mapping_h[k]}")
   #           # row_field = mapping_h[k] # replace the uploaded field to the mapped database field
   #           # row_field = row_field[1..] if row_field[0] == ':' # ignore any leading : in the mapping definition
 
   #           # # map_row functionality for single field set
-  #           # Rails.logger.debug("set field: #{to_json_fields_a[0]} to value #{row[fld.to_sym]}")
+  #           # log_debug("set field: #{to_json_fields_a[0]} to value #{row[fld.to_sym]}")
   #           # mapped_row[to_json_fields_a[0]] = row[fld.to_sym]
      
   #           # # get_ident_for_row functionality for hash
-  #           # Rails.logger.debug("Is an identifier : put in where clause. setting #{k.inspect} #{row_field.inspect} to #{v}")
+  #           # log_debug("Is an identifier : put in where clause. setting #{k.inspect} #{row_field.inspect} to #{v}")
   #           # f_type = get_field_type(model_clazz, row_field)
   #           # case f_type
   #           # when 'integer', :integer
@@ -540,28 +550,28 @@ class ImportUsdaCsvFiles
   #           # end
   
   #           # # map_row functionality for hash
-  #           # Rails.logger.debug("add to json/hash field: #{key} to #{row[fld.to_sym]}")
+  #           # log_debug("add to json/hash field: #{key} to #{row[fld.to_sym]}")
   #           # # mapped_row[key] = row[fld]
   #           # field_with_json = to_json_fields_a[0]
-  #           # Rails.logger.debug("### field_with_json: #{field_with_json.inspect}")
+  #           # log_debug("### field_with_json: #{field_with_json.inspect}")
   #           # mapped_row[field_with_json] = HashWithIndifferentAccess.new() if mapped_row[field_with_json].nil?
-  #           # Rails.logger.debug("### mapped_row for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
+  #           # log_debug("### mapped_row for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
   #           # json_item_key1 = to_json_fields_a[1]
-  #           # Rails.logger.debug("### json_item_key1.to_sym: #{ json_item_key1.to_sym }")
+  #           # log_debug("### json_item_key1.to_sym: #{ json_item_key1.to_sym }")
   #           # mapped_json_item_key1 = row[json_item_key1.to_sym]
-  #           # Rails.logger.debug("### mapped_json_item_key1: #{ mapped_json_item_key1.inspect }")
-  #           # Rails.logger.debug("map mapped_row[mapped_json_item_key1]: #{mapped_row[field_with_json][mapped_json_item_key1].inspect}")
+  #           # log_debug("### mapped_json_item_key1: #{ mapped_json_item_key1.inspect }")
+  #           # log_debug("map mapped_row[mapped_json_item_key1]: #{mapped_row[field_with_json][mapped_json_item_key1].inspect}")
   #           # if mapped_row[field_with_json][mapped_json_item_key1].nil?
   #           #   mapped_row[field_with_json][mapped_json_item_key1] = HashWithIndifferentAccess.new()
-  #           #   Rails.logger.debug("### mapped_row  for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
+  #           #   log_debug("### mapped_row  for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
   #           # end
   #           # if to_json_fields_a.length == 2
-  #           #   Rails.logger.debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
+  #           #   log_debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
   #           #   mapped_row[field_with_json][mapped_json_item_key1][json_item_key1] = row[fld.to_sym]
   #           # else
   #           #   json_item_key2 = to_json_fields_a[2]
-  #           #   Rails.logger.debug("### json_item_key2: #{ json_item_key2.inspect }")
-  #           #   Rails.logger.debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
+  #           #   log_debug("### json_item_key2: #{ json_item_key2.inspect }")
+  #           #   log_debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
   #           #   mapped_row[field_with_json][mapped_json_item_key1][json_item_key2] = row[fld.to_sym]
   #           # end
     
@@ -571,7 +581,7 @@ class ImportUsdaCsvFiles
   #         in_paren = map_2[REGEX_BETWEEN_PAREN, 1]
   #         if in_paren.present?
   #           # custom coded functionality
-  #           Rails.logger.debug("### in parenthesis: #{in_paren.inspect}")
+  #           log_debug("### in parenthesis: #{in_paren.inspect}")
   #           case map_2[REGEX_BEFORE_PAREN, 1]
   #           when 'variance'
   #             # get the field names for the mean, variance, and json array of values
@@ -581,16 +591,16 @@ class ImportUsdaCsvFiles
   #           end
   #         else
   #           # otherwise we have a constant
-  #           # Rails.logger.debug("$$$ row for #{k.inspect} is not a database identifier field")
+  #           # log_debug("$$$ row for #{k.inspect} is not a database identifier field")
   #           # row_field = k
 
   #           # # map_row functionality
-  #           # Rails.logger.debug("$$$ CONSTANT set field: #{fld} to value #{val}")
+  #           # log_debug("$$$ CONSTANT set field: #{fld} to value #{val}")
   #           # mapped_row[fld] = val
   #           # # rec.write_attribute(to_field, set_field_type(ident_map['clazz'], key, row[fld]))
   #         end
   #       end
-  #       Rails.logger.debug("### mv_split: #{mv_split.inspect}")
+  #       log_debug("### mv_split: #{mv_split.inspect}")
   #       raise "we need to finish mapping code"
   #       action = {0 => 'constant', 1 => 'set', 2 => 'hash', 3 => 'hash'}[mv_split.length]
   #     end
@@ -607,58 +617,58 @@ class ImportUsdaCsvFiles
   # @param - row = the uploaded row=.
   # @return - the mapped row.
   def map_row(ident_map, row)
-    Rails.logger.debug("*********************************************************")
-    Rails.logger.debug("MAP ROW")
-    Rails.logger.debug("*********************************************************")
-    Rails.logger.debug "*** row: #{row.inspect}"
+    log_debug("*********************************************************")
+    log_debug("MAP ROW")
+    log_debug("*********************************************************")
+    log_debug "*** row: #{row.inspect}"
 
     @mapped_row = mapped_row = HashWithIndifferentAccess.new()
     
     # loop through mapping and set the fields
     # do not allow ident (matching) fields to be changed.
     ident_map['map'].each do |fld, val|
-      Rails.logger.debug("### mapping: #{fld.inspect} => #{val.inspect}")
+      log_debug("### mapping: #{fld.inspect} => #{val.inspect}")
       action, to_json_fields_a = get_mapping_type(ident_map['map'], fld, row)
       key = fld
-      Rails.logger.debug("map_row for #{key} - has action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
+      log_debug("map_row for #{key} - has action: #{action.inspect}, to_json_fields_a: #{to_json_fields_a.inspect}")
       case action
       when 'constant'
-        Rails.logger.debug("$$$ CONSTANT set field: #{fld} to value #{val}")
+        log_debug("$$$ CONSTANT set field: #{fld} to value #{val}")
         mapped_row[fld] = val
         # rec.write_attribute(to_field, set_field_type(ident_map['clazz'], key, row[fld]))
       when 'set'
-        Rails.logger.debug("set field: #{to_json_fields_a[0]} to value #{row[fld.to_sym]}")
+        log_debug("set field: #{to_json_fields_a[0]} to value #{row[fld.to_sym]}")
         mapped_row[to_json_fields_a[0]] = row[fld.to_sym]
       when 'hash'
-        Rails.logger.debug("add to json/hash field: #{key} to #{row[fld.to_sym]}")
+        log_debug("add to json/hash field: #{key} to #{row[fld.to_sym]}")
         # mapped_row[key] = row[fld]
         field_with_json = to_json_fields_a[0]
-        Rails.logger.debug("### field_with_json: #{field_with_json.inspect}")
+        log_debug("### field_with_json: #{field_with_json.inspect}")
         mapped_row[field_with_json] = HashWithIndifferentAccess.new() if mapped_row[field_with_json].nil?
-        Rails.logger.debug("### mapped_row for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
+        log_debug("### mapped_row for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
         json_item_key1 = to_json_fields_a[1]
-        Rails.logger.debug("### json_item_key1.to_sym: #{ json_item_key1.to_sym }")
+        log_debug("### json_item_key1.to_sym: #{ json_item_key1.to_sym }")
         mapped_json_item_key1 = row[json_item_key1.to_sym]
-        Rails.logger.debug("### mapped_json_item_key1: #{ mapped_json_item_key1.inspect }")
-        Rails.logger.debug("map mapped_row[mapped_json_item_key1]: #{mapped_row[field_with_json][mapped_json_item_key1].inspect}")
+        log_debug("### mapped_json_item_key1: #{ mapped_json_item_key1.inspect }")
+        log_debug("map mapped_row[mapped_json_item_key1]: #{mapped_row[field_with_json][mapped_json_item_key1].inspect}")
         if mapped_row[field_with_json][mapped_json_item_key1].nil?
           mapped_row[field_with_json][mapped_json_item_key1] = HashWithIndifferentAccess.new()
-          Rails.logger.debug("### mapped_row  for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
+          log_debug("### mapped_row  for field_with_json - #{field_with_json} = #{mapped_row[field_with_json]}")
         end
         if to_json_fields_a.length == 2
-          Rails.logger.debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
+          log_debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
           mapped_row[field_with_json][mapped_json_item_key1][json_item_key1] = row[fld.to_sym]
         else
           json_item_key2 = to_json_fields_a[2]
-          Rails.logger.debug("### json_item_key2: #{ json_item_key2.inspect }")
-          Rails.logger.debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
+          log_debug("### json_item_key2: #{ json_item_key2.inspect }")
+          log_debug("to add to json field: #{field_with_json} [ #{mapped_json_item_key1} ] with value #{row[fld.to_sym]}")
           mapped_row[field_with_json][mapped_json_item_key1][json_item_key2] = row[fld.to_sym]
         end
       when 'none'
         # skip this input field
       end
     end
-    Rails.logger.debug("### mapped_row: #{mapped_row.inspect}")
+    log_debug("### mapped_row: #{mapped_row.inspect}")
     return mapped_row
   end
 
@@ -700,18 +710,19 @@ class ImportUsdaCsvFiles
 
     @report << "FIX DUPLICATE NUTRITION RECORDS"
 
-    Rails.logger.debug "point duplicate nutrient records to single active one"
-    Rails.logger.debug "see dups in console using 'Nutrient.select(:name, :unit_code).group_by(&:name)'"
+    log_debug "point duplicate nutrient records to single active one"
+    log_debug "see dups in console using 'Nutrient.select(:name, :unit_code).group_by(&:name)'"
     n1a = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'MG')
     if n1a.present?
       n1b = Nutrient.find_by(name: "Oligosaccharides", unit_code: 'G')
       if n1b.present?
-        Rails.logger.debug "setting G Oligosaccharides record id: #{n1b.id} to point to  #{n1a.id}"
+        log_debug "setting G Oligosaccharides record id: #{n1b.id} to point to  #{n1a.id}"
         n1b.active = false
         n1b.use_this_id = n1a.id
         n1b.save
       else
-        raise "Missing G Oligosaccharides record"
+        # raise "Missing G Oligosaccharides record"
+        Rails.logger.error("Missing G Oligosaccharides record")
       end
     else
       raise "Missing MG Oligosaccharides record"
@@ -721,12 +732,13 @@ class ImportUsdaCsvFiles
     if n2a.present?
       n2b = Nutrient.find_by(name: "Energy", unit_code: 'KCAL')
       if n2b.present?
-        Rails.logger.debug "setting KCAL Energy record id: #{n2b.id} to point to  #{n2a.id}"
+        log_debug "setting KCAL Energy record id: #{n2b.id} to point to  #{n2a.id}"
         n2b.active = false
         n2b.use_this_id = n2a.id
         n2b.save
       else
-        raise "Missing KCAL Energy record"
+        # raise "Missing KCAL Energy record"
+        Rails.logger.error "Missing KCAL Energy record"
       end
     else
       raise "Missing kJ Energy record"
@@ -742,29 +754,35 @@ class ImportUsdaCsvFiles
 
     # load in existing food category mapping
     @usda_cats_by_id = load_usda_cats_by_usda_id()
-    # Rails.logger.debug("### @usda_cats_by_id: #{@usda_cats_by_id.inspect}")
+    # log_debug("### @usda_cats_by_id: #{@usda_cats_by_id.inspect}")
 
     @report << "LOAD FOODS FROM USDA"
     # msg = "Start of Importing of #{model_clazz} table"
-    # Rails.logger.debug("*** msg: #{msg}")
-    # Rails.logger.debug("*** record layout: #{model_clazz.new.inspect}")
+    # log_debug("*** msg: #{msg}")
+    # log_debug("*** record layout: #{model_clazz.new.inspect}")
     # @report << msg
 
     exit_msg = ''
+
+    # Loop through all UsdaFood records (to properly put it in a Food record)
     UsdaFood.all.each do |uf|
-      Rails.logger.debug("**************")
-      Rails.logger.debug("*** New UsdaFood record: #{uf.inspect}")
+      log_debug("**************")
+      log_debug("*** New UsdaFood record: #{uf.inspect}")
       break if exit_msg.present?
       reset_error_flag()
       log_error("ERROR: missing fdc_id in UsdaFood: #{uf.inspect}") if uf.fdc_id.blank?
       log_error("ERROR: Blank food name in UsdaFood: #{uf.inspect}") if uf.name.blank?
-    # get or create the matching food record
+
+      # get or create the matching food record into f variable
+      save_food_rec = false
       if !error_flagged?()
         matching_recs = Food.where(name: uf.name)
         if matching_recs.count == 0
           f = Food.new
           f.name = uf.name
           f.usda_fdc_ids_json = []
+          save_food_rec = true
+          log_audit("Adding a new food record for #{f.name}")
         elsif matching_recs.count == 1
           f = matching_recs.first
           log_error("ERROR: mismatched name food.name: #{f.name} != usda_food.name: #{uf.name}") if f.name != uf.name
@@ -772,16 +790,18 @@ class ImportUsdaCsvFiles
           f = matching_recs.first
           log_error("SYSTEM ERROR: duplicate food name found in foods table usda_food.name: #{uf.name}, count: #{matching_recs.count}")
         end
-        Rails.logger.debug("### Found Food record: #{f.inspect}")
+        log_debug("### Found Food record: #{f.inspect}")
         # check matching food category, or set it if new
         if f.usda_food_cat_id.blank?
           f.usda_food_cat_id = uf.usda_food_cat_id
+          save_food_rec = true
         elsif f.usda_food_cat_id != uf.usda_food_cat_id
           if (f.usda_food_cat_id == 9 && uf.usda_food_cat_id == 11) ||
             (f.usda_food_cat_id == 11 && uf.usda_food_cat_id == 9)
             # food is saved as both 9 - "Fruits and Fruit Juices" and as 11 - "Vegetables and Vegetable Products"
             # set food record as 11 "Vegetables and Vegetable Products"
             f.usda_food_cat_id = 11
+            save_food_rec = true
           elsif f.usda_food_cat_id.present? && uf.usda_food_cat_id.blank?
             # Usda Food record is missing category, use the existing food record category
           else
@@ -791,31 +811,40 @@ class ImportUsdaCsvFiles
         # TODO: set food record's wweia_food_cat_id when needed
       end
 
+      # update the food record's fdc_id json field
       if !error_flagged?()
-        # update the food record's fdc_id json field
-        Rails.logger.debug("### Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
-        f.usda_fdc_ids_json << uf.fdc_id.to_s unless f.usda_fdc_ids_json.include?(uf.fdc_id.to_s)
-        Rails.logger.debug("### Updated Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
-        f.save
-        log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
-        f.reload()
-        Rails.logger.debug("### Food record: #{f.inspect}")
+        log_debug("### Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
+        if !f.usda_fdc_ids_json.include?(uf.fdc_id.to_s)
+          # food record already contains the fdic in the fdic json field
+          f.usda_fdc_ids_json << uf.fdc_id.to_s
+          log_debug("### Updated Food Record fdc json: #{f.usda_fdc_ids_json.inspect}")
+        end
+        if save_food_rec == true
+          f.save
+          log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
+          f.reload()
+          log_debug("### Updated Food record: #{f.inspect}")
+          log_audit("Add/update a food record for #{f.name}")
+        end
       end
 
+      # add or update FoodNutrient records from UsdaFoodNutrient records
+      save_food_nut_rec = false
       if !error_flagged?() # && exit_msg.blank?
-        Rails.logger.debug("### no error saving food record")
+        log_debug("### no error saving food record")
         # Get all of the UsdaFoodNutrients for this UsdaFood by matching fdc_id (USDA food identifier)
         UsdaFoodNutrient.where(fdc_id: uf.fdc_id).each do |ufn|
-          Rails.logger.debug("**************")
-          Rails.logger.debug("*** New UsdaFoodNutrient record: #{ufn.inspect}")
+          log_debug("**************")
+          log_debug("*** New UsdaFoodNutrient record: #{ufn.inspect}")
           # see if the nutrient is already updated in the FoodNutrient record
           nut = Nutrient.find_by(usda_nutrient_id: ufn.usda_nutrient_id)
           if nut.blank?
             log_error("ERROR: Unable to find usda_nutrient_id for UsdaFood id: #{uf.id}, UsdaFoodNutrient id: #{ufn.usda_nutrient_id}")
           else
+
             # check for matching FoodNutrient record, or create a new one
             fn = FoodNutrient.find_by(food_id: f.id, nutrient_id: nut.id)
-            Rails.logger.debug("matching food nutrient: #{fn.inspect}")
+            log_debug("matching food nutrient: #{fn.inspect}")
             if fn.present?
               # confirm the food nutrient record matches this usda food nutrient
               log_error("ERROR: Invalid food_id for FoodNutrient id: #{fn.id}, fn.food_id: #{fn.food_id} != f.id: #{f.id}") if fn.food_id != f.id
@@ -826,7 +855,9 @@ class ImportUsdaCsvFiles
               fn.food_id = f.id
               fn.nutrient_id = nut.id
               fn.samples_json = {}
+              save_food_nut_rec = true
             end
+
             # update the food nutrient from this Usda food nutrient record
             # create json for samples.json field
             usda_samp = {
@@ -838,58 +869,118 @@ class ImportUsdaCsvFiles
               'time_entered': Time.now,
               # 'user_entered': '',
             }
+
             # add/update food nutrient data to samples.json field hash
-            fn.samples_json["fdc,#{ufn.fdc_id.to_s}"] = usda_samp
-            fn.save
-            fn.reload
-            Rails.logger.debug("### updated fn.samples_json: #{fn.samples_json.inspect}")
+            if fn.samples_json["fdc,#{ufn.fdc_id.to_s}"].nil?
+              fn.samples_json["fdc,#{ufn.fdc_id.to_s}"] = usda_samp
+              fn.save
+              fn.reload
+              log_debug("### updated fn.samples_json: #{fn.samples_json.inspect}")
+              save_food_nut_rec = true
+            end
+
+
             # compute mean from the updated samples.json field
             sum_weighted_amt = 0.0
             n = 0
             fn.samples_json.each do |key, samp|
-              # Rails.logger.debug("### samp: #{samp.inspect}")
+              # log_debug("### samp: #{samp.inspect}")
               sum_weighted_amt += samp['amount'].to_f * samp['weight'].to_f * samp['data_points'].to_f
               n += (samp['data_points'].present?) ? samp['data_points'].to_i : 1
-              # Rails.logger.debug("### sum_weighted_amt: #{sum_weighted_amt} #{sum_weighted_amt.inspect}")
-              # Rails.logger.debug("### n: #{n} #{n.inspect}")
+              # log_debug("### sum_weighted_amt: #{sum_weighted_amt} #{sum_weighted_amt.inspect}")
+              # log_debug("### n: #{n} #{n.inspect}")
             end
             mean = fn.amount = sum_weighted_amt / n
-            Rails.logger.debug("### mean: #{mean} #{mean.inspect}")
+            log_debug("### mean: #{mean} #{mean.inspect}")
+
             # compute sample var from the updated samples.json field
             sum_diff_mean_sq = 0.0
             fn.samples_json.each do |key, samp|
-              # Rails.logger.debug("### samp['amount']: #{samp['amount']} #{samp['amount'].inspect}")
+              # log_debug("### samp['amount']: #{samp['amount']} #{samp['amount'].inspect}")
               sum_diff_mean_sq += (samp['amount'].to_f - mean) ** 2
-              # Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
+              # log_debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
             end
-            # Rails.logger.debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
-            # Rails.logger.debug("### n: #{n} #{n.inspect}")
-            fn.variance = (n > 1) ? sum_diff_mean_sq / (n - 1) : 0
+            # log_debug("### sum_diff_mean_sq: #{sum_diff_mean_sq} #{sum_diff_mean_sq.inspect}")
+            # log_debug("### n: #{n} #{n.inspect}")
+            new_variance = (n > 1) ? sum_diff_mean_sq / (n - 1) : 0
+            if fn.variance != new_variance
+              fn.variance = new variance
+              save_food_nut_rec = true
+            end
           end
-          Rails.logger.debug("### fn: #{fn.inspect}")
+          log_debug("### fn: #{fn.inspect}")
           
-          Rails.logger.debug("### About to save.  log_error(: #{get_last_error().inspect}")
-          if !error_flagged?()
+          log_debug("### About to save.  log_error(: #{get_last_error().inspect}")
+          if !error_flagged?() && save_food_nut_rec == true
             # save the record
-            Rails.logger.debug("### Save fn #{fn.inspect}")
+            log_debug("### Save fn #{fn.inspect}")
             fn.save
             # report any errors
             log_error("ERROR saving FoodNutrient: #{fn.id}, fn.food_id: #{fn.food_id} fn.errors: #{fn.errors.full_messages.join('; ')}") if fn.errors.count > 0
+            @report << "Saved food Nutrient: #{f.id}-#{f.name} FoodNutrient: #{fn.id}"
           end
           # log_error('Halt after updating first food nutrient record')
           # raise "Halt"
         end # Loop trough UsdaFoodNutrient records
+      else #error_flagged?()
+        @errors << "ERROR updating Usda_food.id #{uf.id} fdc_id: #{uf.fdc_id}"
       end
     end # Loop through UsdaFood records
 
-    return @report, @errors
+    return
     
+  end
+
+  def deact_empty_foods()
+    Rails.logger.info("*********************************************************")
+    Rails.logger.info("DEACTIVATE EMPTY FOODS")
+    Rails.logger.info("*********************************************************")
+
+    @report << "DEACTIVATE EMPTY FOODS"
+
+    exit_msg = ''
+
+    # Loop through all UsdaFood records (to properly put it in a Food record)
+    Food.all.each do |f|
+      log_debug("**************")
+      log_debug("*** Food record: #{f.inspect}")
+      break if exit_msg.present?
+      reset_error_flag()
+      save_food_rec = false
+
+      if f.food_nutrients.count == 0
+        log_debug("*** Food record with no nutrients: #{f.id} #{f.name}")
+        f.active = false
+        save_food_rec = true
+        f.save
+        log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
+        f.reload()
+        log_debug("### Deactivated Food record: #{f.id} #{f.name}")
+        @report << "Deactivated food record for #{f.id} #{f.name}"git gug
+      end
+      
+    end
+
+    return
+
+  end
+
+  def log_debug(msg)
+    @debug << msg
+    log_debug(msg) if @debug_mode
   end
 
   def log_error(msg)
     @errors << msg
     Rails.logger.error(msg)
     @err_msg = msg
+  end
+
+  def log_audit(msg)
+    if @food_rec_count > 0
+      @audit << msg
+      log_debug(msg) if @debug_mode
+    end
   end
 
   def reset_error_flag()
