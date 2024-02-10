@@ -12,28 +12,41 @@
   <% end %>
 
   <div>
-    <%= form.label :id, style: "display: block" %>
+    <%= form.label :id %>
+    <%= form.id %>
+  </div>
+  
+  <div>
+    <%= form.label :id %>
     <%= form.id %>
   </div>
 
   <div>
-    <%= form.label :name, style: "display: block" %>
-    <%= form.text_field :name %>
+    <%= form.label :name %>
+    <%= form.text_field :name, class: "wide" %>
   </div>
 
   <div>
-    <%= form.label :usda_nutrient_id, style: "display: block" %>
-    <%= form.number_field :usda_nutrient_id %>
+    <%= form.label :usda_nutrient_id %>
+    <%= form.text_field :usda_nutrient_id %>
   </div>
 
   <div>
-    <%= form.label :usda_nutrient_num, style: "display: block" %>
-    <%= form.number_field :usda_nutrient_num %>
+    <%= form.label :usda_nutrient_num %>
+    <%= form.text_field :usda_nutrient_num %>
   </div>
 
   <div>
-    <%= form.label :unit_code, style: "display: block" %>
-    <%= form.text_area :unit_code %>
+    <%= form.label :unit_code %>
+    <select name="nutrient[unit_code]" class="wide">
+      <option value=""></option>
+      <% LookupTable::VALID_UNIT_CODES.each do |k, v| %>
+        <option value="<%= k %>" <%= (k == nutrient.unit_code) ? "  selected=selected" : "" %>>
+          <%= k %> - <%= v %>
+        </option>
+      <% end %>
+    </select>
+
   </div>
 
   <div>

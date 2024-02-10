@@ -188,6 +188,7 @@ class FoodNutrientsController < ApplicationController
     @nutrients = Nutrient
   end
 
+  # TODO: review this
   def set_unused_nutrients()
     @unused_nutrients = Nutrient.active_nutrients.where("NOT EXISTS (
         SELECT * FROM food_nutrients
@@ -197,6 +198,7 @@ class FoodNutrientsController < ApplicationController
 
   # get food_nutrient from either the food_nutrient id or food id params
   # TODO: consider splitting this and the next into two methods
+  # TODO: review this
   def set_food_nutrient_from_params(id_param, food_id_param)
     Rails.logger.debug("$$$ set_food_nutrient_from_params - param: #{params.inspect}")
     # Rails.logger.debug("$$$ set_food_nutrient_from_params - food_nutrient_params: #{food_nutrient_params.inspect}")

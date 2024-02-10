@@ -10,8 +10,12 @@ class Food < ApplicationRecord
   # scope :all_foods, -> { where(active: [true, false]) }
   # scope :all_foods, -> {}
 
-  # belongs_to :usda_food_cat_lu, class_name: :lookup_tables
-  # belongs_to :wweia_food_cat_lu, class_name: :lookup_tables
+  belongs_to :usda_food_cat,
+    class_name: "LookupTable",
+    foreign_key: "usda_food_cat_id"
+  belongs_to :wweia_food_cat,
+    class_name: "LookupTable",
+    foreign_key: "wweia_food_cat_id"
 
   serialize :usda_fdc_ids_json, JSON
 

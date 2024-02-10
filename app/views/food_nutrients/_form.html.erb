@@ -1,5 +1,17 @@
 <%= form_with(model: food_nutrient) do |form| %>
 
+  <% if food_nutrient.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(food.errors.count, "error") %> prohibited this food_nutrient from being saved:</h2>
+
+      <ul>
+        <% food_nutrient.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
   <div>
     <input type='hidden' id="food_nutrient_food_id" name="food_nutrient[food_id]" value="<%= @food.id %>"/>
     <%= form.label :nutrient_id %>
@@ -16,6 +28,7 @@
       <%= form.select :nutrient_id, nutrient_options %>
     <%
       else
+        # TODO: Review this.
         # This is a previously created food_nutrient, so the nutrient doesn't change - display it, no select.
         # Display the nutrient id as a hidden input field, so it is used for the update (consider dropping this)
         # Simply display the nutrient name (with an ID for testing)
@@ -26,18 +39,10 @@
   </div>
 
   <div>
-    <%= form.label :portion %>
-    <%= form.text_field :portion %>
-  </div>
-
-  <div>
     <%= form.label :amount %>
     <%= form.text_field :amount %>
-  </div>
-
-  <div>
-    <%= form.label :desc %>
-    <%= form.text_area :desc %>
+    <%= food_nutrient.nutrient.unit_code %>
+    per 100G
   </div>
 
   <div>

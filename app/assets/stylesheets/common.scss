@@ -32,6 +32,51 @@
   text-align: center;
 }
 
+form label {
+  font-weight: bold;
+  display: inline-block;
+  width: 170px;
+  text-align: right;
+  &:after {
+    content: ":";
+  }
+  margin-right: 5px;
+}
+
+form .thinnest {
+  width: 30px;
+}
+
+form .thinner {
+  width: 60px;
+}
+
+form .thin {
+  width: 90px;
+}
+
+form .wide {
+  width: 300px;
+}
+
+ul.viewItems {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Page Layout
+footer {
+  position: absolute;
+  width: 100%;
+  bottom:0;
+  font-size: 0.7em;
+  line-height: 2.0em;
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+// Index page Table styles
 .inactiveLink {
   pointer-events: none;
   cursor: not-allowed;
@@ -46,25 +91,16 @@
   text-decoration: none;
 }
 
-form label {
-  font-weight: bold;
-  ::after {
-    content: ":";
-  }
-}
-
-ul.viewItems {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-footer {
-  position: absolute;
-  width: 100%;
-  bottom:0;
-  font-size: 0.7em;
-  line-height: 2.0em;
+// why aren't these working ???
+td, th {
   text-align: center;
-  padding-bottom: 5px;
+}
+th.pct20, td.pct20, .pct20 {
+  width: 20%;
+}
+th.pct30, td.pct30 {
+  width: 30%;
+}
+th.pct40, td.pct40 {
+  width: 40%;
 }

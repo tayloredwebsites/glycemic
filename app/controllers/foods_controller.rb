@@ -54,6 +54,7 @@ class FoodsController < ApplicationController
   # PATCH/PUT /foods/1 or /foods/1.json
   def update
     respond_to do |format|
+      Rails.logger.debug("*** food_params: #{food_params.inspect}")
       if @food.update(food_params)
         format.html { redirect_to food_url(@food), notice: "Food was successfully updated." }
         format.json { render :show, status: :ok, location: @food }
@@ -106,6 +107,15 @@ class FoodsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def food_params
-    params.require(:food).permit(:id, :name, :desc, :usda_fdc_id)
+    params.require(:food).permit(
+      :id,
+      :name,
+      :food_portion_unit,
+      :food_portion_amount,
+      :usda_food_cat_id,
+      :wweia_food_cat_id,
+      :usda_fdc_ids_json,
+      :active,
+    )
   end
 end

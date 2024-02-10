@@ -1,0 +1,103 @@
+<!--
+# Diet Support Program
+# Copyright (C) 2023 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
+# Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      .header {
+        /* position: absolute; */
+        width: 100%;
+        top:0;
+        font-size: 0.7em;
+        line-height: 1.0em;
+        text-align: center;
+        margin-bottom: -10px;      }
+    </style>
+  </head>
+  <body>
+    <div class="header">Copyright (C) 2023 tayloredwebsites.com. Freely shared and licensed under <a href="https://opensource.org/license/agpl-v3/" target="_blank">AGPL-3.0-only</a></div>
+    <pre class="mermaid">
+      erDiagram
+
+      food_nutrients {
+        integer id PK
+        integer food_id FK
+        integer nutrient_id FK
+        float amount
+        boolean active
+        float variance
+      }
+
+      foods {
+        integer id PK
+        string name
+        string food_portion_unit
+        float food_portion_amount
+        integer usda_food_cat_id FK
+        integer wweia_food_cat_id FK
+        text usda_fdc_ids_json
+        boolean active
+      }
+
+      foods ||--o{ food_nutrients : contains
+
+      lookup_tables {
+        integer id PK
+        string lu_table
+        integer lu_id
+        string lu_code
+        text lu_desc
+        boolean active
+      }
+      lookup_tables ||--o{ foods : has_usda_food_cat
+      lookup_tables ||--o{ foods : has_wweia_food_cat
+    
+      nutrients {
+        integer id PK
+        string name
+        integer usda_nutrient_id
+        string usda_nutrient_num
+        integer use_this_id
+        boolean active
+        string unit_code
+        float rda
+      }
+      nutrients ||--o{ food_nutrients : has_amount_of
+      nutrients ||--o{ usda_food_nutrients : has_amount_of
+
+      usda_food_nutrients {
+        integer id PK
+        integer fdc_id FK
+        integer nutrient_id FK
+        integer usda_nutrient_id
+        integer usda_nutrient_num
+        float amount
+        integer data_points
+        boolean active
+      }
+      usda_food_nutrients ||--o{ nutrients : matches_nutrient
+      usda_food_nutrients ||--o{ food_nutrients : matches_food_and_nutrient
+
+      usda_foods {
+        integer id PK
+        string name
+        string usda_data_type
+        integer fdc_id
+        integer usda_food_cat_id FK
+        integer wweia_food_cat_id FK
+        boolean active
+      }
+      usda_foods ||--o{ usda_food_nutrients : has_nutrients
+      usda_foods ||--o{ foods : matches_name
+            
+    </pre>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+  </body>
+
+</html>

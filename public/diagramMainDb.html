@@ -74,32 +74,6 @@
         float rda
       }
       nutrients ||--o{ food_nutrients : has_amount_of
-      nutrients ||--o{ usda_food_nutrients : has_amount_of
-
-      usda_food_nutrients {
-        integer id PK
-        integer fdc_id FK
-        integer nutrient_id FK
-        integer usda_nutrient_id
-        integer usda_nutrient_num
-        float amount
-        integer data_points
-        boolean active
-      }
-      usda_food_nutrients ||--o{ nutrients : matches_nutrient
-      usda_food_nutrients ||--o{ food_nutrients : matches_food_and_nutrient
-
-      usda_foods {
-        integer id PK
-        string name
-        string usda_data_type
-        integer fdc_id
-        integer usda_food_cat_id FK
-        integer wweia_food_cat_id FK
-        boolean active
-      }
-      usda_foods ||--o{ usda_food_nutrients : has_nutrients
-      usda_foods ||--o{ foods : matches_name
     
       users {
         integer id PK
