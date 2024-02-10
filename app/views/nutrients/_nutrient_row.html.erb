@@ -6,9 +6,11 @@
   <td><%= nutrient.unit_code %></td>
   <td>
     <% if nutrient.active == true %>
+      <a href="/nutrients/<%= nutrient.id %>">View</a>
       <a href="/nutrients/<%= nutrient.id %>/edit">Edit</a>
       <a href="/nutrients/<%=nutrient.id%>" data-turbo-method="delete">Deactivate</a>
     <% else %>
+      <a href="/nutrients/<%= nutrient.id %>">View</a>
       <a href="/nutrients/<%= nutrient.id %>/edit" class="inactiveLink">Edit</a>
       <a href="/nutrients/<%=nutrient.id%>/reactivate">Reactivate</a>
     <% end %>

@@ -15,18 +15,11 @@
   </p>
 
   <p>
-    <strong>Portion:</strong>
-    <%= food_nutrient.portion %> <%= food_nutrient.portion_unit %>
-  </p>
-
-  <p>
     <strong>Amount:</strong>
-    <%= food_nutrient.amount %> <%= food_nutrient.amount_unit %>
-  </p>
+    <%= food_nutrient.amount %>
+    <%= food_nutrient.nutrient.unit_code %>
+    per 100G
 
-  <p>
-    <strong>Desc:</strong>
-    <%= food_nutrient.desc %>
   </p>
 
 </div>

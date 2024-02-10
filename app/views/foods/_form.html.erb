@@ -12,23 +12,57 @@
   <% end %>
 
   <div>
-    <%= form.label :id, style: "display: block" %>
+    <%= form.label :id %>
     <%= @food.id %>
   </div>
 
   <div>
-    <%= form.label :name, style: "display: block" %>
-    <%= form.text_field :name %>
+    <%= form.label :name %>
+    <%= form.text_field :name, class: "wide" %>
   </div>
 
   <div>
-    <%= form.label :desc, style: "display: block" %>
-    <%= form.text_area :desc %>
+    <%= form.label :portion %>
+    <%= form.text_field :food_portion_amount %>
+    <select name="food[food_portion_unit]">
+      <option value=""></option>
+      <% LookupTable::VALID_UNIT_CODES.each do |k, v| %>
+        <option value="<%= k %>"<%= (k == food.food_portion_unit) ? "  selected" : "" %>><%= k %> - <%= v %></option>
+      <% end %>
+    </select>
+
   </div>
 
   <div>
-    <%= form.label :usda_fdc_id, style: "display: block" %>
-    <%= form.text_field :usda_fdc_id %>
+    <%= form.label :usda_food_cat_id, "USDA Food Cat" %>
+    <select name="food[usda_food_cat_id]" class="wide">
+      <option value=""></option>
+      <% LookupTable.where(lu_table: "usda_cat").order(:lu_code).each do |rec| %>
+        <option value="<%= rec.id %>"<%= (rec.id == food.usda_food_cat_id) ? "  selected" : "" %>><%= rec.lu_desc %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <div>
+    <%= form.label :wweia_food_cat_id, "WWEIA Food Cat" %>
+    <select name="food[wweia_food_cat_id]" class="wide">
+      <option value=""<%= (Food.where(wweia_food_cat_id: food.wweia_food_cat_id).count == 0) ? " selected" : "" %>></option>
+      <% LookupTable.where(lu_table: "wweia_cat").order(:lu_code).each do |rec| %>
+        <option value="<%= rec.id %>"<%= (rec.id == food.wweia_food_cat_id) ? "  selected" : "" %>><%= rec.lu_desc %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <div>
+    <label>Active</label>
+    <label class="thinner">True</label><input type="radio" name="food[active]"<%= ' checked' if food.active == true %> value='true'>
+    <label class="thinner">False</label><input type="radio" name="food[active]"<%= ' checked' if food.active == false %> value='false'>
+  </div>
+  
+
+  <div>
+    <%= form.label :usda_fdc_ids_json, "USDA_FDIC_IDs" %>
+    <%= form.text_area :usda_fdc_ids_json, class: "wide" %>
   </div>
 
   <div>

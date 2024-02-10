@@ -1,0 +1,46 @@
+
+
+/* *************************************************************************************
+Table row dynamically collapse for thin screens using flex
+*/
+@media (max-width: 899px) {
+  table thead {
+    display: none;
+  }
+  table tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    margin-top: 10px;
+  }
+  table {
+    margin: 10px 0;
+    text-align: left;
+    border-collapse: collapse;
+    border: 1px solid var(--table-border);
+  }
+  table tr td, table tr th {
+    text-align: left;
+    width: 100%;
+  }
+  table tr td strong{
+    text-align: left;
+    width: 100%;
+  }
+  
+}
+
+/* *************************************************************************************
+Normal Table display for wide screens
+*/
+@media (min-width: 900px) {
+  table td strong {
+    display: none;
+  }
+  table tbody tr {
+    display: table-row
+  }
+  table tr td, table tr th {
+    text-align: center;
+  }
+}
