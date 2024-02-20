@@ -2,12 +2,21 @@
 # Copyright (C) 2023 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
-# Function to do assertions on a select tag with options (by params passed) in controller tests
-# example: <select id="portion_unit">
+###
+### this file includes some helper assert functions to work within minitest.
+### the 'assert_select_has' function will do a variety of common validations on the test pages select statement, such as: checking the number of options, or checking the selected / displayed option
+### the 'assert_page_headers' function will validate all of the headers for the the diet_support applicaion
+### the 'assert_link_has' function will match selected values with the page that the link points to.
+
+### Function to do assertions on a select tag with options (by params passed) in controller tests
+### For Example:
+### if the test Results in a page that has the the following html:
+# <select id="portion_unit">
 #  <option value="g">gram</option>
 #  <option label="mg" value="mg" selected>milligram</option>
 # </select>
-# e.g. all params used, returns true: {
+### Then the following statement in a test returns true: 
+#  assert_select_has(page, '<select_element_id>', {
 #   :options_count => 2,
 #   :selected_count => 1,
 #   :displayed_option => "milligram",
@@ -18,7 +27,7 @@
 #   :match_by_text => true,
 #   :debugging => true,
 # }
-# only matching done will be on params that are passed
+# Note: only matching done will be on params that are passed in the (params) hash
 # { :displayed_option => gram } will return false
 # { :selected => [ "xxx" => 'milligram'], :match_by_text } will return true
 # { :selected => [ "xxx" => 'milligram'], :match_by_value } will return false
@@ -74,16 +83,32 @@ def get_option_text_or_label(option)
   ret
 end
 
-def assert_page_headers(noko_page, links_hash)
+# function to validate the page headers (for any page)
+# Arguments:
+# - noko_page - page from nokogiri
+#   - e.g. page = Nokogiri::HTML.fragment(response.body)
+# - links_hash - array of links on the page
+#   - e.g. links_h = get_links_hashes(page)
+# Parameters Hash:
+#   - current_food_record - @food value used in controller for view
+#   - debugging_mode - true or false to display extra debugging statements
+# e.g.
+#   assert_page_headers(page, links_h, {
+#     current_food_record: created_food,
+#     debugging_mode: true,
+#   })
+def assert_page_headers(noko_page, links_hash, params)
+  current_food_record = (params[:current_food_record].present?) ? params[:current_food_record] : nil
+  debugging_mode = (params[:debugging_mode].present? ? params[:debugging_mode] === true : false)
   Rails.logger.debug("$$$ assert_page_headers")
-  if @food.present?
+  if current_food_record.present?
     Rails.logger.debug("$$$ assert_page_headers food present")
     assert_link_has(links_hash, {
-      link_text: "#{@food.name} Nutrients",
-      link_url: "/nutrients_of_food/#{@food.id}",
+      link_text: "#{current_food_record.name} Nutrients",
+      link_url: "/nutrients_of_food/#{current_food_record.id}",
       page_title: "Nutrients of Food Listing",
       page_subtitle: "for food:",
-      page_subtitle2: @food.name,
+      page_subtitle2: current_food_record.name,
     })
   else
     Rails.logger.debug("$$$ assert_page_headers - food not present")
@@ -115,16 +140,18 @@ def assert_page_headers(noko_page, links_hash)
 
 end
 
-# Function to do assertions on a link tag (by params passed) in controller tests
-# example:
-#   Link: <a href="LinkURL">LinkText</a>
-#   Page at LinkURL:
-#     <html>
-#       <head><title>PageTitleText</title></head>
-#       <body><h1>AppTitleText</h1><h2>SubtitleText<br/>Subtitle2Text</h2></body>
-#     </html>
-# e.g. all params used, returns true:
-# params: {
+### Function to do assertions on a link tag and the resulting page in controller tests
+### For Example:
+### if the page returned results in a page that has the the following html:
+# <a href="LinkURL">LinkText</a>
+### and if the link were to be clicked (in the test) and it resulted in the following html: 
+# <html>
+#   <head><title>PageTitleText</title></head>
+#   <body><h1>AppTitleText</h1><h2>SubtitleText<br/>Subtitle2Text</h2></body>
+# </html>
+### Then the following statement in a test returns true: 
+# links_hash = get_links_hashes(page)
+# assert_link_has(links_hash, {
 #   :link_text => 'LinkText',
 #   :link_url => 'LinkURL',
 #   :match_by_text => true, # default, not needed to be explicitly stated
@@ -140,12 +167,12 @@ end
 # }
 # only matching done will be on params that are passed
 def assert_link_has(links_hash, params)
-  Rails.logger.debug("$$$ assert_link_has")
+  # Rails.logger.debug("$$$ assert_link_has params[:debugging]: #{params[:debugging]}")
 
   debug_mode = (params[:debugging] && params[:debugging] == true) ? true : false
 
-  Rails.logger.debug("$$$ assert_link_has params: #{JSON.pretty_generate(params)}") if debug_mode
-  Rails.logger.debug("$$$ assert_link_has links_hash: #{JSON.pretty_generate(links_hash)}") if debug_mode
+  # Rails.logger.debug("$$$ assert_link_has links_hash: #{JSON.pretty_generate(links_hash)}") if debug_mode
+  Rails.logger.debug("$$$ assert_link_has params: #{JSON.pretty_generate(params)}") #if debug_mode
 
   # Check to make sure the URL and Link Text match
   # if params[:match_by_url].present? && (params[:match_by_url] == true || params[:match_by_url] == 'true')
@@ -157,7 +184,7 @@ def assert_link_has(links_hash, params)
     Rails.logger.debug("$$$ Match by Text, to see if lookup of params[:link_text] match params[:link_url]") if debug_mode
     assert(links_hash[:by_text][params[:link_text]].present?, "lookup of text: #{params[:link_text]} does not exist")
     assert(links_hash[:by_text][params[:link_text]].count > 0, "lookup of text: #{params[:link_text]} [:href] does not exist")
-    matched, matched_item = in_by_text_hash(links_hash, params[:link_text], params[:link_url])
+    matched, matched_item = in_by_text_hash(links_hash, params[:link_text], params[:link_url], debug_mode)
     assert(matched, "lookup of link text #{params[:link_text]} does not have url: #{params[:link_url]}")
   else
     # This is the default, to look find the Link Text for an href (in the anchor tags on the page)
@@ -169,14 +196,14 @@ def assert_link_has(links_hash, params)
     # confirm links hash by href has a value matching the link_url param
     assert(links_hash[:by_href][params[:link_url]].present?, "lookup of link url: #{params[:link_url]} does not exist")
     assert(links_hash[:by_href][params[:link_url]].count > 0, "lookup of link url: #{params[:link_url]} has no items")
-    matched, matched_item = in_by_href_hash(links_hash, params[:link_url], params[:link_text])
+    matched, matched_item = in_by_href_hash(links_hash, params[:link_url], params[:link_text], debug_mode)
     assert(matched, "lookup of link url #{params[:link_url]} does not have text: #{params[:link_text]}")
   end
 
   if params[:page_title].present? || params[:page_subtitle].present? || params[:page_subtitle2].present? || params[:not_page_title].present?
     # confirm link goes to where we expect it
     if matched_item[:method] == 'delete'
-      delete(matched_item[:href])
+      delete(matched_item[:href])   # TODO: should we be doing this delete here?
     else
       get(matched_item[:href])
     end
@@ -214,6 +241,7 @@ def assert_link_has(links_hash, params)
       assert_not matched_item[:class].include?(cls.strip())
     end
   end
+  Rails.logger.debug("*** successfully finished 'assert_link_has' function.")
 end
 
 def in_by_text_hash(links_hash, link_text, link_url)
@@ -221,20 +249,28 @@ def in_by_text_hash(links_hash, link_text, link_url)
     Rails.logger.debug("$$$ page_link: #{page_link.inspect}")
     return true if page_link[:href].include?(link_url)
   end
+  Rails.logger.debug("$$$ link_text not found: #{link_text.inspect}")
   return false, {}
 end
 
-def in_by_href_hash(links_hash, link_url, link_text)
-  Rails.logger.debug("$$$ in_by_href_hash: #{link_url} to match #{link_text}")
+def in_by_href_hash(links_hash, link_url, link_text, debug_mode = false)
+  Rails.logger.debug("$$$ in_by_href_hash: #{link_url} points to page with title: #{link_text}")
+  # ToDo: confirm we need a loop here (will there be duplicate URLs on a page?)
+  debug_all_links = []
   links_hash[:by_href][link_url].each do |page_link|
+    debug_all_links << "#{page_link[:text]}, " if debug_mode
     Rails.logger.debug("$$$ page_link: #{page_link.inspect}")
-    return true, page_link if page_link[:text].include?(link_text)
+    return true, page_link if page_link[:href].include?(link_url)
   end
+  Rails.logger.debug("$$$ page_link not found: #{link_url.inspect} in #{debug_all_links.inspect}")
   return false, {}
 end
 
 # Get the links on page hashes (:by_text, :by_href, and :count) within one parent hash
 def get_links_hashes(noko_page)
+  # create a hash whose children are hashes pointing to an array
+  # top level is to choose the hash to lookup either by 'link text' or by 'link href'
+  # second level is the hash to return an array of matching items (by 'link text' or by 'link href')
   ret = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = []} }
   # only count links in header and main sections, not the footer
   page_links = noko_page.css('header a', 'section a')
@@ -247,8 +283,8 @@ def get_links_hashes(noko_page)
       class: a['class'],
       method: a['data-turbo-method']
     }
-    ret[:by_text][a.text] << link_item # NOTE: automatically created as an array if nothing there yet
-    ret[:by_href][a['href']] << link_item # NOTE: automatically created as an array if nothing there yet
+    ret[:by_text][a.text] << link_item # NOTE: appends to an automatically created array if nothing there yet
+    ret[:by_href][a['href']] << link_item # NOTE: appends to an automatically created array if nothing there yet
   end
   ret[:count] = page_links.count
   return ret
@@ -272,3 +308,23 @@ def get_input_hidden_field_value(noko_page, params)
   Rails.logger.debug("$$$ get_input_hidden_field_value hidden_field.attr('value').to_s: #{hidden_field.attr('value')}") if debug_mode
   return hidden_field.attr('value').to_s
 end
+
+# output current page from nokogiri to temp file and list ilename in log
+# e.g. page = Nokogiri::HTML.fragment(response.body)
+#      save_noko_page(page, "GetFoodIndexListing")
+# debug log shows: !!! - page output for GetFoodIndexListing = /media/dave/TowerData1/rails/diet_support/tmp/test_html/24-02-16-13-46-59-GetFoodIndexListing.html
+def save_noko_page(noko_page, state_desc)
+  # directory and file name with timestamp and state description
+  fname = Time.now().strftime("%y-%m-%d-%H-%M-%S") + "-" + state_desc + '.html'
+  dfname = "#{Rails.root}/tmp/test_html/#{fname}"
+  # make sure the directory exists before writing to the file
+  dir = File.dirname(dfname)
+  FileUtils.mkdir_p(dir) unless File.directory?(dir)
+  # write the nokogiri html page out to file
+  File.open(dfname, 'w') do |f|
+    f.write(noko_page.inner_html)
+  end
+  # display the filename to the log
+  Rails.logger.debug("!!! - page output for: #{state_desc} is located at: #{dfname}")
+end
+

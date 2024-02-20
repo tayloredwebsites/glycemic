@@ -24,17 +24,17 @@
   <table>
     <thead>
       <tr>
-        <th>ID</th>
-        <th class="pct40">Name</th>
-        <th class="pct20">Actions</th>
+        <th class="pct10">ID</th>
+        <th class="">Name</th>
+        <th class="pct30">Actions</th>
       </tr>
     </thead>
     <tbody>
       <% @foods.each do |food| %>
         <tr id="food_id_<%= food.id %>">
           <td><%= food.id %></td>
-          <td class="pct40"><%= food.name %></td>
-          <td class="pct20">
+          <td><%= food.name %></td>
+          <td>
             <% if food.active == true %>
               <a href="/foods/<%= food.id %>">View</a>
               <a href="/foods/<%= food.id %>/edit">Edit</a>

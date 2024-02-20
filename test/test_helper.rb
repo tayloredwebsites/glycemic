@@ -2,6 +2,8 @@
 # Copyright (C) 2023 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
+SITE_HEADER_LINK_COUNT = 7
+
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
@@ -42,8 +44,9 @@ module ActiveSupport
     end
 
     # helper for controllers, to confirm link goes to where we expect it
-    def assert_at_page(noko_page, html_page_title, subtitle=nil, subtitle2=nil)
-      assert_equal html_page_title, noko_page.css("title").text, 'title mismatch'
+    def assert_at_page(noko_page, expected_title, subtitle=nil, subtitle2=nil)
+      returned_title = noko_page.css("title").text
+      assert_equal expected_title, noko_page.css("title").text, "expected title: '#{expected_title}' got: '#{}'"
       if subtitle.present?
         h2 = noko_page.css('h2').first
         assert h2.text.include?(subtitle), 'subtitle mismatch'

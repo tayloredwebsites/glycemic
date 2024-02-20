@@ -1,6 +1,5 @@
-<% content_for :title, 'Food Page' %>
-<% content_for :header, "Food Page" %>
-<% content_for :subheader, "#{@food.present? ? 'for food: '+@food.name : ''}" %>
+<% content_for :title, "View Food: #{@food.present? ? @food.name : ''}" %>
+<% content_for :header, "View Food: #{@food.present? ? @food.name : ''}" %>
 
 <%= render @food %>
 
