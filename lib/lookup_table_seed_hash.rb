@@ -10,11 +10,38 @@
 
 # Use this to populate the LookupTables for test, production, and development, so all environments are consistently equal
 # - for test environment, within your test (as needed): load "./test/helpers/test_load_lookup_table.rb"
-# - for development environment: RAILS_ENV=development bin/rails runner ./db/load_lookup_table.rb
-# - for production environment: RAILS_ENV=production bin/rails runner ./db/load_lookup_table.rb
+# - for development environment: bin/rails runner LookupTableSeedHash.lookup_table_load development
+# - for production environment: bin/rails runner LookupTableSeedHash.lookup_table_load production
 module LookupTableSeedHash
+  def self.lookup_table_load()
+
+    puts("ARGV: #{ARGV.inspect}")
+    puts("validation: #{['development', 'production'].include?(ARGV[0])}")
+    if ARGV.length != 1  || !['development', 'production'].include?(ARGV[0])
+      puts("Missing  or invalid environment in command line argument")
+      puts("Command syntax: bin/rails runner LookupTableSeedHash.lookup_table_load <env>")
+      puts("  where <env> is { development, or production }")
+      raise "Halt - missing environment command line argument"
+    end
+  
+    # raise 'halt, testing'
+    # clear LookupTable and reset identity autoincrement
+    ActiveRecord::Base.connection.execute("TRUNCATE lookup_tables RESTART IDENTITY")
+
+    # raise 'halt, testing'
+
+    LookupTableSeedHash::get_hash().each do |h|
+      rec = LookupTable.create(h)
+    end
+    Rails.logger.info("CREATED #{LookupTable.count}")
+    
+    raise "Halt - invalid LookupTablerecord count" if LookupTable.count != 199
+    raise "Halt - invalid LookupTablerecord ids" if LookupTable.last.id != 199
+  end
+  
+  
   def self.get_hash()
-    return [
+    lu_hash =  [
       {lu_table: 'usda_cat', lu_id: '1', lu_code: '100', lu_desc: 'Dairy and Egg Products'},
       {lu_table: 'usda_cat', lu_id: '2', lu_code: '200', lu_desc: 'Spices and Herbs'},
       {lu_table: 'usda_cat', lu_id: '3', lu_code: '300', lu_desc: 'Baby Foods'},
@@ -215,5 +242,7 @@ module LookupTableSeedHash
       {lu_table: 'wweia_cat', lu_code: '3742', lu_desc: 'Meat and BBQ sandwiches'},
       {lu_table: 'wweia_cat', lu_code: '3744', lu_desc: 'Vegetable sandwiches/burgers'},
     ]
+    #  lu_hash
+    return lu_hash
   end
 end
