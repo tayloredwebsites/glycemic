@@ -8,29 +8,42 @@ class LookupTable < ApplicationRecord
     "G" => "Gram(s)",
     "kG" => "Kilogram(s)",
     "mG" => "Miligram(s)",
-    "MG" => "Miligram(s)",
     "uG" => "Microgram(s)",
     "UG" => "Microgram(s)",
     "LB" => "Pound(s)",
     "OZ" => "Ounce(s)",
     "FL_OZ" => "Fluid Ounce(s)",
+    "C" => "Cup(s)",
+    "TBSP" => "Tablespoon(s)",
+    "TSP" => "Teaspoon(s)",
+    "PINCH" => "Pinch",
     "L" => "Liter(s)",
     "mL" => "Mililiter(s)",
     "uL" => "Microliter(s)",
-    "CM^3" => "Cubic Centieters(s)",
-    "MM^3" => "Cubic Milimeters(s)",
     "OZ" => "Ounce(s)",
     "IU" => "International Units",
-    "KCAL" => "Kilocalorie(s)",
+    "kCAL" => "Kilocalorie(s)",
     "kJ" => "Kilojoules",
-    "MCG_RE" => "Microgram(s) (??)",
-    "MG_ATE" => "Miligram(s) (??)",
-    "MG_GAE" => "Miligram(s) (??)",
+    "uG_RE" => "Microgram(s) (??)",
+    "uG_ATE" => "Miligram(s) (??)",
+    "uG_GAE" => "Miligram(s) (??)",
     "PH" => "Potential of Hydrogen (acid/alkaline)",
     "SP_GR" => "Specific Gravity",
-    "UMOL_TE" => "Micromole (??)",
-  }
+    "uMOL_TE" => "Micromole (??)",
+  }.freeze
   
+  DEPRECATED_UNIT_CODES = {
+    "MG" => "mG",
+    "UG" => "uG",
+    "KCAL" => "kCAL",
+    "MCG_RE" => "uG_RE",
+    "MG_ATE" => "mG_ATE",
+    "MG_GAE" => "mG_GAE",
+    "UMOL_TE" => "uMOL_TE",
+  }.freeze
+  
+
+
   has_many :usda_food_cat,
     class_name: "Food"
 

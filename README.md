@@ -110,6 +110,14 @@ Run the following rake tasks to load up the database tables from the .csv files 
 
       bin/rails import_usda_csv_files:perform[5]
 
+1. Deactivate Food records with no nutrients
+
+      bin/rails import_usda_csv_files:perform[6]
+
+1. Update nutrient unit codes 
+
+      bin/rails import_usda_csv_files:perform[7]
+
 1. Load the Lookup Table from the Lookup Table Seed program:
 
       bin/rails runner LookupTableSeedHash.lookup_table_load development

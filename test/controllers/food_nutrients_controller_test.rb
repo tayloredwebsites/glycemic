@@ -124,17 +124,6 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       displayed_option: @nutrient3.name,
       debugging: true,
     })
-    # # confirm all appropriate fields exist
-    # assert_equal(1, page.css('input#food_nutrient_portion').count)
-    # Rails.logger.debug("$$$ FoodNutrient::GRAM: #{FoodNutrient::GRAM}")
-    # assert_select_has(page, 'portion_unit', {
-    #   displayed_option: FoodNutrient::GRAM,
-    # })
-    # assert_equal(1, page.css('input#food_nutrient_amount').count)
-    # assert_select_has(page, 'amount_unit', {
-    #   displayed_option: FoodNutrient::GRAM,
-    # })
-    # assert_equal(1, page.css('textarea#food_nutrient_desc').count)
     assert_equal(1, page.css("input[type='submit'][value='Create Food nutrient']").count)
     assert_equal(1, page.css("form[action='/food_nutrients']").count)
     # confirm hidden input field for food_id exists and is the correct value
