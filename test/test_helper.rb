@@ -58,3 +58,65 @@ module ActiveSupport
 
   end
 end
+
+# function to validate the page headers (for MVC pages in this app)
+# Arguments:
+# - noko_page - page from nokogiri
+#   - e.g. page = Nokogiri::HTML.fragment(response.body)
+# - links_hash - array of links on the page
+#   - e.g. links_h = get_links_hashes(page)
+# Parameters Hash:
+#   - current_food_record - @food value used in controller for view
+#   - debugging_mode - true or false to display extra debugging statements
+# e.g.
+#   assert_page_headers(page, links_h, {
+#     current_food_record: created_food,
+#     debugging_mode: true,
+#   })
+def assert_page_headers(noko_page, links_hash, params={})
+  page_has_food_instance = (params[:page_has_food_record].present?) ? params[:page_has_food_record] === true : false
+  current_food_record = (params[:current_food_record].present?) ? params[:current_food_record] : (@food.present?) ? @food : nil
+  debugging_mode = (params[:debugging_mode].present? ? params[:debugging_mode] === true : false)
+  Rails.logger.debug("*** assert_page_headers")
+  Rails.logger.debug("*** assert_page_headers - @food: #{@food.inspect}")
+  if current_food_record.present?
+    Rails.logger.debug("*** assert_page_headers food present")
+    assert_link_has(links_hash, {
+      link_text: "#{current_food_record.name} Nutrients",
+      link_url: "/nutrients_of_food/#{current_food_record.id}",
+      page_title: "Nutrients of Food Listing",
+      page_subtitle: "for food:",
+      page_subtitle2: current_food_record.name,
+    })
+  else
+    Rails.logger.debug("*** assert_page_headers - food not present") if debugging_mode
+    pageInactiveLinkCount = noko_page.css("#food_nutrients_link[class='inactiveLink']").count
+    Rails.logger.debug("*** assert_page_headers - pageInactiveLinkCount: #{pageInactiveLinkCount}") if debugging_mode
+    assertInactiveLinkCount = (params[:page_has_food_instance].present?) ? 0 : (@page.present?) ? 0 : 1
+    assert_equal(assertInactiveLinkCount, pageInactiveLinkCount, "inactive link count is #{pageInactiveLinkCount}, not '#{assertInactiveLinkCount}'")
+  end
+  assert_link_has(links_hash, {
+    link_text: "Foods Listing",
+    link_url: "/foods",
+    page_title: "Foods Listing",
+    :debugging => debugging_mode,
+  })
+  assert_link_has(links_hash, {
+    link_text: "Nutrients Listing",
+    link_url: "/nutrients",
+    page_title: "Nutrients Listing",
+    :debugging => debugging_mode,
+  })
+  assert_link_has(links_hash, {
+    link_text: "Home",
+    link_url: "/",
+    page_title: "Food Nutrients Home",
+    :debugging => debugging_mode,
+  })
+  assert_link_has(links_hash, {
+    link_text: "Sign Out",
+    link_url: "/signout",
+    :debugging => debugging_mode,
+  })
+
+end

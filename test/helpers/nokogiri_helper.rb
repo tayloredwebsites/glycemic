@@ -42,29 +42,29 @@ def assert_select_has(nokogiri_body, select_id, params)
   # Rails.logger.debug("$$$ assert_select_has options[:options_count]: #{params[:options_count]}") if params[:debugging]
   first_option_text = (options.count > 0) ? get_option_text_or_label(options.first) : ''
   # Rails.logger.debug("$$$ assert_select_has first_option_text: #{first_option_text}") if params[:debugging]
-  assert_equal(params[:options_count], options.count) if params[:options_count].present?
+assert_equal(params[:options_count], options.count, "options count is #{options.count}, not #{params[:options_count]}") if params[:options_count].present?
   # match the selected options count
   selected = selects.css('option[selected]')
   # Rails.logger.debug("$$$ assert_select_has selected.count: #{selected.count}") if params[:debugging]
   first_selected_text = (selected.count > 0) ? get_option_text_or_label(selected.first) : ''
   # Rails.logger.debug("$$$ assert_select_has first_selected_text: #{first_selected_text}") if params[:debugging]
-  assert_equal(params[:selected_count], selected.count) if params[:selected_count].present?
+  assert_equal(params[:selected_count], selected.count, "selected count is #{selected.count}, not #{params[:options_count]}") if params[:selected_count].present?
   # if selected params are sent, confirm they are in the array of 'selected' options (to match)
   if params[:selected].present? && params[:selected].count > 0
     # match the selected options values and/or names
     # Rails.logger.debug("$$$ assert_select_has options[:selected]: #{params[:selected].inspect}") if params[:debugging]
     selected.each do |sel_node|
       # Rails.logger.debug("$$$ assert_select_has sel_node.css('[value]'): #{sel_node.css('[value]')}") if params[:debugging]
-      assert params[:selected].include?(sel_node.css('[value]')) if params[:match_by_value]
+      assert(params[:selected].include?(sel_node.css('[value]')), "match_by_value #{params[:selected]}: none found") if params[:match_by_value]
       sel_node_text_or_label = get_option_text_or_label(sel_node)
       # Rails.logger.debug("$$$ assert_select_has sel_node_text_or_label: #{sel_node_text_or_label}") if params[:debugging]
-      assert params[:selected].include?(sel_node_text_or_label) if params[:match_by_text]
+      assert(params[:selected].include?(sel_node_text_or_label), "match_by_text #{params[:selected]}: none found") if params[:match_by_text]
     end
   end
   # confirm the displayed (default or selected) names
   selected_or_first = (selected.count == 0) ? first_option_text : first_selected_text
   # Rails.logger.debug("$$$ assert_select_has selected_or_first: #{selected_or_first}") if params[:debugging]
-  assert_equal(params[:displayed_option], selected_or_first) if params[:displayed_option].present?
+  assert_equal(params[:displayed_option], selected_or_first, "displayed_option is #{selected_or_first}, not #{params[:displayed_option]}") if params[:displayed_option].present?
   # Rails.logger.debug("$$$ selected_or_first: #{selected_or_first.inspect}") if params[:debugging]
   return selected_or_first
 end
@@ -81,63 +81,6 @@ def get_option_text_or_label(option)
     # Rails.logger.debug("$$$ get_option_text_or_label from option label: #{ret}")
   end
   ret
-end
-
-# function to validate the page headers (for any page)
-# Arguments:
-# - noko_page - page from nokogiri
-#   - e.g. page = Nokogiri::HTML.fragment(response.body)
-# - links_hash - array of links on the page
-#   - e.g. links_h = get_links_hashes(page)
-# Parameters Hash:
-#   - current_food_record - @food value used in controller for view
-#   - debugging_mode - true or false to display extra debugging statements
-# e.g.
-#   assert_page_headers(page, links_h, {
-#     current_food_record: created_food,
-#     debugging_mode: true,
-#   })
-def assert_page_headers(noko_page, links_hash, params)
-  current_food_record = (params[:current_food_record].present?) ? params[:current_food_record] : nil
-  debugging_mode = (params[:debugging_mode].present? ? params[:debugging_mode] === true : false)
-  Rails.logger.debug("$$$ assert_page_headers")
-  if current_food_record.present?
-    Rails.logger.debug("$$$ assert_page_headers food present")
-    assert_link_has(links_hash, {
-      link_text: "#{current_food_record.name} Nutrients",
-      link_url: "/nutrients_of_food/#{current_food_record.id}",
-      page_title: "Nutrients of Food Listing",
-      page_subtitle: "for food:",
-      page_subtitle2: current_food_record.name,
-    })
-  else
-    Rails.logger.debug("$$$ assert_page_headers - food not present")
-    assert_equal(1, noko_page.css("#food_nutrients_link[class='inactiveLink']").count)
-  end
-  assert_link_has(links_hash, {
-    link_text: "Foods Listing",
-    link_url: "/foods",
-    page_title: "Foods Listing",
-    # :debugging => true,
-  })
-  assert_link_has(links_hash, {
-    link_text: "Nutrients Listing",
-    link_url: "/nutrients",
-    page_title: "Nutrients Listing",
-    # :debugging => true,
-  })
-  assert_link_has(links_hash, {
-    link_text: "Home",
-    link_url: "/",
-    page_title: "Food Nutrients Home",
-    # :debugging => true,
-  })
-  assert_link_has(links_hash, {
-    link_text: "Sign Out",
-    link_url: "/signout",
-    # :debugging => true,
-  })
-
 end
 
 ### Function to do assertions on a link tag and the resulting page in controller tests

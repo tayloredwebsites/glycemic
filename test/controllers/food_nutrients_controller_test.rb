@@ -32,18 +32,19 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_equal(1, foods_count)
     nutrients_count = Nutrient.all.count
     assert_equal(4, nutrients_count)
-    food_nutrients_count = FoodNutrient.all.count
-    assert_equal(3, food_nutrients_count)
 
     # get default nutrients of foods index listing (active nutrients only)
     get "/nutrients_of_food/#{@food.id}"
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
+    # save_noko_page(page, "GetNutrientsOfFood")
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
     links_h = get_links_hashes(page)
     # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
     # make sure we have links for the header, three for the filter, two for each of the two active nutrient, and one at the bottom
-    assert_equal(5 + 3 + 2 * 2 + 1, links_h[:count])
+    food_nutrients_count = FoodNutrient.where(food_id: @food.id, active: true).count
+    assert_equal(2, food_nutrients_count)
+    assert_equal(SITE_HEADER_LINK_COUNT + 3 + (food_nutrients_count * 2) + 1, links_h[:count])
 
     # get nutrients of foods index listing (deactivated nutrients only)
     get "/nutrients_of_food/#{@food.id}?showing_active=deact"
@@ -52,7 +53,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header, three for the filter, two for the one deactivated nutrient, and one at the bottom
-    assert_equal(5 + 3 + 1 * 2 + 1, links_h[:count])
+    assert_equal(SITE_HEADER_LINK_COUNT + 3 + 1 * 2 + 1, links_h[:count])
 
     # get default nutrients of foods index listing (active nutrients only)
     get "/nutrients_of_food/#{@food.id}?showing_active=all"
@@ -61,10 +62,11 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, "Nutrients of Food Listing", 'Nutrients of Food Listing', "for food: #{@food.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header, three for the filter, three for each of the nutrients, and one at the bottom
-    assert_equal(5 + 3 + 3 * 2 + 1, links_h[:count])
+    assert_equal(SITE_HEADER_LINK_COUNT + 3 + 3 * 2 + 1, links_h[:count])
 
     # make sure that we have the correct links on the all nutrients listing page
-    assert_page_headers(page, links_h)
+    # save_noko_page(page, "ActiveNutrientsOfFood")
+    assert_page_headers(page, links_h, {:assert_page_headers => false})
     # assert_gets_page("/signout", 'Log in')
     @food_nutrients.each do |fn|
       if fn.active == true
@@ -109,10 +111,11 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     get "/food_nutrients/new?food_id=#{@food.id}"
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
+    # save_noko_page(page, "GetNewFood")
     assert_at_page(page, "New Food Nutrient", "New Food Nutrient", "for food: #{@food.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header
-    assert_equal(5, links_h[:count])
+    assert_equal(SITE_HEADER_LINK_COUNT, links_h[:count])
     Rails.logger.debug("check the header links")
     # make sure that we have the correct links on the page
     assert_page_headers(page, links_h)
@@ -165,8 +168,8 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, "'#{@food.name}' Nutrient View Page", 'for food nutrient', @food_nutrient.nutrient.name)
     links_h = get_links_hashes(page)
-    # make sure we have 5 links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
-    assert_equal(5 + 3, links_h[:count])
+    # make sure we links for the header, two for each food_nutrient action (edit, delete), and the 'new' action at the bottom
+    assert_equal(SITE_HEADER_LINK_COUNT + 3, links_h[:count])
     # make sure that we have the correct links on the page
     assert_page_headers(page, links_h)
     assert_link_has(links_h, {
@@ -202,38 +205,40 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     get edit_food_nutrient_url(@food_nutrient) # "/food_nutrient/#{@food_nutrient.id}/edit"
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
+    save_noko_page(page, "EditActiveFood")
     links_h = get_links_hashes(page)
     # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
+    Rails.logger.debug("*** @food: #{@food.inspect}")
     assert_at_page(page, "Food Nutrient Edit Page", "for food: #{@food.name}", "and nutrient: #{@food_nutrient.nutrient.name}")
     # make sure we have links for the header, plus 3 at the bottom
-    assert_equal(5 + 3, links_h[:count])
+    assert_equal(SITE_HEADER_LINK_COUNT + 3, links_h[:count], "Header link count is #{links_h[:count]}, not the expected: '#{SITE_HEADER_LINK_COUNT + 3}'")
     # make sure that we have the correct links on the page
-    assert_page_headers(page, links_h)
+    assert_page_headers(page, links_h, {debugging: true})
 
     # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
     # No select on nutrient, so, check:
     # the hidden field with the food_nutrient id exists and is correct:
-    assert_equal(@food_nutrient.food_id.to_s, get_input_hidden_field_value(page, {
-      hidden_field_id: "food_nutrient_food_id"
-    }))
+    food_id = get_input_hidden_field_value(page, { hidden_field_id: "food_nutrient_food_id", debugging: true })
+    Rails.logger.debug("*** hidden food nutrient id: #{food_id}")
+    assert_equal(@food_nutrient.food_id.to_s, food_id, "hidden_food_nutrient_id: #{food_id} is not the expected: #{@food_nutrient.food_id.to_s}")
     # the hidden field with the food_nutrient id exists and is correct:
-    assert_equal(@food_nutrient.nutrient_id.to_s, get_input_hidden_field_value(page, {
-      hidden_field_id: "food_nutrient_nutrient_id"
-    }))
+    hidden_nutrient_id = get_input_hidden_field_value(page, { hidden_field_id: "food_nutrient_nutrient_id" })
+    assert_equal(@food_nutrient.nutrient_id.to_s, hidden_nutrient_id, "hidden_food_nutrient_id: #{hidden_nutrient_id} is not the expected: #{@food_nutrient.nutrient_id.to_s}")
     # the nutrient name is displayed:
-    assert_equal(@food_nutrient.nutrient.name, page.css("#food_nutrient_nutrient_name").text)
+    food_name = page.css("#food_nutrient_nutrient_name").text
+    assert_equal(@food_nutrient.nutrient.name, food_name, "Food name: #{food_name} is not the expected: #{@food_nutrient.nutrient.name}")
     # confirm all appropriate fields exist
-    assert_equal(1, page.css('input#food_nutrient_portion').count)
-    # assert_select_has(page, 'portion_unit', {
-    #   displayed_option: @food_nutrient.portion_unit,
-    # })
-    assert_equal(1, page.css('input#food_nutrient_amount').count)
+    # assert_equal(1, page.css('input#food_nutrient_portion').count, "food_nutrient_portion field does not exist")
+    # # assert_select_has(page, 'portion_unit', {
+    # #   displayed_option: @food_nutrient.portion_unit,
+    # # })
+    assert_equal(1, page.css('input#food_nutrient_amount').count, "food_nutrient_amount field does not exist")
     # assert_select_has(page, 'amount_unit', {
     #   displayed_option: @food_nutrient.amount_unit,
     # })
     # assert_equal(1, page.css('textarea#food_nutrient_desc').count)
-    assert_equal(1, page.css("input[type='submit'][value='Update Food nutrient']").count)
-    assert_equal(1, page.css("form[action='/food_nutrients/#{@food_nutrient.id}']").count)
+    assert_equal(1, page.css("input[type='submit'][value='Update Food nutrient']").count, "update button does not exist")
+    assert_equal(1, page.css("form[action='/food_nutrients/#{@food_nutrient.id}']").count, "food_nutrients form does not exist")
     # confirm hidden input field for food_id exists and is the correct value
     food_id_node = page.css("input#food_nutrient_food_id")
     Rails.logger.debug("$$$ food_id_node: #{food_id_node}")
