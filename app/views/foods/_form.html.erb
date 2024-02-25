@@ -1,4 +1,4 @@
-<%= form_with(model: food) do |form| %>
+<%= form_with(model: food, html: {name: "food_form"}) do |form| %>
   <% if food.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(food.errors.count, "error") %> prohibited this food from being saved:</h2>
@@ -22,35 +22,36 @@
   </div>
 
   <div>
-    <%= form.label :portion %>
+    <%= form.label :food_portion_amount %>
     <%= form.text_field :food_portion_amount %>
-    <select name="food[food_portion_unit]">
+    <select name='<%= "food[food_portion_unit]" %>' id='<%= "food_food_portion_unit" %>' autocomplete='off'>
       <option value=""></option>
       <% LookupTable::VALID_UNIT_CODES.each do |k, v| %>
-        <option value="<%= k %>"<%= (k == food.food_portion_unit) ? "  selected" : "" %>><%= k %> - <%= v %></option>
+        <option value="<%= k %>"<%= (k.to_s == @food.food_portion_unit) ? " selected " : "" %>><%= k %> - <%= v %></option>
       <% end %>
     </select>
 
   </div>
 
   <div>
-    <%= form.label :usda_food_cat_id, "USDA Food Cat" %>
-    <select name="food[usda_food_cat_id]" class="wide">
+    <%= form.label :usda_food_cat_id, "USDA Food Cat #{@food.usda_food_cat_id}" %>
+    <select name='food[usda_food_cat_id]' id='food_usda_food_cat_id' autocomplete='off'>
       <option value=""></option>
-      <% LookupTable.where(lu_table: "usda_cat").order(:lu_code).each do |rec| %>
-        <option value="<%= rec.id %>"<%= (rec.id == food.usda_food_cat_id) ? "  selected" : "" %>><%= rec.lu_desc %></option>
+      <% @lookups_usda_cats.each do |rec| %>
+        <option value="<%= rec.id %>"<%= (rec.id == @food.usda_food_cat_id) ? " selected " : "" %>><%= rec.id %> - <%= rec.lu_id %> - <%= rec.lu_desc %></option>
       <% end %>
     </select>
   </div>
 
   <div>
     <%= form.label :wweia_food_cat_id, "WWEIA Food Cat" %>
-    <select name="food[wweia_food_cat_id]" class="wide">
-      <option value=""<%= (Food.where(wweia_food_cat_id: food.wweia_food_cat_id).count == 0) ? " selected" : "" %>></option>
-      <% LookupTable.where(lu_table: "wweia_cat").order(:lu_code).each do |rec| %>
-        <option value="<%= rec.id %>"<%= (rec.id == food.wweia_food_cat_id) ? "  selected" : "" %>><%= rec.lu_desc %></option>
+    <select name='food[wweia_food_cat_id]' id='wweia_food_cat_id' autocomplete='off'>
+      <option value=""></option>
+      <% @lookups_wweia_cats.each do |rec| %>
+        <option value="<%= rec.id %>"<%= (rec.id == @food.wweia_food_cat_id) ? " selected " : "" %>><%= rec.id %> - <%= rec.lu_id %> - <%= rec.lu_desc %></option>
       <% end %>
     </select>
+
   </div>
 
   <div>

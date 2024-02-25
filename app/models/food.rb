@@ -12,11 +12,15 @@ class Food < ApplicationRecord
 
   belongs_to :usda_food_cat,
     class_name: "LookupTable",
-    foreign_key: "usda_food_cat_id"
+    foreign_key: "usda_food_cat_id",
+    optional: true
   belongs_to :wweia_food_cat,
     class_name: "LookupTable",
-    foreign_key: "wweia_food_cat_id"
+    foreign_key: "wweia_food_cat_id",
+    optional: true
 
   serialize :usda_fdc_ids_json, JSON
+
+  validates :name, presence: true, allow_blank: false
 
 end

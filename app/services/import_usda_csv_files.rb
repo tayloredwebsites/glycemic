@@ -162,6 +162,8 @@ class ImportUsdaCsvFiles
       load_foods_from_usda()
     when 6
       deact_empty_foods()
+    when 7
+      update_nutrient_unit_codes()
     else
       raise "invalid step number"
     end
@@ -956,13 +958,43 @@ class ImportUsdaCsvFiles
         log_error("ERROR: Saving Food rec errors: #{f.errors.full_messages.join('; ')}") if f.errors.count > 0
         f.reload()
         log_debug("### Deactivated Food record: #{f.id} #{f.name}")
-        @report << "Deactivated food record for #{f.id} #{f.name}"git gug
+        @report << "Deactivated food record for #{f.id} #{f.name}"
+      end
+      
+    end
+    return
+  end
+
+  def update_nutrient_unit_codes()
+    Rails.logger.info("*********************************************************")
+    Rails.logger.info("UPDATE NUTRIENT UNIT CODES")
+    Rails.logger.info("*********************************************************")
+    @report << "UPDATE NUTRIENT UNIT CODES"
+    exit_msg = ''
+    # Loop through all UsdaFood records (to properly put it in a Food record)
+    Nutrient.all.each do |n|
+      log_debug("**************")
+      log_debug("*** Nutrient record: #{n.inspect}")
+      break if exit_msg.present?
+      reset_error_flag()
+      save_nutrient_rec = false
+      current_unit_code = n.unit_code
+      if LookupTable::DEPRECATED_UNIT_CODES[n.unit_code].present?
+        new_unit_code = LookupTable::DEPRECATED_UNIT_CODES[n.unit_code]
+        msg = "#{n.name} unit code from #{current_unit_code} to #{new_unit_code}"
+        log_debug("*** To update #{msg}")
+        n.unit_code = new_unit_code
+        save_nutrient_rec = true
+        n.save
+        log_error("ERROR: Saving Nutrient rec errors: #{n.errors.full_messages.join('; ')}") if n.errors.count > 0
+        n.reload()
+        log_debug("### Updated #{msg}")
+        @report << "### Updated #{msg}"
       end
       
     end
 
     return
-
   end
 
   def log_debug(msg)

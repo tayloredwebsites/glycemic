@@ -16,7 +16,11 @@ Rails.application.routes.draw do
       get 'reactivate'
     end
   end
-  get 'home/index'
+
+  get '/home/index', to: 'home#index'
+  get '/home/about', to: 'home#about'
+  get '/home/copyright', to: 'home#copyright'
+
   devise_for :users
   devise_scope :user do
     get '/signout', to: 'devise/sessions#destroy', as: :signout

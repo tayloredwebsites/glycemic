@@ -20,8 +20,14 @@
   <body>
     <div class="header">Copyright (C) 2023 tayloredwebsites.com. Freely shared and licensed under <a href="https://opensource.org/license/agpl-v3/" target="_blank">AGPL-3.0-only</a></div>
     <pre class="mermaid">
-      erDiagram
+      
+    erDiagram
 
+      lookup_tables ||--o{ foods : has_usda_food_cat
+      lookup_tables ||--o{ foods : has_wweia_food_cat
+      nutrients ||--o{ food_nutrients : has_amount_of
+      foods ||--o{ food_nutrients : contains
+        
       food_nutrients {
         integer id PK
         integer food_id FK
@@ -29,6 +35,7 @@
         float amount
         boolean active
         float variance
+        text samples_json
       }
 
       food_portion_grams {
@@ -48,10 +55,6 @@
         boolean active
       }
 
-      foods ||--o{ food_nutrients : contains
-      %% foods ||--o{ food_components_xx : used_in
-      %% foods ||--o{ food_eaten_xx: food_was_eaten_at
-
       lookup_tables {
         integer id PK
         string lu_table
@@ -60,8 +63,6 @@
         text lu_desc
         boolean active
       }
-      lookup_tables ||--o{ foods : has_usda_food_cat
-      lookup_tables ||--o{ foods : has_wweia_food_cat
     
       nutrients {
         integer id PK
@@ -73,7 +74,6 @@
         string unit_code
         float rda
       }
-      nutrients ||--o{ food_nutrients : has_amount_of
     
       users {
         integer id PK
@@ -98,6 +98,9 @@
       %% users ||--o{ tests_taken_xx : user_took_test
       %% users ||--o{ food_eaten_xx : user_ate
 
+      %% foods ||--o{ food_components_xx : used_in
+      %% foods ||--o{ food_eaten_xx: food_was_eaten_at
+    
       %% food_components_recipe_ingredient {
         %%  integer id PK
         %%  integer food_id FK

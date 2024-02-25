@@ -36,9 +36,9 @@ The program is being designed to help you plan your diet, and to give you feedba
 
 DONE
 - Ability to enter foods, nutrients, and the nutrients in a food.
+- Download the foods and nutrients in the USDA database, and populate the database with them.
 
 NEXT STEPS
-- Download the foods and nutrients in the USDA database, and populate the database with them.
 - Foods listing page with various sorts and filters to help choose foods for a meal.
 - Dynamically develop a meal with portions of foods, with the ability to adjust portions till goals are met.
 - Save a meal for future reference.
@@ -90,6 +90,7 @@ Run the following rake tasks to load up the database tables from the .csv files 
         bin/rails db:reset
 
 1. load up the two category lookup tables and the nutrients table
+  Note: the lookup table will be reloaded using the Lookup Table Seed program.  see below
 
       bin/rails import_usda_csv_files:perform[1]
 
@@ -108,6 +109,18 @@ Run the following rake tasks to load up the database tables from the .csv files 
 1. load the Food and FoodNutrients table from the UsdaFood and UsdaFoodNutrient tables
 
       bin/rails import_usda_csv_files:perform[5]
+
+1. Deactivate Food records with no nutrients
+
+      bin/rails import_usda_csv_files:perform[6]
+
+1. Update nutrient unit codes 
+
+      bin/rails import_usda_csv_files:perform[7]
+
+1. Load the Lookup Table from the Lookup Table Seed program:
+
+      bin/rails runner LookupTableSeedHash.lookup_table_load development
 
 ### Tips and Hints
 

@@ -32,15 +32,33 @@
   text-align: center;
 }
 
-form label {
+form.thin_labels label {
+  width: 100px;
+}
+
+form.wide_labels label {
+  width: 300px;
+}
+
+form label, form input[type="submit"] {
   font-weight: bold;
   display: inline-block;
-  width: 170px;
+  width: 200px;
+  margin-right: 5px;
+}
+form label {
   text-align: right;
   &:after {
     content: ":";
   }
-  margin-right: 5px;
+}
+form input[type="submit"] {
+  text-align: center;
+}
+
+// keep two column form with rail adds div with class field_with_errors
+form .field_with_errors {
+  display: inline-block
 }
 
 form .thinnest {
@@ -67,13 +85,6 @@ ul.viewItems {
 
 // Page Layout
 footer {
-  position: absolute;
-  width: 100%;
-  bottom:0;
-  font-size: 0.7em;
-  line-height: 2.0em;
-  text-align: center;
-  padding-bottom: 5px;
 }
 
 // Index page Table styles
@@ -91,11 +102,13 @@ footer {
   text-decoration: none;
 }
 
-// why aren't these working ???
 td, th {
   text-align: center;
 }
-th.pct20, td.pct20, .pct20 {
+th.pct10, td.pct10 {
+  width: 10%;
+}
+th.pct20, td.pct20 {
   width: 20%;
 }
 th.pct30, td.pct30 {
@@ -103,4 +116,33 @@ th.pct30, td.pct30 {
 }
 th.pct40, td.pct40 {
   width: 40%;
+}
+th.pct50, td.pct50 {
+  width: 50%;
+}
+th.pct60, td.pct60 {
+  width: 60%;
+}
+th.pct70, td.pct70 {
+  width: 70%;
+}
+th.pct80, td.pct80 {
+  width: 80%;
+}
+th.pct90, td.pct90 {
+  width: 90%;
+}
+
+.font-smallest {
+  font-size: .40em;
+}.font-smaller {
+  font-size: .60em;
+}.font-small {
+  font-size: .80em;
+}.font-large {
+  font-size: 1.20em;
+}.font-larger {
+  font-size: 1.40em;
+}.font-largest {
+  font-size: 1.60em;
 }

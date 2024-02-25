@@ -30,10 +30,14 @@ class FoodsController < ApplicationController
   # GET /foods/new
   def new
     @food = Food.new
+    @lookups_usda_cats = LookupTable.where(lu_table: "usda_cat").order(:lu_desc)
+    @lookups_wweia_cats = LookupTable.where(lu_table: "wweia_cat").order(:lu_desc)
   end
 
   # GET /foods/1/edit
   def edit
+    @lookups_usda_cats = LookupTable.where(lu_table: "usda_cat").order(:lu_desc)
+    @lookups_wweia_cats = LookupTable.where(lu_table: "wweia_cat").order(:lu_desc)
   end
 
   # POST /foods or /foods.json
@@ -114,7 +118,7 @@ class FoodsController < ApplicationController
       :food_portion_amount,
       :usda_food_cat_id,
       :wweia_food_cat_id,
-      :usda_fdc_ids_json,
+      # :usda_fdc_ids_json,
       :active,
     )
   end

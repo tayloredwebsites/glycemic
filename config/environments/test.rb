@@ -67,8 +67,8 @@ Rails.application.configure do
   # # To adjust logger level, create a new logger
   config.logger = ActiveSupport::Logger.new(STDOUT)
   # # use debug see debugging statements as well as SQL statements
-  config.log_level = :fatal
-  # config.log_level = :error
+  # config.log_level = :fatal
+  config.log_level = :error
   # config.log_level = :info
   # config.log_level = :warn
   # config.log_level = :debug

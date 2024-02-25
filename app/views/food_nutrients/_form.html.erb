@@ -41,7 +41,9 @@
   <div>
     <%= form.label :amount %>
     <%= form.text_field :amount %>
-    <%= food_nutrient.nutrient.unit_code %>
+    <% Rails.logger.debug("$$$ food_nutrient: #{food_nutrient.inspect}") %>
+    <% Rails.logger.debug("$$$ @food_nutrient: #{@food_nutrient.inspect}") %>
+    <%= (food_nutrient.nutrient.present?) ? food_nutrient.nutrient.unit_code : "no nutrient yet" %>
     per 100G
   </div>
 

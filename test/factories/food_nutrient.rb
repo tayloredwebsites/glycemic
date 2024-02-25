@@ -7,16 +7,6 @@ FactoryBot.define do
     association :food, factory: :food
     association :nutrient, factory: :nutrient
     amount {Faker::Number.decimal(r_digits: 1)}
-    # cannot post a FoodNutrient with json as field value
-    # TODO: must have post action add and remove samples from FoodNutrient
-    # samples_json { { "#{generate(:fdc_sample_id)}": {
-    #   "amount": "#{Faker::Number.decimal(r_digits: 1)}",
-    #   "data_points": "1",
-    #   "weight": "1.0",
-    #   "active": true,
-    #   "notes": "",
-    #   "time_entered": "#{Time.now.to_s}"
-    # } } }
     samples_json {""}
 
 end

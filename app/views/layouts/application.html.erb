@@ -12,9 +12,11 @@
 
   <body>
     <header>
-      <h1 class="center">Food Nutrients Dietary Assistant</h1>
+      <h1 class="center">Diet Assistant<span class="font-smallest"> &#169; AGPL-V3</span></h1>
       <div class="center">
         <ul class="inlineListButtons">
+          <li><a href="/">Home</a></li>
+          <li><a href='/foods'>Foods Listing</a></li>
           <% if @food.present? && @food.id.present? %>
             <li><a href="/nutrients_of_food/<%= @food.id %>">
               <%= @food.name.present? ? @food.name.truncate(25).titleize : "Food" %> Nutrients
@@ -22,14 +24,14 @@
           <% else %>
             <li><a id="food_nutrients_link" class="inactiveLink" href="#">Food Nutrients</a></li>
           <% end %>
-          <li><a href='/foods'>Foods Listing</a></li>
           <li><a href='/nutrients'>Nutrients Listing</a></li>
-          <li><a href="/">Home</a></li>
+          <li><a href='/home/about'>About</a></li>
+          <li><a href='/home/copyright'>Copyright</a></li>
           <li><a href='/signout'>Sign Out</a></li>
         </ul>
       </div>
 
-      <h2>
+      <h2 class="center">
         <%= content_for?(:header) ? yield(:header) : "Glycemic" %>
         <% if content_for?(:subheader) %>
           <br/><%= yield(:subheader) %>
@@ -57,8 +59,6 @@
     </section>
 
     <footer class="footer">
-      Copyright (C) 2023 tayloredwebsites.com. Freely shared and licensed under
-        <a href="https://opensource.org/license/agpl-v3/" target="_blank">AGPL-3.0-only</a>
     </footer>
   </body>
 </html>
