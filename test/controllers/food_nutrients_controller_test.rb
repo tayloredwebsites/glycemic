@@ -205,7 +205,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     get edit_food_nutrient_url(@food_nutrient) # "/food_nutrient/#{@food_nutrient.id}/edit"
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
-    save_noko_page(page, "EditActiveFood")
+    # save_noko_page(page, "EditActiveFood")
     links_h = get_links_hashes(page)
     # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
     Rails.logger.debug("*** @food: #{@food.inspect}")

@@ -3,6 +3,7 @@
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
 SITE_HEADER_LINK_COUNT = 7
+LISTINGS_FILTER_LINK_COUNT = 3 # Note: current (selected) page is a link that is in effect inactive
 
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"

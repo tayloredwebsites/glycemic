@@ -33,12 +33,13 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     get '/nutrients/'
     assert_response 200
     page = Nokogiri::HTML.fragment(response.body)
+    save_noko_page(page, "NutrientListing")
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
     # Rails.logger.debug("$$$ assert_link_has links_h: #{JSON.pretty_generate(links_h)}")
-    # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
-    assert_equal(5 + 3 + 2 * 2 + 1, links_h[:count])
+    # make sure we have links for the header, three filter buttons, three for 2 active nutrients, and one at the bottom
+    assert_equal(SITE_HEADER_LINK_COUNT + LISTINGS_FILTER_LINK_COUNT + 3 * 2 + 1, links_h[:count])
 
     # get nutrients index listing with only deactivated nutrients
     get '/nutrients?showing_active=deact'
@@ -47,8 +48,8 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
-    # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
-    assert_equal(5 + 3 + 1 * 2 + 1, links_h[:count])
+    # make sure we have links for the header, three filter buttons,three for 1 deactivated nutrient, and one at the bottom
+    assert_equal(SITE_HEADER_LINK_COUNT + LISTINGS_FILTER_LINK_COUNT + 3 * 1 + 1, links_h[:count])
 
     # get nutrients index listing with all nutrients
     get '/nutrients?showing_active=all'
@@ -57,8 +58,8 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
-    # make sure we have links for the header, three filter buttons,two for each active nutrient, and one at the bottom
-    assert_equal(5 + 3 + 3 * 2 + 1, links_h[:count])
+    # make sure we have links for the header, three filter buttons, three for all 3 active and deactivated nutrients, and one at the bottom
+    assert_equal(SITE_HEADER_LINK_COUNT + LISTINGS_FILTER_LINK_COUNT + 3 * 3 + 1, links_h[:count])
 
     # make sure that we have the correct links on the all nutrients page
     assert_page_headers(page, links_h)
@@ -68,14 +69,17 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
         assert_link_has(links_h, {
           link_text: "Edit",
           link_url: "/nutrients/#{nut.id}/edit",
-          page_title: "Edit Nutrient Page",
-          page_subtitle: "for nutrient: #{nut.name}"
+          page_title: "Edit Nutrient: #{nut.name}"
         })
-        assert_link_has(links_h, {
-          link_text: "Deactivate",
-          link_url: "/nutrients/#{nut.id}",
-          page_title: 'Nutrients Listing',
-        })
+        # TODO: develop method to safely test deactivation link eventual location
+        #  consider doing an active flag reset after confirming that it is deactivated
+        #  Note: see if get the method in the get_links_hashes method, and then pass it on
+        # assert_link_has(links_h, {
+        #   link_text: "Deactivate",
+        #   link_url: "/nutrients/#{nut.id}",
+        #   page_title: 'Nutrients Listing',
+        #   debugging: true,
+        # })
       else
         assert_link_has(links_h, {
           link_text: "Edit",
@@ -105,31 +109,38 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_at_page(page, "New Nutrient Page", "New Nutrient Page")
     links_h = get_links_hashes(page)
     # make sure we have links for the header
-    assert_equal(5, links_h[:count])
+    assert_equal(SITE_HEADER_LINK_COUNT, links_h[:count])
     # make sure that we have the correct links on the page
     assert_page_headers(page, links_h)
 
     # confirm all appropriate form fields exist
     assert_equal(1, page.css("form[action='/nutrients']").count)
     assert_equal(1, page.css('input#nutrient_name').count)
-    assert_equal(1, page.css('textarea#nutrient_desc').count)
-    assert_equal(1, page.css('input#nutrient_usda_ndb_num').count)
+    assert_equal(1, page.css('input#nutrient_usda_nutrient_id').count)
+    assert_equal(1, page.css('input#nutrient_usda_nutrient_num').count)
+    assert_equal(1, page.css('select#nutrient_unit_code').count)
     assert_equal(1, page.css("input[type='submit'][value='Create Nutrient']").count)
   end
 
   test "should create nutrient as active" do
     @new_nutrient = FactoryBot.build(:nutrient)
+    Rails.logger.debug("*** @new_nutrient: #{@new_nutrient.inspect}")
     assert_difference("Nutrient.count") do
       post nutrients_url, params: {
         nutrient: {
-          desc: @new_nutrient.desc,
           # id: @new_nutrient.id,
           name: @new_nutrient.name,
-          usda_ndb_num: @new_nutrient.usda_ndb_num
+          usda_nutrient_id: @new_nutrient.usda_nutrient_id,
+          usda_nutrient_num: @new_nutrient.usda_nutrient_num,
+          unit_code: @new_nutrient.unit_code,
         }
       }
     end
     new_nutrient = Nutrient.last
+    assert_equal(@new_nutrient.name, new_nutrient.name)
+    assert_equal(@new_nutrient.usda_nutrient_id, new_nutrient.usda_nutrient_id)
+    assert_equal(@new_nutrient.usda_nutrient_num, new_nutrient.usda_nutrient_num)
+    assert_equal(@new_nutrient.unit_code, new_nutrient.unit_code)
     assert_equal(true, new_nutrient.active)
     assert_redirected_to nutrient_url(new_nutrient)
   end
@@ -148,10 +159,10 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     get edit_nutrient_url(@nutrient1)
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
-    assert_at_page(page, "Edit Nutrient Page", "Edit Nutrient Page", "for nutrient: #{@nutrient1.name}")
+    assert_at_page(page, "Edit Nutrient: #{@nutrient1.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header plus 2 extra ones below
-    assert_equal(5 + 2, links_h[:count])
+    assert_equal(SITE_HEADER_LINK_COUNT + 3, links_h[:count])
     # make sure that we have the correct links on the page
     @nutrient = @nutrient1.clone # 'assert_page_headers' uses @nutrient to determine if 'Food' Nutrients link should be dim or not.
     assert_page_headers(page, links_h)
@@ -162,15 +173,18 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
       page_title: "New Nutrient Page",
       page_subtitle: "New Nutrient Page",
     })
-    assert_link_has(links_h, {
-      link_text: "Deactivate this nutrient",
-      link_url: "/nutrients/#{@nutrient1.id}",
-      page_title: 'Nutrients Listing',
-    })
+    # TODO: develop method to safely test deactivation link eventual location
+    #  consider doing an active flag reset after confirming that it is deactivated
+    #  Note: see if get the method in the get_links_hashes method, and then pass it on
+    # assert_link_has(links_h, {
+    #   link_text: "Deactivate this nutrient",
+    #   link_url: "/nutrients/#{@nutrient1.id}",
+    #   page_title: 'Nutrients Listing',
+    # })
   end
 
   test "should update active nutrient" do
-    # save off the original state of the nutrient (no need for exact copy)
+    # save off the original state of trighthe nutrient (no need for exact copy)
     @changed_nutrient = @nutrient1.dup
 
     # put in some changes
@@ -189,6 +203,9 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
         nutrient: {
           # id: @nutrient.id, # note: this is passed in params
           name: @changed_nutrient.name,
+          usda_nutrient_id: @changed_nutrient.usda_nutrient_id,
+          usda_nutrient_num: @changed_nutrient.usda_nutrient_num,
+          unit_code: @changed_nutrient.unit_code,
         }
       }
     end
@@ -201,7 +218,9 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     Rails.logger.debug("$$$ @updated_nutrient: #{@updated_nutrient.inspect}")
 
     assert_equal(@changed_nutrient.name, @updated_nutrient.name)
-    assert_equal(@changed_nutrient.usda_ndb_num, @updated_nutrient.usda_ndb_num)
+    assert_equal(@changed_nutrient.usda_nutrient_id, @updated_nutrient.usda_nutrient_id)
+    assert_equal(@changed_nutrient.usda_nutrient_num, @updated_nutrient.usda_nutrient_num)
+    assert_equal(@changed_nutrient.unit_code, @updated_nutrient.unit_code)
   end
 
   test "should deactivate active nutrient" do

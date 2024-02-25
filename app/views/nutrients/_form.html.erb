@@ -1,4 +1,4 @@
-<%= form_with(model: nutrient) do |form| %>
+<%= form_with(model: nutrient, html: { name: "nutrients_form"} ) do |form| %>
   <% if nutrient.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(nutrient.errors.count, "error") %> prohibited this nutrient from being saved:</h2>
@@ -12,13 +12,8 @@
   <% end %>
 
   <div>
-    <%= form.label :id %>
-    <%= form.id %>
-  </div>
-  
-  <div>
-    <%= form.label :id %>
-    <%= form.id %>
+    <%= form.label :id, "ID" %>
+    <%= @nutrient.id %>
   </div>
 
   <div>
@@ -27,21 +22,21 @@
   </div>
 
   <div>
-    <%= form.label :usda_nutrient_id %>
+    <%= form.label :usda_nutrient_id, "USDA Nutrient ID" %>
     <%= form.text_field :usda_nutrient_id %>
   </div>
 
   <div>
-    <%= form.label :usda_nutrient_num %>
+    <%= form.label :usda_nutrient_num, "USDA Nutrient #" %>
     <%= form.text_field :usda_nutrient_num %>
   </div>
 
   <div>
-    <%= form.label :unit_code %>
-    <select name="nutrient[unit_code]" class="wide">
+    <%= form.label :unit_code, "Unit Code" %>
+    <select id="nutrient_unit_code" name="nutrient[unit_code]" class="wide">
       <option value=""></option>
       <% LookupTable::VALID_UNIT_CODES.each do |k, v| %>
-        <option value="<%= k %>" <%= (k == nutrient.unit_code) ? "  selected=selected" : "" %>>
+        <option value="<%= k %>" <%= (k == @nutrient.unit_code) ? "  selected=selected" : "" %>>
           <%= k %> - <%= v %>
         </option>
       <% end %>

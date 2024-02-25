@@ -105,6 +105,6 @@ class NutrientsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def nutrient_params
-    params.require(:nutrient).permit(:id, :name, :usda_ndb_num, :desc)
+    params.require(:nutrient).permit(:id, :name, :usda_nutrient_id, :usda_nutrient_num, :unit_code)
   end
 end

@@ -1,6 +1,5 @@
-<% content_for :title, 'Edit Nutrient Page' %>
-<% content_for :header, "Edit Nutrient Page" %>
-<% content_for :subheader, "#{@nutrient.present? ? 'for nutrient: '+@nutrient.name : ''}" %>
+<% content_for :title, "Edit Nutrient: #{@nutrient.present? ? @nutrient.name : ''}" %>
+<% content_for :header, "Edit Nutrient: #{@nutrient.present? ? @nutrient.name : ''}" %>
 
 
 <%= render "nutrients/form", nutrient: @nutrient %>
@@ -9,13 +8,11 @@
 
 <ul>
   <li><a href="/nutrients/new">New Nutrient</a></li>
-  <li><a href="/nutrients/<%= @nutrient.id %>">View this nutrient</a></li>
-  <li><a href="/nutrients/<%=@nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Deactivate this nutrient</a></li>
+  <% if @nutrient.active == true %>
+    <li><a href="/nutrients/<%= @nutrient.id %>">View Nutrient</a></li>
+    <li><a href="/nutrients/<%= @nutrient.id%>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Deactivate nutrient</a></li>
+  <% else %>
+    <li><a href="/nutrients/<%= @nutrient.id %>/edit" class="inactiveLink">Edit</a></li>
+    <li><a href="/nutrients/<%= @nutrient.id%>/reactivate">Reactivate</a></li>
+  <% end %>
 </ul>
-    <% if @nutrient.active == true %>
-      <a href="/nutrients/<%= @nutrient.id %>/edit">Edit</a>
-      <a href="/nutrients/<%= @nutrient.id%>" data-turbo-method="delete">Deactivate</a>
-    <% else %>
-      <a href="/nutrients/<%= @nutrient.id %>/edit" class="inactiveLink">Edit</a>
-      <a href="/nutrients/<%= @nutrient.id%>/reactivate">Reactivate</a>
-    <% end %>

@@ -32,16 +32,30 @@
   text-align: center;
 }
 
-form label {
+form.thin_labels label {
+  width: 100px;
+}
+
+form.wide_labels label {
+  width: 300px;
+}
+
+form label, form input[type="submit"] {
   font-weight: bold;
   display: inline-block;
-  width: 170px;
+  width: 200px;
+  margin-right: 5px;
+}
+form label {
   text-align: right;
   &:after {
     content: ":";
   }
-  margin-right: 5px;
 }
+form input[type="submit"] {
+  text-align: center;
+}
+
 // keep two column form with rail adds div with class field_with_errors
 form .field_with_errors {
   display: inline-block
