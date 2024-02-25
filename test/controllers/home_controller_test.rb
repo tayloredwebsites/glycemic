@@ -37,8 +37,20 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
       link_url: "/nutrients",
     })
     assert_link_has(links_h, {
-      link_text: "Database Diagrams",
-      link_url: "/diagrams.html",
+      link_text: "Main Database Diagrams",
+      link_url: "/diagramMainDb.html",
+    })
+    assert_link_has(links_h, {
+      link_text: "CSV Import Database Diagram",
+      link_url: "/diagramImport.html",
+    })
+    assert_link_has(links_h, {
+      link_text: "About",
+      link_url: "/home/about",
+    })
+    assert_link_has(links_h, {
+      link_text: "Copyright",
+      link_url: "/home/copyright",
     })
     assert_link_has(links_h, {
       link_text: "Sign Out",
