@@ -20,7 +20,6 @@ class LookupTable < ApplicationRecord
     "L" => "Liter(s)",
     "mL" => "Mililiter(s)",
     "uL" => "Microliter(s)",
-    "OZ" => "Ounce(s)",
     "IU" => "International Units",
     "kCAL" => "Kilocalorie(s)",
     "kJ" => "Kilojoules",
