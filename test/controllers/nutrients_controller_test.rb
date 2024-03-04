@@ -32,7 +32,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # get default nutrients index listing with only active nutrients
     get '/nutrients/'
     assert_response 200
-    page = Nokogiri::HTML.fragment(response.body)
+    page = Nokogiri::HTML.fragment(@response.body)
     save_noko_page(page, "NutrientListing")
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
@@ -44,7 +44,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # get nutrients index listing with only deactivated nutrients
     get '/nutrients?showing_active=deact'
     assert_response 200
-    page = Nokogiri::HTML.fragment(response.body)
+    page = Nokogiri::HTML.fragment(@response.body)
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
@@ -54,7 +54,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # get nutrients index listing with all nutrients
     get '/nutrients?showing_active=all'
     assert_response 200
-    page = Nokogiri::HTML.fragment(response.body)
+    page = Nokogiri::HTML.fragment(@response.body)
     assert_at_page(page, 'Nutrients Listing')
     # make a hash of all links on the page
     links_h = get_links_hashes(page)
@@ -71,15 +71,12 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
           link_url: "/nutrients/#{nut.id}/edit",
           page_title: "Edit Nutrient: #{nut.name}"
         })
-        # TODO: develop method to safely test deactivation link eventual location
-        #  consider doing an active flag reset after confirming that it is deactivated
-        #  Note: see if get the method in the get_links_hashes method, and then pass it on
-        # assert_link_has(links_h, {
-        #   link_text: "Deactivate",
-        #   link_url: "/nutrients/#{nut.id}",
-        #   page_title: 'Nutrients Listing',
-        #   debugging: true,
-        # })
+        assert_link_has(links_h, {
+          link_text: "Deactivate",
+          link_url: "/nutrients/#{nut.id}",
+          page_title: 'Nutrients Listing',
+          # debugging: true,
+        })
       else
         assert_link_has(links_h, {
           link_text: "Edit",
@@ -90,6 +87,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
           link_text: "Reactivate",
           link_url: "/nutrients/#{nut.id}/reactivate",
           page_title: 'Nutrients Listing',
+          # debugging: true,
         })
       end
     end
@@ -105,7 +103,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
   test "should get new" do
     get new_nutrient_url
     assert_response :success
-    page = Nokogiri::HTML.fragment(response.body)
+    page = Nokogiri::HTML.fragment(@response.body)
     assert_at_page(page, "New Nutrient Page", "New Nutrient Page")
     links_h = get_links_hashes(page)
     # make sure we have links for the header
@@ -158,7 +156,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
   test "should get active nutrient edit" do
     get edit_nutrient_url(@nutrient1)
     assert_response :success
-    page = Nokogiri::HTML.fragment(response.body)
+    page = Nokogiri::HTML.fragment(@response.body)
     assert_at_page(page, "Edit Nutrient: #{@nutrient1.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header plus 2 extra ones below

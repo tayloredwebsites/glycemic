@@ -99,23 +99,23 @@ end
 #   :link_url => 'LinkURL',
 #   :match_by_text => true, # default, not needed to be explicitly stated
 #   :match_by_url => true, # only needed when there are duplicate link texts, note: non-GET urls can cause duplicate URLs
-#   :link_has_classes => "class1, class2"
-#   :link_hasnt_classes => "class3, class4"
-#   :link_has_method => "delete"
-#   :page_title => "PageTitleText",
-#   :page_subtitle => "SubtitleText",
-#   :page_subtitle2 => "Subtitle2Text",
-#   :not_page_title => "NotPageTitleText" # to confirm page has changed, etc.
+#   :link_has_classes => "class1, class2",
+#   :link_hasnt_classes => "class3, class4",
+#   :link_has_method => "delete",
+#   :page_title => "PageTitleText", # confirms Title Text (requires getting page)
+#   :page_subtitle => "SubtitleText", # confirms Subtitle Text (requires getting page)
+#   :page_subtitle2 => "Subtitle2Text", # confirms Subtitle2 Text (requires getting page)
+#   :not_page_title => "NotPageTitleText",  # confirms not Title Text (requires getting page)
 #   :debugging => true,
 # }
 # only matching done will be on params that are passed
 def assert_link_has(links_hash, params)
-  # Rails.logger.debug("$$$ assert_link_has params[:debugging]: #{params[:debugging]}")
+  # Rails.logger.debug("$$$ assert_link_has params[:debugging]: #{params[:debugging]}") 
 
   debug_mode = (params[:debugging] && params[:debugging] == true) ? true : false
 
   # Rails.logger.debug("$$$ assert_link_has links_hash: #{JSON.pretty_generate(links_hash)}") if debug_mode
-  Rails.logger.debug("$$$ assert_link_has params: #{JSON.pretty_generate(params)}") #if debug_mode
+  Rails.logger.debug("$$$ assert_link_has params: #{JSON.pretty_generate(params)}") if debug_mode
 
   # Check to make sure the URL and Link Text match
   # if params[:match_by_url].present? && (params[:match_by_url] == true || params[:match_by_url] == 'true')
@@ -124,7 +124,7 @@ def assert_link_has(links_hash, params)
   if params[:match_by_text].present? && (params[:match_by_text] == true || params[:match_by_text] == 'true')
     # confirm the link text passed in the params points to the url passed in the params
     # uses the by_text hash created in get_links_hashes to match them up
-    Rails.logger.debug("$$$ Match by Text, to see if lookup of params[:link_text] match params[:link_url]") if debug_mode
+    Rails.logger.debug("$$$ assert_link_has Match by Text, to see if lookup of params[:link_text] match params[:link_url]") if debug_mode
     assert(links_hash[:by_text][params[:link_text]].present?, "lookup of text: #{params[:link_text]} does not exist")
     assert(links_hash[:by_text][params[:link_text]].count > 0, "lookup of text: #{params[:link_text]} [:href] does not exist")
     matched, matched_item = in_by_text_hash(links_hash, params[:link_text], params[:link_url], debug_mode)
@@ -135,7 +135,7 @@ def assert_link_has(links_hash, params)
     # uses the by_href hash created in get_links_hashes to match them up
     # ?? Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_url]") if debug_mode
     # ?? assert_equal(params[:link_url], links_hash[:by_text][params[:link_text]], 'link text lookup does not match link url')
-    Rails.logger.debug("$$$ Match by URL, to see if lookup of params[:link_url] match params[:link_text]") if debug_mode
+    Rails.logger.debug("$$$ assert_link_has Match by URL, to see if lookup of params[:link_url] match params[:link_text]") if debug_mode
     # confirm links hash by href has a value matching the link_url param
     assert(links_hash[:by_href][params[:link_url]].present?, "lookup of link url: #{params[:link_url]} does not exist")
     assert(links_hash[:by_href][params[:link_url]].count > 0, "lookup of link url: #{params[:link_url]} has no items")
@@ -143,24 +143,20 @@ def assert_link_has(links_hash, params)
     assert(matched, "lookup of link url #{params[:link_url]} does not have text: #{params[:link_text]}")
   end
 
+  Rails.logger.debug("$$$ assert_link_has page title validations if requested") if debug_mode
   if params[:page_title].present? || params[:page_subtitle].present? || params[:page_subtitle2].present? || params[:not_page_title].present?
+    # we have been asked to confirm the page title, so we must go to that page
     # confirm link goes to where we expect it
+    Rails.logger.debug("$$$ assert_link_has titles go to href: #{matched_item[:href]}") if debug_mode
     if matched_item[:method] == 'delete'
       delete(matched_item[:href])   # TODO: should we be doing this delete here?
     else
       get(matched_item[:href])
     end
-    new_page = Nokogiri::HTML.fragment(response.body)
-    if response.status == 200
-      # good
-    elsif response.status == 302
-      redir_page = Nokogiri::HTML.fragment(response.body)
-      redir_url = redir_page.css('a').first.attribute('href').text
-      Rails.logger.debug("%%% redir_url: #{redir_url.inspect}")
-      get(redir_url)
-      assert_response :success
-    end
-    new_page = Nokogiri::HTML.fragment(response.body)
+    Rails.logger.debug("$$$ assert_link_has response from: #{matched_item[:href]} got status: #{@response.status}") if debug_mode
+    handle_redirect
+    assert_response :success
+    new_page = Nokogiri::HTML.fragment(@response.body)
     Rails.logger.debug("$$$ Match by URL, got to page: #{new_page.css('title').text}") if debug_mode
     assert_equal params[:page_title], new_page.css('title').text, "page title #{params[:page_title]} does not match #{new_page.css('title').text}" if params[:page_title].present?
     if params[:page_subtitle].present?
@@ -184,28 +180,28 @@ def assert_link_has(links_hash, params)
       assert_not matched_item[:class].include?(cls.strip())
     end
   end
-  Rails.logger.debug("*** successfully finished 'assert_link_has' function.")
+  Rails.logger.debug("*** successfully finished 'assert_link_has' function.") if debug_mode
 end
 
 def in_by_text_hash(links_hash, link_text, link_url)
   links_hash[:by_text][link_text].each do |page_link|
-    Rails.logger.debug("$$$ page_link: #{page_link.inspect}")
+    Rails.logger.debug("$$$ page_link: #{page_link.inspect}") if debug_mode
     return true if page_link[:href].include?(link_url)
   end
-  Rails.logger.debug("$$$ link_text not found: #{link_text.inspect}")
+  Rails.logger.debug("$$$ link_text not found: #{link_text.inspect}") if debug_mode
   return false, {}
 end
 
 def in_by_href_hash(links_hash, link_url, link_text, debug_mode = false)
-  Rails.logger.debug("$$$ in_by_href_hash: #{link_url} points to page with title: #{link_text}")
+  Rails.logger.debug("$$$ in_by_href_hash: #{link_url} should point to a page with title: #{link_text}") if debug_mode
   # ToDo: confirm we need a loop here (will there be duplicate URLs on a page?)
   debug_all_links = []
   links_hash[:by_href][link_url].each do |page_link|
     debug_all_links << "#{page_link[:text]}, " if debug_mode
-    Rails.logger.debug("$$$ page_link: #{page_link.inspect}")
-    return true, page_link if page_link[:href].include?(link_url)
+    Rails.logger.debug("$$$ in_by_href_hash: found a matching page_link: #{page_link.inspect}") if debug_mode
+    return true, page_link if page_link[:text].include?(link_text)
   end
-  Rails.logger.debug("$$$ page_link not found: #{link_url.inspect} in #{debug_all_links.inspect}")
+  Rails.logger.debug("$$$ in_by_href_hash: page_link not found: #{link_url.inspect} in #{debug_all_links.inspect}") if debug_mode
   return false, {}
 end
 
@@ -253,7 +249,7 @@ def get_input_hidden_field_value(noko_page, params)
 end
 
 # output current page from nokogiri to temp file and list ilename in log
-# e.g. page = Nokogiri::HTML.fragment(response.body)
+# e.g. page = Nokogiri::HTML.fragment(@response.body)
 #      save_noko_page(page, "GetFoodIndexListing")
 # debug log shows: !!! - page output for GetFoodIndexListing = /media/dave/TowerData1/rails/diet_support/tmp/test_html/24-02-16-13-46-59-GetFoodIndexListing.html
 def save_noko_page(noko_page, state_desc)
@@ -268,6 +264,20 @@ def save_noko_page(noko_page, state_desc)
     f.write(noko_page.inner_html)
   end
   # display the filename to the log
-  Rails.logger.debug("!!! - page output for: #{state_desc} is located at: #{dfname}")
+  Rails.logger.info("!!! - page output for: #{state_desc} is located at: #{dfname}")
 end
+
+private
+
+def handle_redirect
+  # Rails.logger.debug("$$$ nokogiri_helper::handle_redirect @response.status: #{@response.status}")
+  if @response.status == 200
+    # good
+  elsif @response.status == 302
+    # Rails.logger.debug("$$$ header location: #{@response.headers['Location']}")
+    get(@response.headers['Location'])
+    handle_redirect
+  end
+end
+
 
