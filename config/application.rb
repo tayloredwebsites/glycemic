@@ -24,7 +24,6 @@ module Glycemic
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    config.eager_load_paths << Rails.root.join("lib")
 
     # add rubocop disables to rails notes
     config.annotations.register_tags('rubocop:disable')
