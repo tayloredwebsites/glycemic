@@ -23,6 +23,7 @@ default: &default
   # see: https://stackoverflow.com/questions/51894053/is-the-server-running-locally-and-accepting-connections-on-unix-domain-socket
   # host: /private/tmp # needed for mac
   host: /var/run/postgresql # for running on linux
+  port: 5432
   
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
@@ -31,6 +32,8 @@ default: &default
 development:
   <<: *default
   database: glycemic_development
+  username: glycemic_development
+  password: password
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -65,6 +68,8 @@ development:
 test:
   <<: *default
   database: glycemic_test
+  username: glycemic_test
+  password: password
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is

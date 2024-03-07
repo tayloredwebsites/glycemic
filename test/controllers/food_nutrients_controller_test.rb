@@ -125,7 +125,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       options_count: 1,
       selected_count: 0,
       displayed_option: @nutrient3.name,
-      debugging: true,
+      # debugging: true,
     })
     assert_equal(1, page.css("input[type='submit'][value='Create Food nutrient']").count)
     assert_equal(1, page.css("form[action='/food_nutrients']").count)
@@ -185,7 +185,7 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
       page_title: "Food Nutrient Edit Page",
       page_subtitle: "for food: #{@food.name}",
       page_subtitle2: "and nutrient: #{@food_nutrient.nutrient.name}",
-      debugging: true,
+      # debugging: true,
     })
     assert_link_has(links_h, {
       link_text: "Remove this nutrient from #{@food.name}",
@@ -213,12 +213,17 @@ class FoodNutrientsControllerTest < ActionDispatch::IntegrationTest
     # make sure we have links for the header, plus 3 at the bottom
     assert_equal(SITE_HEADER_LINK_COUNT + 3, links_h[:count], "Header link count is #{links_h[:count]}, not the expected: '#{SITE_HEADER_LINK_COUNT + 3}'")
     # make sure that we have the correct links on the page
-    assert_page_headers(page, links_h, {debugging: true})
+    assert_page_headers(page, links_h, {
+      # debugging: true,
+    })
 
     # confirm that the only option displayed is the third nutrient, which has not been assigned to this food yet.
     # No select on nutrient, so, check:
     # the hidden field with the food_nutrient id exists and is correct:
-    food_id = get_input_hidden_field_value(page, { hidden_field_id: "food_nutrient_food_id", debugging: true })
+    food_id = get_input_hidden_field_value(page, {
+      hidden_field_id: "food_nutrient_food_id",
+      # debugging: true,
+    })
     Rails.logger.debug("*** hidden food nutrient id: #{food_id}")
     assert_equal(@food_nutrient.food_id.to_s, food_id, "hidden_food_nutrient_id: #{food_id} is not the expected: #{@food_nutrient.food_id.to_s}")
     # the hidden field with the food_nutrient id exists and is correct:

@@ -80,7 +80,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
         assert_link_has(links_h, {
           link_text: "Deactivate",
           link_url: "/foods/#{fn.id}",
-          page_title: "View Food: #{fn.name}",
+          page_title: "Foods Listing",
           # debugging: true,
           })
       else
@@ -90,6 +90,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
           link_has_classes: 'inactiveLink',
           # debugging: true,
           })
+        # TODO: Usability fix, so nutrients of food are on food page itself
         # assert_link_has(links_h, {
         #   link_text: "Nutrients",
         #   link_url: "/nutrients_of_food/#{fn.id}",
@@ -137,7 +138,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create new food as active" do
     @new_food = FactoryBot.build(:food)
-    @new_food.name = "A new name for the food"
+    @new_food.name = "New Food Name"
     @new_food.food_portion_amount = 2
     @new_food.food_portion_unit = "L"
     @new_food.usda_food_cat_id = 10
@@ -216,7 +217,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     assert_link_has(links_h, {
       link_text: "Deactivate this food",
       link_url: "/foods/#{@food1.id}",
-      page_title: "View Food: #{@food1.name}",
+      page_title: "Foods Listing",
     })
 
   end
@@ -228,7 +229,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
 
     # put in some changes
     # @changed_vals.id = -1  # this is the record to be updated
-    @changed_vals.name = "A updated name for the food"
+    @changed_vals.name = "New Food Name"
     @changed_vals.food_portion_amount = 2
     @changed_vals.food_portion_unit = "L"
     @changed_vals.usda_food_cat_id = 10
@@ -272,7 +273,7 @@ class FoodsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
-    # save_noko_page(page, "CreatedNewFood")
+    save_noko_page(page, "CreatedNewFood")
     assert_at_page(page, "View Food: #{@food1.name}")
     links_h = get_links_hashes(page)
     # make sure we have links for the header

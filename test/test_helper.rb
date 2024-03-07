@@ -12,17 +12,15 @@ require "capybara/rails"
 require 'capybara/minitest'
 
 module ActiveSupport
-  class TestCase
+	class TestCase
     # Run tests in parallel with specified workers
     parallelize(workers: :number_of_processors)
-
-    # # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
+	
+    # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     # fixtures :all
     # see https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#configure-your-test-suite
+    
     include FactoryBot::Syntax::Methods
-
-    #   # Add more helper methods to be used by all tests here...
-    # end
 
     # class ActionDispatch::IntegrationTest
     # Make the Capybara DSL available in all integration tests

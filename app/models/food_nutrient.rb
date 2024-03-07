@@ -12,6 +12,5 @@ class FoodNutrient < ApplicationRecord
   # scope :all_food_nutrients, -> {}
 
   # automatically convert samples_json (hash) field to JSON string in the database
-  serialize :samples_json, JSON
-  
+  serialize :samples_json, coder: JSON  
 end

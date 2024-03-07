@@ -19,7 +19,7 @@ class Food < ApplicationRecord
     foreign_key: "wweia_food_cat_id",
     optional: true
 
-  serialize :usda_fdc_ids_json, JSON
+  serialize :usda_fdc_ids_json, coder: JSON
 
   validates :name, presence: true, allow_blank: false
 

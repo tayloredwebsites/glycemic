@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
-git_source(:github) do |repo|
-  "https://github.com/#{repo}.git"
-end
+# git_source(:github) do |repo|
+#   "https://github.com/#{repo}.git"
+# end
 
-ruby '3.1.3'
+ruby '3.3.0'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem 'rails',
-  '~> 7.0.4'
+  '~> 7.1.3'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
@@ -18,7 +18,7 @@ gem 'pg',
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem 'puma',
-  '~> 5.0'
+  '>= 5.0'
 
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
@@ -34,7 +34,7 @@ gem 'jbuilder'
 
 # Use Redis adapter to run Action Cable in production
 gem 'redis',
-  '~> 4.0'
+  '>= 4.0.1'
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
@@ -52,7 +52,7 @@ gem 'bcrypt',
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data',
   platforms: %i[
-    mingw mswin x64_mingw jruby
+    mingw windows
   ]
 
 # Reduces boot times through caching; required in config/boot.rb

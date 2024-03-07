@@ -37,7 +37,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
       link_url: "/nutrients",
     })
     assert_link_has(links_h, {
-      link_text: "Main Database Diagrams",
+      link_text: "Main Database Diagram",
       link_url: "/diagramMainDb.html",
     })
     assert_link_has(links_h, {

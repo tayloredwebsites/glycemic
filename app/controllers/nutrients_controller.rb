@@ -87,7 +87,7 @@ class NutrientsController < ApplicationController
     Rails.logger.debug("$$$ Reactivate - params: #{params.inspect}")
     respond_to do |format|
       if @nutrient.update(active: true)
-        format.html { redirect_to nutrients_url, notice: "Nutrient was successfully reactivated." }
+        format.html { redirect_to "/nutrients", notice: "Nutrient was successfully reactivated." }
         format.json { render :show, status: :ok, location: @nutrient }
       else
         format.html { render :edit, status: :unprocessable_entity }
