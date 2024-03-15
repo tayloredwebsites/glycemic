@@ -88,36 +88,43 @@ Run the following rake tasks to load up the database tables from the .csv files 
   Note: the lookup table will be reloaded using the Lookup Table Seed program.  see below
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[1]"
+      
       (linux) - bin/rails import_usda_csv_files:perform[1]
 
 1. run the fixes for duplicate nutrients
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[2]"
+
       (linux) - bin/rails import_usda_csv_files:perform[2]
 
 1.  load the ff_foods.csv into the usda_foods table
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[3]"
+
       (linux) - bin/rails import_usda_csv_files:perform[3]
 
 1. load the ff_food_nutrients.csv into the usda_food_nutrients table
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[4]"
+
       (linux) - bin/rails import_usda_csv_files:perform[4]
 
 1. load the Food and FoodNutrients table from the UsdaFood and UsdaFoodNutrient tables
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[5]"
+
       (linux) - bin/rails import_usda_csv_files:perform[5]
 
 1. Deactivate Food records with no nutrients
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[6]"
+
       (linux) - bin/rails import_usda_csv_files:perform[6]
 
 1. Update nutrient unit codes 
 
       (mac zsh) - bin/rails "import_usda_csv_files:perform[7]"
+
       (linux) - bin/rails import_usda_csv_files:perform[7]
 
 1. Load the Lookup Table from the Lookup Table Seed program:
