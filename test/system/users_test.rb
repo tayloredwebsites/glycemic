@@ -18,7 +18,7 @@ class UsersTest < ApplicationSystemTestCase
 
   test "visiting the home page works for signed in user" do
     # skip("Use Controller Tests. They are slow.  Note: save_and_open_page hangs up test.")
-    visit home_index_url
+    visit home_index_path
     # save_and_open_page
     assert_selector "h1", text: "Home#index"
   end

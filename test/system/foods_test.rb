@@ -10,12 +10,12 @@ class FoodsTest < ApplicationSystemTestCase
   end
 
   test "visiting the index" do
-    visit foods_url
+    visit foods_path
     assert_selector "h1", text: "Foods"
   end
 
   test "should create food" do
-    visit foods_url
+    visit foods_path
     click_on "New food"
 
     fill_in "Desc", with: @food.desc
@@ -29,7 +29,7 @@ class FoodsTest < ApplicationSystemTestCase
   end
 
   test "should update Food" do
-    visit food_url(@food)
+    visit food_path(@food)
     click_on "Edit this food", match: :first
 
     fill_in "Desc", with: @food.desc
@@ -43,7 +43,7 @@ class FoodsTest < ApplicationSystemTestCase
   end
 
   test "should destroy Food" do
-    visit food_url(@food)
+    visit food_path(@food)
     click_on "Destroy this food", match: :first
 
     assert_text "Food was successfully destroyed"

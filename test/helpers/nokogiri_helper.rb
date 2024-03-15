@@ -96,9 +96,9 @@ end
 # links_hash = get_links_hashes(page)
 # assert_link_has(links_hash, {
 #   :link_text => 'LinkText',
-#   :link_url => 'LinkURL',
+#   :link_path => 'LinkURL',
 #   :match_by_text => true, # default, not needed to be explicitly stated
-#   :match_by_url => true, # only needed when there are duplicate link texts, note: non-GET urls can cause duplicate URLs
+#   :match_by_path => true, # only needed when there are duplicate link texts, note: non-GET urls can cause duplicate URLs
 #   :link_has_classes => "class1, class2",
 #   :link_hasnt_classes => "class3, class4",
 #   :link_has_method => "delete",
@@ -118,29 +118,29 @@ def assert_link_has(links_hash, params)
   Rails.logger.debug("$$$ assert_link_has params: #{JSON.pretty_generate(params)}") if debug_mode
 
   # Check to make sure the URL and Link Text match
-  # if params[:match_by_url].present? && (params[:match_by_url] == true || params[:match_by_url] == 'true')
+  # if params[:match_by_path].present? && (params[:match_by_path] == true || params[:match_by_path] == 'true')
   # default to look up links by href first, only do by text if specified in params
   matched_item = nil
   if params[:match_by_text].present? && (params[:match_by_text] == true || params[:match_by_text] == 'true')
     # confirm the link text passed in the params points to the url passed in the params
     # uses the by_text hash created in get_links_hashes to match them up
-    Rails.logger.debug("$$$ assert_link_has Match by Text, to see if lookup of params[:link_text] match params[:link_url]") if debug_mode
+    Rails.logger.debug("$$$ assert_link_has Match by Text, to see if lookup of params[:link_text] match params[:link_path]") if debug_mode
     assert(links_hash[:by_text][params[:link_text]].present?, "lookup of text: #{params[:link_text]} does not exist")
     assert(links_hash[:by_text][params[:link_text]].count > 0, "lookup of text: #{params[:link_text]} [:href] does not exist")
-    matched, matched_item = in_by_text_hash(links_hash, params[:link_text], params[:link_url], debug_mode)
-    assert(matched, "lookup of link text #{params[:link_text]} does not have url: #{params[:link_url]}")
+    matched, matched_item = in_by_text_hash(links_hash, params[:link_text], params[:link_path], debug_mode)
+    assert(matched, "lookup of link text #{params[:link_text]} does not have url: #{params[:link_path]}")
   else
     # This is the default, to look find the Link Text for an href (in the anchor tags on the page)
     # confirm the link url passed in the params points to the text passed in the params
     # uses the by_href hash created in get_links_hashes to match them up
-    # ?? Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_url]") if debug_mode
-    # ?? assert_equal(params[:link_url], links_hash[:by_text][params[:link_text]], 'link text lookup does not match link url')
-    Rails.logger.debug("$$$ assert_link_has Match by URL, to see if lookup of params[:link_url] match params[:link_text]") if debug_mode
-    # confirm links hash by href has a value matching the link_url param
-    assert(links_hash[:by_href][params[:link_url]].present?, "lookup of link url: #{params[:link_url]} does not exist")
-    assert(links_hash[:by_href][params[:link_url]].count > 0, "lookup of link url: #{params[:link_url]} has no items")
-    matched, matched_item = in_by_href_hash(links_hash, params[:link_url], params[:link_text], debug_mode)
-    assert(matched, "lookup of link url #{params[:link_url]} does not have text: #{params[:link_text]}")
+    # ?? Rails.logger.debug("$$$ Match by URL, to see if params[:link_path] match params[:link_path]") if debug_mode
+    # ?? assert_equal(params[:link_path], links_hash[:by_text][params[:link_text]], 'link text lookup does not match link url')
+    Rails.logger.debug("$$$ assert_link_has Match by URL, to see if lookup of params[:link_path] match params[:link_text]") if debug_mode
+    # confirm links hash by href has a value matching the link_path param
+    assert(links_hash[:by_href][params[:link_path]].present?, "lookup of link url: #{params[:link_path]} does not exist")
+    assert(links_hash[:by_href][params[:link_path]].count > 0, "lookup of link url: #{params[:link_path]} has no items")
+    matched, matched_item = in_by_href_hash(links_hash, params[:link_path], params[:link_text], debug_mode)
+    assert(matched, "lookup of link url #{params[:link_path]} does not have text: #{params[:link_text]}")
   end
 
   Rails.logger.debug("$$$ assert_link_has page title validations if requested") if debug_mode
@@ -161,10 +161,10 @@ def assert_link_has(links_hash, params)
     assert_equal params[:page_title], new_page.css('title').text, "page title #{params[:page_title]} does not match #{new_page.css('title').text}" if params[:page_title].present?
     if params[:page_subtitle].present?
       h2 = new_page.css('h2').first
-      Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+      Rails.logger.debug("$$$ Match by URL, to see if params[:link_path] match params[:link_text]") if debug_mode
       assert h2.text.include?(params[:page_subtitle]), "page subtitle #{params[:page_subtitle]} is not contained in #{h2.text}"
       if params[:page_subtitle2].present?
-        Rails.logger.debug("$$$ Match by URL, to see if params[:link_url] match params[:link_text]") if debug_mode
+        Rails.logger.debug("$$$ Match by URL, to see if params[:link_path] match params[:link_text]") if debug_mode
         assert h2.text.include?(params[:page_subtitle2]), "page subtitle2 #{params[:page_subtitle2]} is not contained in #{h2.text}"
       end
     end
@@ -183,25 +183,25 @@ def assert_link_has(links_hash, params)
   Rails.logger.debug("*** successfully finished 'assert_link_has' function.") if debug_mode
 end
 
-def in_by_text_hash(links_hash, link_text, link_url)
+def in_by_text_hash(links_hash, link_text, link_path)
   links_hash[:by_text][link_text].each do |page_link|
     Rails.logger.debug("$$$ page_link: #{page_link.inspect}") if debug_mode
-    return true if page_link[:href].include?(link_url)
+    return true if page_link[:href].include?(link_path)
   end
   Rails.logger.debug("$$$ link_text not found: #{link_text.inspect}") if debug_mode
   return false, {}
 end
 
-def in_by_href_hash(links_hash, link_url, link_text, debug_mode = false)
-  Rails.logger.debug("$$$ in_by_href_hash: #{link_url} should point to a page with title: #{link_text}") if debug_mode
+def in_by_href_hash(links_hash, link_path, link_text, debug_mode = false)
+  Rails.logger.debug("$$$ in_by_href_hash: #{link_path} should point to a page with title: #{link_text}") if debug_mode
   # ToDo: confirm we need a loop here (will there be duplicate URLs on a page?)
   debug_all_links = []
-  links_hash[:by_href][link_url].each do |page_link|
+  links_hash[:by_href][link_path].each do |page_link|
     debug_all_links << "#{page_link[:text]}, " if debug_mode
     Rails.logger.debug("$$$ in_by_href_hash: found a matching page_link: #{page_link.inspect}") if debug_mode
     return true, page_link if page_link[:text].include?(link_text)
   end
-  Rails.logger.debug("$$$ in_by_href_hash: page_link not found: #{link_url.inspect} in #{debug_all_links.inspect}") if debug_mode
+  Rails.logger.debug("$$$ in_by_href_hash: page_link not found: #{link_path.inspect} in #{debug_all_links.inspect}") if debug_mode
   return false, {}
 end
 

@@ -21,7 +21,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "logged in user should get index and see links" do
-    get home_index_url
+    get home_index_path
     assert_response :success
     page = Nokogiri::HTML.fragment(response.body)
     assert_at_page(page, 'Food Nutrients Home')
@@ -30,31 +30,31 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_page_headers(page, links_h)
     assert_link_has(links_h, {
       link_text: "Foods Listing",
-      link_url: "/foods",
+      link_path: "/foods",
     })
     assert_link_has(links_h, {
       link_text: "Nutrients Listing",
-      link_url: "/nutrients",
+      link_path: "/nutrients",
     })
     assert_link_has(links_h, {
       link_text: "Main Database Diagram",
-      link_url: "/diagramMainDb.html",
+      link_path: "/diagramMainDb.html",
     })
     assert_link_has(links_h, {
       link_text: "CSV Import Database Diagram",
-      link_url: "/diagramImport.html",
+      link_path: "/diagramImport.html",
     })
     assert_link_has(links_h, {
       link_text: "About",
-      link_url: "/home/about",
+      link_path: "/home/about",
     })
     assert_link_has(links_h, {
       link_text: "Copyright",
-      link_url: "/home/copyright",
+      link_path: "/home/copyright",
     })
     assert_link_has(links_h, {
       link_text: "Sign Out",
-      link_url: "/signout",
+      link_path: "/signout",
     })
 
   end

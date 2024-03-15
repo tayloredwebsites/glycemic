@@ -1,5 +1,6 @@
 # PostgreSQL. Versions 9.3 and up are supported.
 #
+# TODO: update these instructions.
 # Install the pg driver:
 #   gem install pg
 # On macOS with Homebrew:
@@ -21,8 +22,7 @@ default: &default
   # if error: Is the server running locally and accepting connections on Unix domain socket “/var/run/postgresql/.s.PGSQL.5432”?
   # if error: Is the server running locally and accepting connections on Unix domain socket “/private/tmp/.s.PGSQL.5432”?
   # see: https://stackoverflow.com/questions/51894053/is-the-server-running-locally-and-accepting-connections-on-unix-domain-socket
-  # host: /private/tmp # needed for mac
-  host: /var/run/postgresql # for running on linux
+  # host: /var/run/postgresql # for running on linux
   port: 5432
   
   # For details on connection pooling, see Rails configuration guide

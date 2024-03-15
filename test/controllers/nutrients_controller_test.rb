@@ -68,24 +68,24 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
       if nut.active == true
         assert_link_has(links_h, {
           link_text: "Edit",
-          link_url: "/nutrients/#{nut.id}/edit",
+          link_path: "/nutrients/#{nut.id}/edit",
           page_title: "Edit Nutrient: #{nut.name}"
         })
         assert_link_has(links_h, {
           link_text: "Deactivate",
-          link_url: "/nutrients/#{nut.id}",
+          link_path: "/nutrients/#{nut.id}",
           page_title: 'Nutrients Listing',
           # debugging: true,
         })
       else
         assert_link_has(links_h, {
           link_text: "Edit",
-          link_url: "/nutrients/#{nut.id}/edit",
+          link_path: "/nutrients/#{nut.id}/edit",
           link_has_classes: 'inactiveLink',
         })
         assert_link_has(links_h, {
           link_text: "Reactivate",
-          link_url: "/nutrients/#{nut.id}/reactivate",
+          link_path: "/nutrients/#{nut.id}/reactivate",
           page_title: 'Nutrients Listing',
           # debugging: true,
         })
@@ -93,7 +93,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_link_has(links_h, {
       link_text: "New Nutrient",
-      link_url: "/nutrients/new",
+      link_path: "/nutrients/new",
       page_title: "New Nutrient Page",
       page_subtitle: "New Nutrient Page",
     })
@@ -101,7 +101,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get new" do
-    get new_nutrient_url
+    get new_nutrient_path
     assert_response :success
     page = Nokogiri::HTML.fragment(@response.body)
     assert_at_page(page, "New Nutrient Page", "New Nutrient Page")
@@ -124,7 +124,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     @new_nutrient = FactoryBot.build(:nutrient)
     Rails.logger.debug("*** @new_nutrient: #{@new_nutrient.inspect}")
     assert_difference("Nutrient.count") do
-      post nutrients_url, params: {
+      post nutrients_path, params: {
         nutrient: {
           # id: @new_nutrient.id,
           name: @new_nutrient.name,
@@ -140,12 +140,12 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     assert_equal(@new_nutrient.usda_nutrient_num, new_nutrient.usda_nutrient_num)
     assert_equal(@new_nutrient.unit_code, new_nutrient.unit_code)
     assert_equal(true, new_nutrient.active)
-    assert_redirected_to nutrient_url(new_nutrient)
+    assert_redirected_to nutrient_path(new_nutrient)
   end
 
   test "should show nutrient" do
     skip "TODO - enable when nutrient views are available in menus"
-    get nutrient_url(@nutrient1)
+    get nutrient_path(@nutrient1)
     assert_response :success
   end
 
@@ -154,7 +154,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get active nutrient edit" do
-    get edit_nutrient_url(@nutrient1)
+    get edit_nutrient_path(@nutrient1)
     assert_response :success
     page = Nokogiri::HTML.fragment(@response.body)
     assert_at_page(page, "Edit Nutrient: #{@nutrient1.name}")
@@ -167,7 +167,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
 
     assert_link_has(links_h, {
       link_text: "New Nutrient",
-      link_url: "/nutrients/new",
+      link_path: "/nutrients/new",
       page_title: "New Nutrient Page",
       page_subtitle: "New Nutrient Page",
     })
@@ -176,7 +176,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     #  Note: see if get the method in the get_links_hashes method, and then pass it on
     # assert_link_has(links_h, {
     #   link_text: "Deactivate this nutrient",
-    #   link_url: "/nutrients/#{@nutrient1.id}",
+    #   link_path: "/nutrients/#{@nutrient1.id}",
     #   page_title: 'Nutrients Listing',
     # })
   end
@@ -197,7 +197,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     # confirm no new records are created from this update
     assert_no_changes("Nutrient.count", "reactivation should not change number of nutrient records") do
       # update the nutrient_nutrient in the controller update action
-      patch nutrient_url(@nutrient1), params: {
+      patch nutrient_path(@nutrient1), params: {
         nutrient: {
           # id: @nutrient.id, # note: this is passed in params
           name: @changed_nutrient.name,
@@ -209,7 +209,7 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
     end
 
     # confirm we are at the nutrient view page
-    assert_redirected_to nutrient_url(@nutrient1)
+    assert_redirected_to nutrient_path(@nutrient1)
 
     @updated_nutrient = Nutrient.find_by(id: @nutrient1.id)
 
@@ -224,21 +224,21 @@ class NutrientsControllerTest < ActionDispatch::IntegrationTest
   test "should deactivate active nutrient" do
     assert_equal(true, @nutrient1.active)
     assert_no_changes("Nutrient.count", "reactivation should not change number of nutrient records") do
-      delete nutrient_url(@nutrient1)
+      delete nutrient_path(@nutrient1)
     end
     @nutrient1.reload
     assert_equal(false, @nutrient1.active)
-    assert_redirected_to nutrients_url
+    assert_redirected_to nutrients_path
   end
 
   test "should reactivate a deactived nutrient" do
     assert_equal(false, @nutrient_d.active)
     assert_no_changes("Nutrient.count", "reactivation should not change number of nutrient records") do
-      get reactivate_nutrient_url(@nutrient_d)
+      get reactivate_nutrient_path(@nutrient_d)
     end
     @nutrient_d.reload
     assert_equal(true, @nutrient_d.active)
-    assert_redirected_to nutrients_url
+    assert_redirected_to nutrients_path
   end
 
 end

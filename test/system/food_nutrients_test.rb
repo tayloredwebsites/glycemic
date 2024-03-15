@@ -10,12 +10,12 @@ class FoodNutrientsTest < ApplicationSystemTestCase
   end
 
   test "visiting the index" do
-    visit food_nutrients_url
+    visit food_nutrients_path
     assert_selector "h1", text: "Food nutrients"
   end
 
   test "should create food nutrient" do
-    visit food_nutrients_url
+    visit food_nutrients_path
     click_on "New food nutrient"
 
     fill_in "Amount", with: @food_nutrient.amount
@@ -36,7 +36,7 @@ class FoodNutrientsTest < ApplicationSystemTestCase
   end
 
   test "should update Food nutrient" do
-    visit food_nutrient_url(@food_nutrient)
+    visit food_nutrient_path(@food_nutrient)
     click_on "Edit this food nutrient", match: :first
 
     fill_in "Amount", with: @food_nutrient.amount
@@ -57,7 +57,7 @@ class FoodNutrientsTest < ApplicationSystemTestCase
   end
 
   test "should destroy Food nutrient" do
-    visit food_nutrient_url(@food_nutrient)
+    visit food_nutrient_path(@food_nutrient)
     click_on "Destroy this food nutrient", match: :first
 
     assert_text "Food nutrient was successfully destroyed"

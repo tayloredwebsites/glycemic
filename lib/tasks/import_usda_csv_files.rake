@@ -6,6 +6,7 @@ namespace :import_usda_csv_files do
     puts "args[:arg2] was: '#{args[:arg2]}' of class #{args[:arg2].class}"
   end
   
+  desc "Perform Import tasks"
   task :perform, [:num, :debug_flag] => [:environment] do |t, args|
     arg_in = args[:num]
     deb_arg = (args[:debug_flag] == false) ? false : (args[:debug_flag] == true) ? true : false

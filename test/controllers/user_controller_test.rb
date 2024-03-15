@@ -23,7 +23,7 @@ class HomeControllerTests
     test "user not signed in can sign_in and sign_out" do
 
       # go to sign in page
-      get new_user_session_url
+      get new_user_session_path
       assert_response 200
       # see nokogiri docs at https://nokogiri.org/rdoc/ (use search)
       page = Nokogiri::HTML.fragment(response.body)
@@ -47,12 +47,12 @@ class HomeControllerTests
 
       # user can sign in when not locked
       sign_in @user
-      get root_url
+      get root_path
       assert_response 200
 
       # sign out
       sign_out @user
-      get root_url
+      get root_path
       assert_redirected_to_sign_in()
 
       # lock user
@@ -65,11 +65,11 @@ class HomeControllerTests
 
       # iuser cannot sign in when locked
       sign_in @user
-      get root_url
+      get root_path
       assert_redirected_to_sign_in()
 
       # confirm user gets email with unlock instructions
-      get new_user_unlock_url
+      get new_user_unlock_path
       assert_response 200
       page = Nokogiri::HTML.fragment(response.body)
       h2 = page.css('h2').first
@@ -116,7 +116,7 @@ class HomeControllerTests
 
       # Sign in as @user
       sign_in @user
-      get root_url
+      get root_path
       assert_response 200
     end
 
@@ -141,7 +141,7 @@ class HomeControllerTests
     end
 
     test "User confirmation with 'Didn't receive confirmation instructions?' link" do
-      get new_user_confirmation_url
+      get new_user_confirmation_path
       assert_response 200
       page = Nokogiri::HTML.fragment(response.body)
       h2 = page.css('h2').first
@@ -180,7 +180,7 @@ class HomeControllerTests
     test "user can sign up with 'Sign up' link" do
 
       # go to sign in page
-      get new_user_session_url
+      get new_user_session_path
       assert_response 200
       # see nokogiri docs at https://nokogiri.org/rdoc/ (use search)
       page = Nokogiri::HTML.fragment(response.body)
