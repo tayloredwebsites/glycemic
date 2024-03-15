@@ -82,7 +82,7 @@ def assert_page_headers(noko_page, links_hash, params={})
     Rails.logger.debug("*** assert_page_headers food present")
     assert_link_has(links_hash, {
       link_text: "#{current_food_record.name} Nutrients",
-      link_url: "/nutrients_of_food/#{current_food_record.id}",
+      link_path: "/nutrients_of_food/#{current_food_record.id}",
       page_title: "Nutrients of Food Listing",
       page_subtitle: "for food:",
       page_subtitle2: current_food_record.name,
@@ -96,25 +96,25 @@ def assert_page_headers(noko_page, links_hash, params={})
   end
   assert_link_has(links_hash, {
     link_text: "Foods Listing",
-    link_url: "/foods",
+    link_path: "/foods",
     page_title: "Foods Listing",
     :debugging => debugging_mode,
   })
   assert_link_has(links_hash, {
     link_text: "Nutrients Listing",
-    link_url: "/nutrients",
+    link_path: "/nutrients",
     page_title: "Nutrients Listing",
     :debugging => debugging_mode,
   })
   assert_link_has(links_hash, {
     link_text: "Home",
-    link_url: "/",
+    link_path: "/",
     page_title: "Food Nutrients Home",
     :debugging => debugging_mode,
   })
   assert_link_has(links_hash, {
     link_text: "Sign Out",
-    link_url: "/signout",
+    link_path: "/signout",
     :debugging => debugging_mode,
   })
 

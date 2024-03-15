@@ -46,7 +46,7 @@ class FoodsController < ApplicationController
 
     respond_to do |format|
       if @food.save
-        format.html { redirect_to food_url(@food), notice: "Food was successfully created." }
+        format.html { redirect_to food_path(@food), notice: "Food was successfully created." }
         format.json { render :show, status: :created, location: @food }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -60,7 +60,7 @@ class FoodsController < ApplicationController
     respond_to do |format|
       Rails.logger.debug("*** food_params: #{food_params.inspect}")
       if @food.update(food_params)
-        format.html { redirect_to food_url(@food), notice: "Food was successfully updated." }
+        format.html { redirect_to food_path(@food), notice: "Food was successfully updated." }
         format.json { render :show, status: :ok, location: @food }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -83,7 +83,7 @@ class FoodsController < ApplicationController
       @errors + @food.errors.full_messages
     end
     respond_to do |format|
-      format.html { redirect_to foods_url, notice: "Food was successfully deactivated." }
+      format.html { redirect_to foods_path, notice: "Food was successfully deactivated." }
       format.json { head :no_content }
     end
   end
@@ -92,7 +92,7 @@ class FoodsController < ApplicationController
     Rails.logger.debug("$$$ Reactivate - params: #{params.inspect}")
     respond_to do |format|
       if @food.update(active: true)
-        format.html { redirect_to foods_url, notice: "Food was successfully reactivated." }
+        format.html { redirect_to foods_path, notice: "Food was successfully reactivated." }
         format.json { render :show, status: :ok, location: @food }
       else
         format.html { render :edit, status: :unprocessable_entity }

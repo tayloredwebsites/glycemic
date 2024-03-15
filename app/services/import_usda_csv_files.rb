@@ -906,7 +906,7 @@ class ImportUsdaCsvFiles
             # log_debug("### n: #{n} #{n.inspect}")
             new_variance = (n > 1) ? sum_diff_mean_sq / (n - 1) : 0
             if fn.variance != new_variance
-              fn.variance = new variance
+              fn.variance = new_variance
               save_food_nut_rec = true
             end
           end

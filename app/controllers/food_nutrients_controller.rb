@@ -128,7 +128,7 @@ class FoodNutrientsController < ApplicationController
     respond_to do |format|
       format.html do
         if @errors.count > 0
-          redirect_to food_nutrients_url, notice: "Food nutrient was stopped from being destroyed."
+          redirect_to food_nutrients_path, notice: "Food nutrient was stopped from being destroyed."
         else
           redirect_to "/nutrients_of_food/#{save_food_id}"
         end
@@ -142,7 +142,7 @@ class FoodNutrientsController < ApplicationController
     Rails.logger.debug("$$$ Reactivate - params: #{params.inspect}")
     respond_to do |format|
       if @food_nutrient.update(active: true)
-        format.html { redirect_to nutrients_of_food_url(@food_nutrient.food_id), notice: "Food nutrient was successfully reactivated." }
+        format.html { redirect_to nutrients_of_food_path(@food_nutrient.food_id), notice: "Food nutrient was successfully reactivated." }
         format.json { render :show, status: :ok, location: @food_nutrient }
       else
         set_flash_msg('', "ERROR: unable to deactivate food nutrient")

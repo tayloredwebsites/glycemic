@@ -43,7 +43,7 @@ class NutrientsController < ApplicationController
 
     respond_to do |format|
       if @nutrient.save
-        format.html { redirect_to nutrient_url(@nutrient), notice: "Nutrient was successfully created." }
+        format.html { redirect_to nutrient_path(@nutrient), notice: "Nutrient was successfully created." }
         format.json { render :show, status: :created, location: @nutrient }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -56,7 +56,7 @@ class NutrientsController < ApplicationController
   def update
     respond_to do |format|
       if @nutrient.update(nutrient_params)
-        format.html { redirect_to nutrient_url(@nutrient), notice: "Nutrient was successfully updated." }
+        format.html { redirect_to nutrient_path(@nutrient), notice: "Nutrient was successfully updated." }
         format.json { render :show, status: :ok, location: @nutrient }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -78,7 +78,7 @@ class NutrientsController < ApplicationController
       @errors + @nutrient.errors.full_messages
     end
     respond_to do |format|
-      format.html { redirect_to nutrients_url, notice: "Nutrient was successfully deactivated." }
+      format.html { redirect_to nutrients_path, notice: "Nutrient was successfully deactivated." }
       format.json { head :no_content }
     end
   end

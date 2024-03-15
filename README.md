@@ -67,20 +67,15 @@ Licensed under  [AGPL-3.0-only](https://opensource.org/license/agpl-v3/).
 
 ### System Dependencies
 
-- Rails 7
-- PostgreSQL 12
-- ruby 3.1
+- Rails 7.1
+- PostgreSQL 12 - 16
+- ruby 3.3
 
 ### Developer Installation Instructions
 
-#### Linux (Mint 20.3)
+#### Linux Ubuntu Installation
 
-- TODO Instructions to install postgres12
-- TODO Instructions to install rbenv
-- TODO Instructions to install ruby 3.1.3
-- TODO Instructions to install bundler
-- TODO Instructions to install rails 7.0.4
-- TODO Instructions to configure rails
+#### M2 Mac Installation
 
 #### Upload Nutrition Data
 
@@ -92,31 +87,38 @@ Run the following rake tasks to load up the database tables from the .csv files 
 1. load up the two category lookup tables and the nutrients table
   Note: the lookup table will be reloaded using the Lookup Table Seed program.  see below
 
-      bin/rails import_usda_csv_files:perform[1]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[1]"
+      (linux) - bin/rails import_usda_csv_files:perform[1]
 
 1. run the fixes for duplicate nutrients
 
-      bin/rails import_usda_csv_files:perform[2]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[2]"
+      (linux) - bin/rails import_usda_csv_files:perform[2]
 
 1.  load the ff_foods.csv into the usda_foods table
 
-      bin/rails import_usda_csv_files:perform[3]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[3]"
+      (linux) - bin/rails import_usda_csv_files:perform[3]
 
 1. load the ff_food_nutrients.csv into the usda_food_nutrients table
 
-      bin/rails import_usda_csv_files:perform[4]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[4]"
+      (linux) - bin/rails import_usda_csv_files:perform[4]
 
 1. load the Food and FoodNutrients table from the UsdaFood and UsdaFoodNutrient tables
 
-      bin/rails import_usda_csv_files:perform[5]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[5]"
+      (linux) - bin/rails import_usda_csv_files:perform[5]
 
 1. Deactivate Food records with no nutrients
 
-      bin/rails import_usda_csv_files:perform[6]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[6]"
+      (linux) - bin/rails import_usda_csv_files:perform[6]
 
 1. Update nutrient unit codes 
 
-      bin/rails import_usda_csv_files:perform[7]
+      (mac zsh) - bin/rails "import_usda_csv_files:perform[7]"
+      (linux) - bin/rails import_usda_csv_files:perform[7]
 
 1. Load the Lookup Table from the Lookup Table Seed program:
 
