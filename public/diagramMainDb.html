@@ -22,9 +22,7 @@
       
     erDiagram
 
-      lookup_tables ||--o{ foods : has_usda_food_cat
-      lookup_tables ||--o{ foods : has_wweia_food_cat
-      nutrients ||--o{ food_nutrients : has_amount_of
+      nutrients ||--o{ food_nutrients : has_amount
       foods ||--o{ food_nutrients : contains
         
       food_nutrients {
@@ -32,9 +30,9 @@
         integer food_id FK
         integer nutrient_id FK
         float amount
-        boolean active
         float variance
         text samples_json
+        boolean active
       }
 
       food_portion_grams {
@@ -51,6 +49,7 @@
         integer usda_food_cat_id FK
         integer wweia_food_cat_id FK
         text usda_fdc_ids_json
+        integer recipe_id FK
         boolean active
       }
 
@@ -94,31 +93,85 @@
         datetime updated_at    
         boolean active
       }
+    
+      alternates {
+        integer id PK
+        integer parent_food_id FK
+        integer food_id FK
+        float proportion_of_parent
+        boolean active
+      }
+      foods ||--o{ alternates : alt_of
+      alternates ||--o{ foods : kind_of
+
+      ingredients {
+        integer id PK
+        integer parent_food_id FK
+        integer uses_food_id FK
+        float portion_amount
+        string portion_unit
+        string alt_food_ids_json
+        boolean active
+      }
+      foods ||--o{ ingredients : ingredient_of
+      ingredients ||--o{ foods : used_in
+      %% recipes ||--o{ foods : made_of
+
+      %% references {
+        %% integer id PK
+        %% text urls_json
+      %% }
+
       %% users ||--o{ tests_taken_xx : user_took_test
       %% users ||--o{ food_eaten_xx : user_ate
 
-      %% foods ||--o{ food_components_xx : used_in
       %% foods ||--o{ food_eaten_xx: food_was_eaten_at
     
-      %% food_components_recipe_ingredient {
-        %%  integer id PK
-        %%  integer food_id FK
-        %%  float portion_amount
-        %%  string sequence
-        %%  string step_template
-      %% }
-      %% food_components_xx ||--o{ foods : is_made_from
+      goals {
+        integer id PK
+        integer user_id FK
+        goal_name string
+        text goal_description
+        integer nutrient_id FK "nutrient"
+        integer food_id FK "allergy food"
+        string unit_code
+        float min_alert_amount
+        float min_warn_amount
+        float min_good_amount
+        float max_good_amount
+        float max_warn_amount
+        float max_alert_amount
+        boolean active
 
-      %% goals_xx {
-        %%  integer id PK
-        %%  goal_name string
-        %%  text goal_description
-        %%  string good_ranges
-        %%  string ok_ranges
-        %%  string caution_ranges
-      %% }
-      %% goals_xx ||--o{ goal_nutrients_xx : calculated_by
-
+      }
+      users ||--o{ goals : has_goal
+      
+      calendar_items {
+        integer id PK
+        integer user_id FK
+        string title
+        string description
+        integer lu_event_type "mealPlan meal dayProfile alert"
+        integer year "of meal"
+        integer month "of meal"
+        integer sequence
+        integer day "of month or plan"
+        integer hr24 "event hour in 24 hr clock"
+        integer min "event minute"
+        integer food_id FK "if meal"
+        integer lu_unit_code FK "of meal portion"
+        float portion
+      }
+      users ||--o{ calendar_items : event_happened
+      calendar_items ||--o{ foods : eaten
+      
+      
+      lookup_tables ||--o{ calendar_items : event_type
+      lookup_tables ||--o{ calendar_items : unit_codes
+      lookup_tables ||--o{ foods : has_usda_cat
+      lookup_tables ||--o{ foods : has_wweia_cat
+      lookup_tables ||--o{ nutrients: unit_codes
+    
       %% goal_nutrients_xx {
         %%  integer id PK
         %%  integer nutrient_id
