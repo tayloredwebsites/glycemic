@@ -10,9 +10,40 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_22_165418) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_11_003545) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "alternates", force: :cascade do |t|
+    t.integer "parent_food_id", null: false
+    t.integer "food_id", null: false
+    t.float "proportion_of_parent", default: 1.0, null: false
+    t.boolean "active", default: true, null: false
+    t.index ["food_id"], name: "ix_alternates_on_food_id"
+    t.index ["parent_food_id"], name: "ix_alternates_on_parent_food_id"
+  end
+
+  create_table "calendar_items", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "title", null: false
+    t.string "description", default: "", null: false
+    t.integer "lu_cal_event_type", null: false
+    t.integer "year"
+    t.integer "month"
+    t.integer "sequence"
+    t.integer "day"
+    t.integer "hr24"
+    t.integer "min"
+    t.integer "food_id"
+    t.string "lu_unit_code"
+    t.float "portion"
+    t.boolean "active", default: true, null: false
+    t.index ["food_id"], name: "ix_cal_items_on_food_id"
+    t.index ["lu_cal_event_type"], name: "ix_cal_items_on_event_type"
+    t.index ["lu_unit_code"], name: "ix_cal_items_on_lu_unit_code"
+    t.index ["title"], name: "ix_cal_items_on_title"
+    t.index ["user_id"], name: "ix_cal_items_on_user_id"
+  end
 
   create_table "food_nutrients", force: :cascade do |t|
     t.integer "food_id", null: false
@@ -49,6 +80,38 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_22_165418) do
     t.index ["name"], name: "ix_foods_on_name", unique: true
     t.index ["usda_food_cat_id"], name: "ix_foods_on_usda_cat"
     t.index ["wweia_food_cat_id"], name: "ix_foods_on_wweia_cat"
+  end
+
+  create_table "goals", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "goal_name", null: false
+    t.text "goal_description", default: "", null: false
+    t.integer "nutrient_id"
+    t.integer "food_id"
+    t.integer "usda_food_cat_id"
+    t.integer "lu_unit_code", null: false
+    t.float "min_alert_amount"
+    t.float "min_warn_amount"
+    t.float "min_good_amount"
+    t.float "max_good_amount"
+    t.float "max_warn_amount"
+    t.float "max_alert_amount"
+    t.boolean "active", default: true, null: false
+    t.index ["food_id"], name: "ix_goals_on_food_id"
+    t.index ["goal_name"], name: "ix_goals_on_goal_name"
+    t.index ["nutrient_id"], name: "ix_goals_on_nutrient_id"
+    t.index ["user_id"], name: "ix_goals_on_user_id"
+  end
+
+  create_table "ingredients", force: :cascade do |t|
+    t.integer "parent_food_id", null: false
+    t.integer "food_id", null: false
+    t.string "lu_unit_code", null: false
+    t.float "portion_amount", null: false
+    t.string "alt_food_ids_json"
+    t.boolean "active", default: true, null: false
+    t.index ["food_id"], name: "ix_ingredients_on_food_id"
+    t.index ["parent_food_id"], name: "ix_ingredients_on_parent_food_id"
   end
 
   create_table "lookup_tables", force: :cascade do |t|
