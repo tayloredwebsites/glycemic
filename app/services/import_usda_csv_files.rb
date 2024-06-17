@@ -981,7 +981,7 @@ class ImportUsdaCsvFiles
       current_unit_code = n.unit_code
       if LookupTable::DEPRECATED_UNIT_CODES[n.unit_code].present?
         new_unit_code = LookupTable::DEPRECATED_UNIT_CODES[n.unit_code]
-        msg = "#{n.name} unit code from #{current_unit_code} to #{new_unit_code}"
+        msg = "#{n.name} unit code from #{current_unit_code} to #{new_unit_code}."
         log_debug("*** To update #{msg}")
         n.unit_code = new_unit_code
         save_nutrient_rec = true
@@ -990,6 +990,13 @@ class ImportUsdaCsvFiles
         n.reload()
         log_debug("### Updated #{msg}")
         @report << "### Updated #{msg}"
+      elsif LookupTable::VALID_UNIT_CODES[n.unit_code].present?
+        msg = "#{n.name} unit code stays at #{current_unit_code}."
+        @report << "### OK #{msg}"
+      else
+        msg = "#{n.name} has invalid unit code of: #{current_unit_code}."
+        @report << "### Invalid unit code: #{msg}"
+        log_error("### Invalid unit code: #{msg}")
       end
       
     end

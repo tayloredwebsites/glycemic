@@ -49,3 +49,6 @@
 
 # ignore Gemfile.lock - user should copy Gemfile.lock.linux or Gemfile.lock.mac to Gemfile.lock
 /Gemfile.lock
+
+# ignore O/S files
+.DS_Store
