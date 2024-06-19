@@ -1,5 +1,5 @@
 # Diet Support Program
-# Copyright (C) 2023 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
+# Copyright (C) 2024 David A. Taylor of Taylored Web Sites (tayloredwebsites.com)
 # Licensed under AGPL-3.0-only.  See https://opensource.org/license/agpl-v3/
 
 class LookupTable < ApplicationRecord
@@ -9,7 +9,6 @@ class LookupTable < ApplicationRecord
     "kG" => "Kilogram(s)",
     "mG" => "Miligram(s)",
     "uG" => "Microgram(s)",
-    "UG" => "Microgram(s)",
     "LB" => "Pound(s)",
     "OZ" => "Ounce(s)",
     "FL_OZ" => "Fluid Ounce(s)",
@@ -23,12 +22,15 @@ class LookupTable < ApplicationRecord
     "IU" => "International Units",
     "kCAL" => "Kilocalorie(s)",
     "kJ" => "Kilojoules",
-    "uG_RE" => "Microgram(s) (??)",
-    "uG_ATE" => "Miligram(s) (??)",
-    "uG_GAE" => "Miligram(s) (??)",
+    "mG_RE" => "Miligram(s) Retinol",
+    "mG_ATE" => "Miligram(s) Alpha Tocopherol Equivalents ",
+    "mG_GAE" => "Miligram(s) Gallic Acid",
+    "uG_RE" => "Microgram(s) Retinol",
+    "uG_ATE" => "Microgram(s) Alpha Tocopherol Equivalents ",
+    "uG_GAE" => "Microgram(s) Gallic Acid",
     "PH" => "Potential of Hydrogen (acid/alkaline)",
     "SP_GR" => "Specific Gravity",
-    "uMOL_TE" => "Micromole (??)",
+    "uMOL_TE" => "Micromole Trolox Equivalents",
   }.freeze
   
   DEPRECATED_UNIT_CODES = {
